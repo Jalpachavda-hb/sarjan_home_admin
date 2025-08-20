@@ -3,15 +3,13 @@ import { useState } from "react";
 import Label from "../Label";
 import Input from "../input/InputField";
 import { CiMail } from "react-icons/ci";
-import PhoneInput from "../group-input/PhoneInput";
+
 import TextArea from "../input/TextArea";
 export default function InputGroup() {
    const [message, setMessage] = useState("");
-  const [messageTwo, setMessageTwo] = useState("");
 
-  const handlePhoneNumberChange = (phoneNumber: string) => {
-    console.log("Updated phone number:", phoneNumber);
-  };
+
+
   return (
     <ComponentCard title="Add Client Info">
       <div className="space-y-6">

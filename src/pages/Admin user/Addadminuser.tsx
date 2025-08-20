@@ -1,19 +1,9 @@
-// import React from 'react'
-
-// const Addadminuser = () => {
-//   return (
-//     <div>Addadminuser</div>
-//   )
-// }
-
-// export default Addadminuser
-
-import React, { useState } from "react";
+import  { useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
-import FileInput from "../../components/form/input/FileInput";
+
 import Select from "../../components/form/Select";
 
 import Button from "../../components/ui/button/Button";
@@ -31,12 +21,10 @@ const Addadminuser = () => {
   ];
 
   // File upload preview
-  const handleReceiptChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setReceiptPreview(URL.createObjectURL(file));
-    }
-  };
+const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (file) setReceiptPreview(URL.createObjectURL(file));
+};
 
   return (
     <div>

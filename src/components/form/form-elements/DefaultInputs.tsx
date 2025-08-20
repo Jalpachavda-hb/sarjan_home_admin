@@ -1,15 +1,9 @@
-import { useState } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
 import Input from "../input/InputField";
 import Select from "../Select";
-import TextArea from "../input/TextArea";
-import { EyeCloseIcon, EyeIcon, TimeIcon } from "../../../icons";
-
 
 export default function DefaultInputs() {
-  const [showPassword, setShowPassword] = useState(false);
-   
   const options = [
     { value: "marketing", label: "Marketing" },
     { value: "template", label: "Template" },
@@ -35,9 +29,8 @@ export default function DefaultInputs() {
           <Label htmlFor="input">Name</Label>
           <Input type="text" id="input" />
         </div>
-          
-        
-         <div>
+
+        <div>
           <Label>Unit type </Label>
           <Select
             options={options}
@@ -46,7 +39,7 @@ export default function DefaultInputs() {
             className="dark:bg-dark-900"
           />
         </div>
-         <div>
+        <div>
           <Label>Block/Shop</Label>
           <Select
             options={options}
@@ -55,11 +48,10 @@ export default function DefaultInputs() {
             className="dark:bg-dark-900"
           />
         </div>
-         <div>
+        <div>
           <Label htmlFor="input">Property Amount</Label>
           <Input type="text" id="input" />
         </div>
-    
       </div>
     </ComponentCard>
   );

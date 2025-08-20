@@ -14,7 +14,7 @@ interface BadgeProps {
   size?: BadgeSize; // Badge size
   color?: BadgeColor; // Badge color
   startIcon?: React.ReactNode; // Icon at the start
-
+  className?: string;
   children: React.ReactNode; // Badge content
 }
 
