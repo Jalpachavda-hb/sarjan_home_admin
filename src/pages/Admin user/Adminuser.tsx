@@ -1,13 +1,3 @@
-// import React from 'react'
-
-// const Adminuser = () => {
-//   return (
-//     <div>Adminuser</div>
-//   )
-// }
-
-// export default Adminuser
-
 import {
   Table,
   TableBody,
@@ -20,24 +10,8 @@ import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo } from "react";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
-import { FaRegEye } from "react-icons/fa";
 
-import {
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Checkbox,
-  ListItemText,
-} from "@mui/material";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
+import { TextField, Button } from "@mui/material";
 
 interface Adminuser {
   id: number;
@@ -67,8 +41,8 @@ export default function Adminuser() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState<Adminuser | null>(null);
+  // const [editOpen, setEditOpen] = useState(false);
+  // const [editData, setEditData] = useState<Adminuser | null>(null);
   const [sortConfig, setSortConfig] = useState<{
     key: keyof Adminuser;
     direction: "asc" | "desc";
@@ -77,7 +51,7 @@ export default function Adminuser() {
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
 
-  const [newCategory, setNewCategory] = useState("");
+  // const [newCategory, setNewCategory] = useState("");
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -122,29 +96,22 @@ export default function Adminuser() {
 
   //   return data;
   // }, [search, sortConfig]);
- 
- 
-   const filteredData = tableData.filter((item) => {
+
+  const filteredData = tableData.filter((item) => {
     const searchTerm = search.trim().toLowerCase(); // remove spaces at start & end
 
     const matchesSearch = Object.values(item)
-      .map((val) => String(val).trim().toLowerCase()) // trim each value
+      .map((val) => String(val).trim().toLowerCase()) 
       .join(" ")
       .includes(searchTerm);
 
     const matchesSite = siteFilter
-      ? item.siteName.trim() === siteFilter.trim()
+      ? item.sitename.trim() === siteFilter.trim()
       : true;
 
     return matchesSearch && matchesSite;
   });
- 
- 
- 
- 
- 
- 
- 
+
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -153,19 +120,6 @@ export default function Adminuser() {
   }, [filteredData, page, rowsPerPage]);
 
   //   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
-
-  const handleSort = (key: keyof Adminuser) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">

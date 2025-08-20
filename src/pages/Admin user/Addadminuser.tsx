@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
@@ -11,7 +11,6 @@ import { FaRegEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
 
 const Addadminuser = () => {
-  const [receiptPreview, setReceiptPreview] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   // Dropdown options
   const siteOptions = [
@@ -21,10 +20,6 @@ const Addadminuser = () => {
   ];
 
   // File upload preview
-const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (file) setReceiptPreview(URL.createObjectURL(file));
-};
 
   return (
     <div>
