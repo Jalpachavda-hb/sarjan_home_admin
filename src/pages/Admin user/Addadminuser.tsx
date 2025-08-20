@@ -50,6 +50,7 @@ const Addadminuser = () => {
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
+                  onChange={(val) => console.log(val)} // 👈 required handler
                 />
               </div>
 
@@ -77,6 +78,7 @@ const Addadminuser = () => {
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
+                  onChange={(val) => console.log(val)}
                 />
               </div>
               {/* Received Payment Date */}
@@ -94,6 +96,7 @@ const Addadminuser = () => {
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
+                  onChange={(val) => console.log(val)}
                 />
               </div>
               <div>
@@ -102,6 +105,7 @@ const Addadminuser = () => {
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
+                  onChange={(val) => console.log(val)}
                 />
               </div>
               <div>
@@ -110,6 +114,7 @@ const Addadminuser = () => {
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
+                  onChange={(val) => console.log(val)}
                 />
               </div>
               <div>
@@ -118,6 +123,7 @@ const Addadminuser = () => {
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
+                  onChange={(val) => console.log(val)}
                 />
               </div>
               <div>
@@ -126,6 +132,7 @@ const Addadminuser = () => {
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
+                  onChange={(val) => console.log(val)}
                 />
               </div>
               <div>
@@ -134,6 +141,7 @@ const Addadminuser = () => {
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
+                  onChange={(val) => console.log(val)}
                 />
               </div>
             </div>

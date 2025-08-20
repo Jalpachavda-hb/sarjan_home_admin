@@ -15,19 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
-import Badge from "../components/ui/badge/Badge";
+
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo } from "react";
-import { FaRegEye } from "react-icons/fa";
+
 import {
   TextField,
-  Button,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Checkbox,
-  ListItemText,
+
 } from "@mui/material";
 
 interface Aprovel {

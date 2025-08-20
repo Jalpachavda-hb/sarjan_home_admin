@@ -40,16 +40,18 @@ const tableData: Adminuser[] = [
 export default function Adminuser() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumns] = useState<string[]>([]);
   // const [editOpen, setEditOpen] = useState(false);
   // const [editData, setEditData] = useState<Adminuser | null>(null);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Adminuser;
-    direction: "asc" | "desc";
-  } | null>(null);
+
+  // const [sortConfig, setSortConfig] = useState<{
+  //   key: keyof Adminuser;
+  //   direction: "asc" | "desc";
+  // } | null>(null);
+
   // use for search
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
+  const [siteFilter] = useState("");
 
   // const [newCategory, setNewCategory] = useState("");
 

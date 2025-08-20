@@ -35,7 +35,7 @@ type NavItem = {
   path?: string;
   subItems?: {
     name: string;
-    path: string;
+    path: string; // remove optional
     icon?: React.ReactNode;
     pro?: boolean;
     new?: boolean;
@@ -191,8 +191,8 @@ const AppSidebar: React.FC = () => {
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
     {}
   );
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
+  // const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const subMenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const isActive = useCallback(
     (path: string) => location.pathname === path,
     [location.pathname]
@@ -312,7 +312,9 @@ const AppSidebar: React.FC = () => {
 
             {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
               <div
-                ref={(el) => (subMenuRefs.current[key] = el)}
+                ref={(el: HTMLDivElement | null) => {
+                  subMenuRefs.current[key] = el;
+                }}
                 className="overflow-hidden transition-all duration-300"
                 style={{
                   height: isSubmenuOpen
