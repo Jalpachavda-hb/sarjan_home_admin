@@ -1,0 +1,8 @@
+{
+  "redirects": [
+    { "source": "/", "destination": "/admin/dashboard", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
