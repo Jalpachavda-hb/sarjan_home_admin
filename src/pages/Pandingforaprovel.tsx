@@ -8,6 +8,8 @@ import {
 import Badge from "../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo } from "react";
+// import SiteFilter from "../../components/form/input/FilterbySite";
+import SiteFilter from "../components/form/input/FilterbySite";
 import {
   TextField,
   Button,
@@ -113,77 +115,37 @@ export default function Pandingforaprovel() {
     setPage(0);
   };
 
-  // const filteredData = useMemo(() => {
-  //   let data = [...tableData];
-
-  //   if (search) {
-  //     const searchTerm = search.toLowerCase();
-  //     data = data.filter((item) =>
-  //       Object.values(item).some((val) =>
-  //         String(val).toLowerCase().includes(searchTerm)
-  //       )
-  //     );
-  //   }
-
-  //   if (sortConfig) {
-  //     data.sort((a, b) => {
-  //       const aValue = a[sortConfig.key];
-  //       const bValue = b[sortConfig.key];
-
-  //       if (aValue < bValue) {
-  //         return sortConfig.direction === "asc" ? -1 : 1;
-  //       }
-  //       if (aValue > bValue) {
-  //         return sortConfig.direction === "asc" ? 1 : -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-
-  //   return data;
-  // }, [search, sortConfig]);
-  
   const filteredData = useMemo(() => {
-  let data = [...tableData];
+    let data = [...tableData];
 
-  const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
+    const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
 
-  if (searchTerm) {
-    data = data.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTerm)
-      )
-    );
-  }
+    if (searchTerm) {
+      data = data.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-  if (sortConfig) {
-    data.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+    if (sortConfig) {
+      data.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
 
-      if (aValue < bValue) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }
+        if (aValue < bValue) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
 
-  return data;
-}, [search, sortConfig]);
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+    return data;
+  }, [search, sortConfig]);
+
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -213,20 +175,6 @@ export default function Pandingforaprovel() {
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] px-4 pb-3 pt-4 sm:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-wrap gap-2 items-center">
-            {/* <Button
-              size="small"
-              variant="contained"
-              className="!bg-green-600 hover:!bg-green-700 text-white"
-            >
-              Copy
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              className="!bg-blue-600 hover:!bg-blue-700 text-white"
-            >
-              CSV
-            </Button> */}
             <Button
               size="small"
               variant="contained"
@@ -304,39 +252,10 @@ export default function Pandingforaprovel() {
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
             {/* Filter by Site Dropdown */}
 
-            {/* <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel
-                className="text-gray-500 dark:text-white"
-                sx={{ fontFamily: "Poppins" }}
-              >
-                Filter by Site
-              </InputLabel>
-              <Select
-                value={siteFilter}
-                label="Filter by Site"
-                onChange={(e) => setSiteFilter(e.target.value)}
-                sx={{ fontFamily: "Poppins" }}
-                MenuProps={{
-                  PaperProps: {
-                    sx: { fontFamily: "Poppins", fontSize: "14px" },
-                  },
-                }}
-              >
-                <MenuItem value="">All Sites</MenuItem>
-                {uniqueSites.map((site) => (
-                  <MenuItem
-                    key={site}
-                    value={site}
-                    sx={{ fontFamily: "Poppins", fontSize: "14px" }}
-                  >
-                    {site}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl> */}
-
-            {/* Search Input */}
-
+            {/* <SiteFilter
+              value={siteFilter}
+              onChange={(e) => setSiteFilter(e.target.value)}
+            /> */}
             <TextField
               size="small"
               variant="outlined"

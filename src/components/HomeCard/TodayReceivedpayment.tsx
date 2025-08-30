@@ -18,7 +18,7 @@ import {
   Checkbox,
   ListItemText,
 } from "@mui/material";
-
+import SiteFilter from "../../components/form/input/FilterbySite";
 interface Payment {
   id: number;
   clientName: string;
@@ -133,7 +133,7 @@ export default function TodayReceivedpayment() {
       .includes(searchTerm);
 
     const matchesSite = siteFilter
-      ? item.siteName.trim() === siteFilter.trim()
+      ? item.siteName === siteFilter
       : true;
 
     return matchesSearch && matchesSite;
@@ -245,36 +245,11 @@ export default function TodayReceivedpayment() {
           {/* Right Column */}
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
             {/* Filter by Site Dropdown */}
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel
-                className="text-gray-500 dark:text-white"
-                sx={{ fontFamily: "Poppins" }}
-              >
-                Filter by Site
-              </InputLabel>
-              <Select
-                value={siteFilter}
-                label="Filter by Site"
-                onChange={(e) => setSiteFilter(e.target.value)}
-                sx={{ fontFamily: "Poppins" }}
-                MenuProps={{
-                  PaperProps: {
-                    sx: { fontFamily: "Poppins", fontSize: "14px" },
-                  },
-                }}
-              >
-                <MenuItem value="">All Sites</MenuItem>
-                {uniqueSites.map((site) => (
-                  <MenuItem
-                    key={site}
-                    value={site}
-                    sx={{ fontFamily: "Poppins", fontSize: "14px" }}
-                  >
-                    {site}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          
+            <SiteFilter
+              value={siteFilter}
+              onChange={(e) => setSiteFilter(e.target.value)}
+            />
 
             {/* Search Input */}
             <TextField

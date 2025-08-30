@@ -1,11 +1,28 @@
 import { FaArrowUp } from "react-icons/fa";
+import { useState, useEffect } from "react";
 import Badge from "../ui/badge/Badge";
 import { RiMoneyRupeeCircleLine } from "react-icons/ri";
 import { HiMiniUserGroup } from "react-icons/hi2";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { FaBuildingColumns } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+import { fetchDashboardCount ,fetchProfile} from "../../utils/Handlerfunctions/getdata";
 export default function HomeCard() {
+  const [formData, setFormData] = useState({
+  clientCount: "",
+  projectTypes: "",
+  adminUsers: "",
+  siteDetailsCount: "",
+  today_payment: "",
+  sitenames: "",
+  admin_id: "",
+});
+
+useEffect(() => {
+  fetchDashboardCount()
+    .then((data) => setFormData({...data}))
+    .catch((err) => console.error("Error fetching dashboardcount:", err));
+}, []);
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-6">
       {/* Card 1 */}
@@ -19,10 +36,11 @@ export default function HomeCard() {
               Today's Total Collection
             </span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              0
+              {formData.today_payment}
+              {/* 5 */}
             </h4>
           </div>
-            <Link to="/admin/payments" className="cursor-pointer">
+          <Link to="/admin/payments" className="cursor-pointer">
             <Badge color="success" className="self-end">
               <FaArrowUp />
               More
@@ -42,7 +60,7 @@ export default function HomeCard() {
               Clients
             </span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              2
+                {formData.clientCount}
             </h4>
           </div>
           <Link to="/admin/selectproject" className="cursor-pointer">
@@ -65,7 +83,7 @@ export default function HomeCard() {
               Admin Users
             </span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              2
+              {formData.adminUsers}
             </h4>
           </div>
           <Link to="/admin/admin_users" className="cursor-pointer">
@@ -88,10 +106,10 @@ export default function HomeCard() {
               Number of Sites/Projects
             </span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              7
+                {formData.siteDetailsCount}
             </h4>
           </div>
-            <Link to="/admin/projects/site_details" className="cursor-pointer">
+          <Link to="/admin/projects/site_details" className="cursor-pointer">
             <Badge color="success" className="self-end">
               <FaArrowUp />
               More

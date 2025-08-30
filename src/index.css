@@ -791,5 +791,13 @@ span.flatpickr-weekday,
   @apply mt-3 ml-3 bg-red-600 hover:bg-red-700;
 }
 
+.Toastify__toast-container {
+  z-index: 100000 !important;
+}
 
-
+.swal2-container {
+  z-index: 100000 !important;
+}
+.unitTypeCell {
+  width: 90px !important;
+}

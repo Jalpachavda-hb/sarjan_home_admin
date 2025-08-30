@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
@@ -7,10 +7,11 @@ import FileInput from "../../components/form/input/FileInput";
 import Select from "../../components/form/Select";
 import DatePicker from "../../components/form/date-picker";
 import Button from "../../components/ui/button/Button";
+import SiteSelector from "../../components/form/input/SelectSiteinput";
 
 const Addpaymentdetails = () => {
   const [receiptPreview, setReceiptPreview] = useState(null);
-
+  const [selectedSite, setSelectedSite] = useState(null);
   // Dropdown options
   const siteOptions = [
     { value: "site1", label: "Site 1" },
@@ -32,6 +33,7 @@ const Addpaymentdetails = () => {
     }
   };
 
+  
   return (
     <div>
       {/* Page Title */}
@@ -43,22 +45,24 @@ const Addpaymentdetails = () => {
           <ComponentCard title="Add Payment Details">
             <div className="space-y-6">
               {/* Select Site */}
-              <div>
+              {/* <div>
                 <Label>Select Site</Label>
                 <Select
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
                 />
-              </div>
-             
+              </div> */}
+              <SiteSelector
+                onChange={(site) => setSelectedSite(site?.value || null)}
+              />
 
               {/* Received Amount */}
               <div>
                 <Label>Received Amount</Label>
                 <Input type="number" placeholder="Enter amount" />
               </div>
-  <div>
+              <div>
                 <Label>Amount Type</Label>
                 <Select
                   options={siteOptions}
@@ -77,7 +81,7 @@ const Addpaymentdetails = () => {
                   }
                 />
               </div>
-               <div>
+              <div>
                 <Label>Upload Receipt</Label>
                 <FileInput id="fileUpload" onChange={handleReceiptChange} />
                 {/* {receiptPreview && (
@@ -93,8 +97,6 @@ const Addpaymentdetails = () => {
             </div>
           </ComponentCard>
         </div>
-
-       
       </div>
 
       {/* Buttons */}
@@ -105,4 +107,3 @@ const Addpaymentdetails = () => {
 };
 
 export default Addpaymentdetails;
-

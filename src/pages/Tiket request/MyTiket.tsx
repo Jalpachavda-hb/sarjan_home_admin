@@ -5,6 +5,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
+import SiteFilter from "../../components/form/input/FilterbySite";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo } from "react";
@@ -303,26 +304,11 @@ export default function MyTiket() {
                 ))}
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Filter by Site</InputLabel>
-              <Select
-                value={siteFilter}
-                onChange={(e) => setSiteFilter(e.target.value)}
-                label="Filter by Site"
-                MenuProps={{
-                  PaperProps: {
-                    sx: { fontFamily: "Poppins", fontSize: "14px" },
-                  },
-                }}
-              >
-                <MenuItem value="">All Sites</MenuItem>
-                {uniqueSites.map((site) => (
-                  <MenuItem key={site} value={site}>
-                    {site}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+               
+            <SiteFilter
+              value={siteFilter}
+              onChange={(e) => setSiteFilter(e.target.value)}
+            />
           </div>
 
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
@@ -340,7 +326,7 @@ export default function MyTiket() {
                 className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
               >
                 <FaPlus />
-                Add New Clients
+                Add New Ticket
               </Button>
             </a>
           </div>

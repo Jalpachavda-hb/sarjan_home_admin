@@ -1,22 +1,3 @@
-// import React from 'react'
-
-// const Commundocument = () => {
-//   return (
-//     <div>Commundocument</div>
-//   )
-// }
-
-// export default Commundocument
-// import React from 'react'
-
-// const Adminuser = () => {
-//   return (
-//     <div>Adminuser</div>
-//   )
-// }
-
-// export default Adminuser
-
 import {
   Table,
   TableBody,
@@ -24,52 +5,29 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
-import { FaEdit } from "react-icons/fa";
+import { fetchCommonDocuments ,getAdminId} from "../../utils/Handlerfunctions/getdata";
+import { deleteCommonDocument } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { FaRegEye } from "react-icons/fa";
-import {
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Checkbox,
-  ListItemText,
-} from "@mui/material";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
+import { TextField, Button } from "@mui/material";
 
-interface Adminuser {
-  id: number;
-  sitename: string;
-  DocType: string;
+interface CommonDocument {
+  id: string;
+  common_document_name: string;
+  common_document_file: string;
+  site_title: string;
 }
 
-const tableData: Adminuser[] = [
-  {
-    id: 1,
-    sitename: "sarjan era",
-    DocType: "Residential Commercial Mix",
-  },
-  {
-    id: 2,
-    sitename: "sarjan era",
-    DocType: "Residential Commercial Mix",
-  },
-];
 export default function Commundocument() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-
+  const [documents, setDocuments] = useState<CommonDocument[]>([]);
   const [sortConfig, setSortConfig] = useState<{
     key: keyof Adminuser;
     direction: "asc" | "desc";
@@ -94,53 +52,21 @@ export default function Commundocument() {
     setPage(0);
   };
 
-  // const filteredData = useMemo(() => {
-  //   let data = [...tableData];
+   const filteredData = useMemo(() => {
+    return documents.filter((item) => {
+      const searchTerm = search.trim().toLowerCase();
+      const matchesSearch =
+        item.common_document_name.toLowerCase().includes(searchTerm) ||
+        item.site_title.toLowerCase().includes(searchTerm);
 
-  //   if (search) {
-  //     const searchTerm = search.toLowerCase();
-  //     data = data.filter((item) =>
-  //       Object.values(item).some((val) =>
-  //         String(val).toLowerCase().includes(searchTerm)
-  //       )
-  //     );
-  //   }
+      const matchesSite = siteFilter
+        ? item.site_title.trim() === siteFilter.trim()
+        : true;
 
-  //   if (sortConfig) {
-  //     data.sort((a, b) => {
-  //       const aValue = a[sortConfig.key];
-  //       const bValue = b[sortConfig.key];
+      return matchesSearch && matchesSite;
+    });
+  }, [documents, search, siteFilter]);
 
-  //       if (aValue < bValue) {
-  //         return sortConfig.direction === "asc" ? -1 : 1;
-  //       }
-  //       if (aValue > bValue) {
-  //         return sortConfig.direction === "asc" ? 1 : -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-
-  //   return data;
-  // }, [search, sortConfig]);
-  
-    const filteredData = tableData.filter((item) => {
-    const searchTerm = search.trim().toLowerCase(); // remove spaces at start & end
-
-    const matchesSearch = Object.values(item)
-      .map((val) => String(val).trim().toLowerCase()) // trim each value
-      .join(" ")
-      .includes(searchTerm);
-
-    const matchesSite = siteFilter
-      ? item.siteName.trim() === siteFilter.trim()
-      : true;
-
-    return matchesSearch && matchesSite;
-  });
-  
-  
-  
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -148,20 +74,52 @@ export default function Commundocument() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  //   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
 
-  const handleSort = (key: keyof Adminuser) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
+ useEffect(() => {
+    const loadDocs = async () => {
+       const adminId = getAdminId(); 
+    if (!adminId) return;
+
+      const data = await fetchCommonDocuments(adminId);
+      setDocuments(data);
+    };
+    loadDocs();
+  }, []);
+
+const handleDelete = async (id: string) => {
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "You won’t be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!",
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await deleteCommonDocument(id);
+
+      // ✅ Update state
+      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+
+      // ✅ Show success
+      toast.success("Document deleted successfully!");
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to delete document. Please try again.");
     }
-    setSortConfig({ key, direction });
-    setPage(0);
+  }
+};
+
+
+  // ✅ View handler
+  const handleView = (fileUrl: string) => {
+    window.open(fileUrl, "_blank");
   };
+
+  //   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -334,51 +292,43 @@ export default function Commundocument() {
               </TableRow>
             </TableHeader>
 
-            <TableBody>
-              {paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    // colSpan={}
-                    className="justify-between py-12 text-gray-500  "
-                    // style={{ fontSize: "16px" }}
-                  >
-                    No data available
+                 <TableBody>
+            {paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell className="py-12 text-gray-500">
+                  No data available
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedData.map((item, index) => (
+                <TableRow key={item.id}>
+                  <TableCell className="rowtext">
+                    {page * rowsPerPage + index + 1}
+                  </TableCell>
+                  <TableCell className="rowtext">{item.site_title}</TableCell>
+                  <TableCell className="rowtext">
+                    {item.common_document_name}
+                  </TableCell>
+                  <TableCell className="rowtext">
+                    <div className="flex gap-2 mt-1">
+                      <Badge variant="light" color="error">
+                        <MdDelete
+                          className="text-2xl cursor-pointer"
+                          onClick={() => handleDelete(item.id)}
+                        />
+                      </Badge>
+                      <Badge variant="light">
+                        <FaRegEye
+                          className="text-2xl cursor-pointer"
+                          onClick={() => handleView(item.common_document_file)}
+                        />
+                      </Badge>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                paginatedData.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="rowtext">
-                      {page * rowsPerPage + index + 1}
-                    </TableCell>
-
-                    {isColumnVisible("sitename") && (
-                      <TableCell className="rowtext">{item.sitename}</TableCell>
-                    )}
-
-                    {isColumnVisible("DocType") && (
-                      <TableCell className="rowtext">{item.DocType}</TableCell>
-                    )}
-
-                    {isColumnVisible("Action") && (
-                      <TableCell className="rowtext">
-                        <div className="flex gap-2 mt-1">
-                          <Badge variant="light" color="error">
-                            <MdDelete className="text-2xl cursor-pointer" />
-                          </Badge>
-                          <Badge variant="light">
-                            <FaRegEye
-                              className="text-2xl cursor-pointer"
-                              onClick={() => handleEditClick(item)}
-                            />
-                          </Badge>
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
+              ))
+            )}
+          </TableBody>
           </Table>
         </div>
 

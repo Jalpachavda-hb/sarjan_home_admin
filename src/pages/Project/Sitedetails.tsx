@@ -7,67 +7,51 @@ import {
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
+import { fetchSiteDetails } from "../../utils/Handlerfunctions/getdata";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
-import { FaRegEye } from "react-icons/fa";
-import {
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Checkbox,
-  ListItemText,
-} from "@mui/material";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
+import { useEffect, useState, useMemo } from "react";
+import { TextField, Button } from "@mui/material";
+import {} from "@mui/material";
 
-interface projectcategory {
-  id: number;
-  projectType: string;
-  projectCategory: string;
-  siteDetails: string;
+interface project_category_name {
+  id: string;
+  project_type: string;
+  project_category_name: string;
+  title: string;
 }
 
-const tableData: projectcategory[] = [
-  {
-    id: 1,
-    projectType: "Completed Project",
-    projectCategory: "Residential Commercial Mix",
-    siteDetails: "Sarjan Tower",
-  },
-  {
-    id: 2,
-    projectType: "Ongoing Project",
-    projectCategory: "Commercial",
-    siteDetails: "Skyline Plaza",
-  },
-];
 export default function sitedetails() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState<projectcategory | null>(null);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof projectcategory;
-    direction: "asc" | "desc";
-  } | null>(null);
+  const [editData, setEditData] = useState<project_category_name | null>(null);
+
   // use for search
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [siteDetails, setSiteDetails] = useState<project_category_name[]>([]);
   const [newCategory, setNewCategory] = useState("");
-  const handleEditClick = (row: projectcategory) => {
+
+  const handleEditClick = (row: project_category_name) => {
     setEditData({ ...row });
     setEditOpen(true);
   };
+
+  useEffect(() => {
+    const loadSiteDetails = async () => {
+      try {
+        const data = await fetchSiteDetails();
+        setSiteDetails(data);
+      } catch (error) {
+        console.error("Error loading site details:", error);
+      }
+    };
+
+    loadSiteDetails();
+  }, []);
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (editData) {
@@ -97,39 +81,22 @@ export default function sitedetails() {
     setPage(0);
   };
 
-   const filteredData = useMemo(() => {
-  let data = [...tableData];
+  const filteredData = useMemo(() => {
+    let data = [...siteDetails];
 
-  const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
+    const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
 
-  if (searchTerm) {
-    data = data.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTerm)
-      )
-    );
-  }
+    if (searchTerm) {
+      data = data.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-  if (sortConfig) {
-    data.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+    return data;
+  }, [search, siteDetails]);
 
-      if (aValue < bValue) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }
-
-  return data;
-}, [search, sortConfig]);
-  
-  
-  
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -137,20 +104,7 @@ export default function sitedetails() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  //   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
-
-  const handleSort = (key: keyof projectcategory) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
+  //   const uniqueSites = [...new Set(siteDetails.map((item) => item.name))];
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -318,7 +272,7 @@ export default function sitedetails() {
                   <TableCell className="columtext">Project Category</TableCell>
                 )}
                 {isColumnVisible("siteName") && (
-                  <TableCell className="columtext">Site Details</TableCell>
+                  <TableCell className="columtext">Site Title</TableCell>
                 )}
                 {isColumnVisible("siteName") && (
                   <TableCell className="columtext">Action</TableCell>
@@ -346,19 +300,17 @@ export default function sitedetails() {
 
                     {isColumnVisible("count") && (
                       <TableCell className="rowtext">
-                        {item.projectType}
+                        {item.project_type}
                       </TableCell>
                     )}
 
                     {isColumnVisible("count") && (
                       <TableCell className="rowtext">
-                        {item.projectCategory}
+                        {item.project_category_name}
                       </TableCell>
                     )}
                     {isColumnVisible("count") && (
-                      <TableCell className="rowtext">
-                        {item.siteDetails}
-                      </TableCell>
+                      <TableCell className="rowtext">{item.title}</TableCell>
                     )}
 
                     {isColumnVisible("Action") && (
@@ -417,7 +369,6 @@ export default function sitedetails() {
                 },
               }}
             />
-          
           </div>
         </div>
       </div>

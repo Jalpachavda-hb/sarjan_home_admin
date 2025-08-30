@@ -9,6 +9,7 @@ import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo } from "react";
 import { FaPlus } from "react-icons/fa6";
+import SiteFilter from "../../components/form/input/FilterbySite";
 import {
   TextField,
   Button,
@@ -29,7 +30,6 @@ interface MyTiket {
   date: string;
   message: string;
   status: string;
-
 }
 
 const tableData: MyTiket[] = [
@@ -42,7 +42,6 @@ const tableData: MyTiket[] = [
     date: "2025-08-11",
     message: "hello",
     status: "Pending",
-  
   },
   {
     id: 2,
@@ -53,7 +52,6 @@ const tableData: MyTiket[] = [
     date: "2025-08-10",
     message: "hello",
     status: "Completed",
-   
   },
 ];
 
@@ -111,37 +109,37 @@ export default function ClientTiket() {
   //   return data;
   // }, [search, siteFilter, sortConfig]);
 
-      const filteredData = useMemo(() => {
-  let data = [...tableData];
+  const filteredData = useMemo(() => {
+    let data = [...tableData];
 
-  const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
+    const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
 
-  if (searchTerm) {
-    data = data.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTerm)
-      )
-    );
-  }
+    if (searchTerm) {
+      data = data.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-  if (sortConfig) {
-    data.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+    if (sortConfig) {
+      data.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
 
-      if (aValue < bValue) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }
+        if (aValue < bValue) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
 
-  return data;
-}, [search, sortConfig]);
-  
+    return data;
+  }, [search, sortConfig]);
+
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -193,8 +191,6 @@ export default function ClientTiket() {
               Print
             </Button> */}
 
-          
-
             <FormControl size="small" sx={{ minWidth: 200 }}>
               <InputLabel
                 className="text-gray-700 dark:text-white"
@@ -233,7 +229,7 @@ export default function ClientTiket() {
                   "date",
                   "status",
                   "message",
-                
+
                   "blocknumberType",
                 ].map((col) => (
                   <MenuItem
@@ -252,7 +248,7 @@ export default function ClientTiket() {
                           date: "Date",
                           status: "Status",
                           message: "message",
-                        
+
                           blocknumberType: "Manage",
                         }[col]
                       }
@@ -261,31 +257,14 @@ export default function ClientTiket() {
                 ))}
               </Select>
             </FormControl>
-              <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Filter by Site</InputLabel>
-              <Select
-                value={siteFilter}
-                onChange={(e) => setSiteFilter(e.target.value)}
-                label="Filter by Site"
-                MenuProps={{
-                  PaperProps: {
-                    sx: { fontFamily: "Poppins", fontSize: "14px" },
-                  },
-                }}
-              >
-                <MenuItem value="">All Sites</MenuItem>
-                {uniqueSites.map((site) => (
-                  <MenuItem key={site} value={site}>
-                    {site}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
+              
+            <SiteFilter
+              value={siteFilter}
+              onChange={(e) => setSiteFilter(e.target.value)}
+            />
           </div>
 
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-          
             <TextField
               size="small"
               variant="outlined"
@@ -293,16 +272,19 @@ export default function ClientTiket() {
               value={search}
               onChange={(e) => setSearch(e.target.value.trimStart())}
             />
-             <a href="/admin/ticket-request/mytiket/addtiket" className="text-blue-500 hover:text-blue-700">
-                          <Button
-                            size="small"
-                            variant="contained"
-                            className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
-                          >
-                            <FaPlus />
-                            Add New Clients
-                          </Button>
-                        </a>
+            <a
+              href="/admin/ticket-request/mytiket/addtiket"
+              className="text-blue-500 hover:text-blue-700"
+            >
+              <Button
+                size="small"
+                variant="contained"
+                className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
+              >
+                <FaPlus />
+                Add New Ticket
+              </Button>
+            </a>
           </div>
         </div>
 
@@ -334,7 +316,7 @@ export default function ClientTiket() {
                 {isColumnVisible("status") && (
                   <TableCell className="columtext">Status</TableCell>
                 )}
-              
+
                 {isColumnVisible("blocknumberType") && (
                   <TableCell className="columtext">Action</TableCell>
                 )}
@@ -380,7 +362,7 @@ export default function ClientTiket() {
                     {isColumnVisible("status") && (
                       <TableCell className="rowtext">{item.status}</TableCell>
                     )}
-                    
+
                     {isColumnVisible("blocknumberType") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">

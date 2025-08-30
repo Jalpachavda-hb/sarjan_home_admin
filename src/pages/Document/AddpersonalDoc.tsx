@@ -9,10 +9,10 @@ import FileInput from "../../components/form/input/FileInput";
 import Select from "../../components/form/Select";
 import DatePicker from "../../components/form/date-picker";
 import Button from "../../components/ui/button/Button";
-
+import SiteSelector from "../../components/form/input/SelectSiteinput";
 const AddpersonalDoc = () => {
   const [receiptPreview, setReceiptPreview] = useState(null);
-
+ const [selectedSite, setSelectedSite] = useState(null);
   // Dropdown options
   const siteOptions = [
     { value: "site1", label: "Site 1" },
@@ -34,19 +34,16 @@ const AddpersonalDoc = () => {
       {/* Page Title */}
       <PageMeta title="Add Personal Document Details" />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         {/* Card 1: Payment Info */}
         <div className="space-y-6">
           <ComponentCard title="Add Personal Document Details">
             <div className="space-y-6">
               {/* Select Site */}
               <div>
-                <Label>Select Site</Label>
-                <Select
-                  options={siteOptions}
-                  placeholder="Select a site"
-                  className="dark:bg-dark-900"
-                />
+                  <SiteSelector
+                onChange={(site) => setSelectedSite(site?.value || null)}
+              />
               </div>
               
 

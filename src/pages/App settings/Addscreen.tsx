@@ -1,96 +1,86 @@
-// import React from 'react'
-
-// const Addscreen = () => {
-//      const handleLogoChange = (e) => {
-//     const file = e.target.files[0];
-//     if (file) {
-//       setLogoPreview(URL.createObjectURL(file));
-//     }
-//   };
-
-//   const handleFaviconChange = (e) => {
-//     const file = e.target.files[0];
-//     if (file) {
-//       setFaviconPreview(URL.createObjectURL(file));
-//     }
-//   };
-
-//   return (
-//     <div>Addscreen</div>
-//   )
-// }
-
-// export default Addscreen
-
-import React, { useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import FileInput from "../../components/form/input/FileInput";
 import Button from "../../components/ui/button/Button";
-import Badge from "../../components/ui/badge/Badge";
-const Addscreen = () => {
-  const [logoPreview, setLogoPreview] = useState(null);
-  const [faviconPreview, setFaviconPreview] = useState(null);
+import { submitSplashScreen } from "../../utils/Handlerfunctions/formSubmitHandlers";
 
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setLogoPreview(URL.createObjectURL(file));
+const Addscreen = () => {
+  const [splashscreen_image, setSplashscreenImage] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [data, setData] = useState<any[]>([]);
+  const navigate = useNavigate();
+
+  const handleSplashScreenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSplashscreenImage(e.target.files[0]);
     }
   };
 
-  const handleFaviconChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFaviconPreview(URL.createObjectURL(file));
+  const handleSubmit = async () => {
+    const newRecord = await submitSplashScreen(splashscreen_image, title);
+
+    if (newRecord) {
+      // Add new record at the top of table (if needed)
+      setData((prev) => [newRecord, ...prev]);
+
+      // Reset form fields
+      setSplashscreenImage(null);
+      setTitle("");
+
+      // Redirect after success
+      navigate("/admin/settings/home_slider");
     }
   };
 
   return (
     <div>
-      {/* Page Title */}
       <PageMeta title="Add Site Info" />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        {/* Card 1: Logo & Group Name */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         <div className="space-y-6">
           <ComponentCard title="Add New Splash Screen">
             <div className="space-y-6">
-              {/* Group Name */}
-
-              {/* Logo Preview */}
-              <Label>preview:</Label>
-              {logoPreview && (
+              {splashscreen_image && (
                 <div className="w-32 h-32 border rounded overflow-hidden">
                   <img
-                    src={logoPreview}
-                    alt="Logo Preview"
+                    src={URL.createObjectURL(splashscreen_image)}
+                    alt="splashscreen preview"
                     className="w-full h-full object-contain"
                   />
                 </div>
               )}
 
-              {/* Upload Logo */}
               <div>
-                <Label htmlFor="logoUpload">Upload Image</Label>
-                <FileInput id="fileUpload" onChange={handleLogoChange} />
+                <Label htmlFor="fileUpload">Upload Image</Label>
+                <FileInput id="fileUpload" onChange={handleSplashScreenChange} />
               </div>
+
               <div>
-                <Label htmlFor="groupName">Title</Label>
+                <Label htmlFor="title">Title</Label>
                 <Input
                   type="text"
-                  id="groupName"
+                  id="title"
                   placeholder="Enter splash screen Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
             </div>
           </ComponentCard>
         </div>
       </div>
-      <Button className="mt-3 bg-green-600  hover:bg-green-700">Submit</Button>
-      <Button className="canclebtn">Cancle</Button>
+
+      <Button
+        onClick={handleSubmit}
+        className="mt-3 bg-green-600 hover:bg-green-700"
+      >
+        Add
+      </Button>
+      <Button className="canclebtn">Cancel</Button>
     </div>
   );
 };

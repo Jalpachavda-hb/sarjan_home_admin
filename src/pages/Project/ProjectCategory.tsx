@@ -5,48 +5,62 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import { editProjectCategory } from "../../utils/Handlerfunctions/formEditHandlers";
+import { fetchProjectcategory } from "../../utils/Handlerfunctions/getdata";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { TextField, Button } from "@mui/material";
-import Addcategory from "./Addcategory"; // ✅ Import your Addcategory component
-
-interface Projecttype {
+import { useNavigate } from "react-router-dom";
+import { deleteProjectCategory } from "../../utils/Handlerfunctions/formdeleteHandlers";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import { Navigate } from "react-router";
+// ✅ Match API response
+interface ProjectCategoryType {
   id: number;
-  ProjectType: string;
+  name: string;
 }
-
-const tableData: Projecttype[] = [
-  {
-    id: 1,
-    ProjectType: "Commercial",
-  },
-  {
-    id: 2,
-    ProjectType: "Residential Commercial Mix",
-  },
-];
 
 export default function ProjectCategory() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editData, setEditData] = useState<ProjectCategoryType | null>(null);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Projecttype;
-    direction: "asc" | "desc";
-  } | null>(null);
-
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [tableData, setTableData] = useState<ProjectCategoryType[]>([]);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
+  // ✅ Fetch data from API
+  const fetchData = async () => {
+    try {
+      const data = await fetchProjectcategory();
+      setTableData(data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // ✅ Fetch on mount
+  useEffect(() => {
+    fetchData();
+  }, []);
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
 
@@ -57,40 +71,24 @@ export default function ProjectCategory() {
     setPage(0);
   };
 
-   const filteredData = useMemo(() => {
-  let data = [...tableData];
+  // ✅ Search filter
+  const filteredData = useMemo(() => {
+    let data = [...tableData];
 
-  const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
+    const searchTerm = search.trim().toLowerCase();
 
-  if (searchTerm) {
-    data = data.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTerm)
-      )
-    );
-  }
+    if (searchTerm) {
+      data = data.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-  if (sortConfig) {
-    data.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+    return data;
+  }, [search, tableData]);
 
-      if (aValue < bValue) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }
-
-  return data;
-}, [search, sortConfig]);
-  
-  
-  
-
+  // ✅ Pagination
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -98,44 +96,69 @@ export default function ProjectCategory() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  const handleSort = (key: keyof Projecttype) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
+  const handleEditClick = (category: ProjectCategoryType) => {
+    setEditData(category);
+    setEditOpen(true);
   };
-
-  const handleAddClick = () => {
-    setFormMode("add");
-    setSelectedCategory("");
-    setShowForm(true);
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editData) return;
+    setEditData({ ...editData, [e.target.name]: e.target.value });
   };
-
-  const handleEditClick = (categoryName: string) => {
-    setFormMode("edit");
-    setSelectedCategory(categoryName);
-    setShowForm(true);
-  };
-
   const handleCancelForm = () => {
     setShowForm(false);
   };
 
-  if (showForm) {
-    return (
-      <Addcategory
-        mode={formMode}
-        category={selectedCategory}
-        onCancel={handleCancelForm}
-      />
-    );
-  }
+  const handleDelete = async (id: string) => {
+    try {
+      const confirm = await Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      const res = await deleteProjectCategory(id, "1"); // admin_id from auth if possible
+
+      if (res?.status === 200 || res?.success) {
+        toast.success("Category deleted successfully");
+        fetchData(); // 🔹 refetch fresh list after delete
+      } else {
+        toast.error(res?.message || "Failed to delete category");
+      }
+    } catch (error) {
+      toast.error("Something went wrong while deleting");
+      console.error("Delete error:", error);
+    }
+  };
+  const handleEditSave = async () => {
+    if (!editData) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("admin_id", "1"); // or dynamic admin id
+      formData.append("id", editData.id.toString());
+      formData.append("project_category_name", editData.name); // 🔹 FIXED KEY
+
+      const res = await editProjectCategory(formData);
+
+      if (res?.status === 200) {
+        setTableData((prev) =>
+          prev.map((item) =>
+            item.id === editData.id ? { ...item, name: editData.name } : item
+          )
+        );
+        setEditOpen(false);
+           toast.success("Project category updated successfully!");
+      }
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
+  };
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -147,14 +170,23 @@ export default function ProjectCategory() {
 
           {/* Right Column */}
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-            <Button
+            {/* <Button
               size="small"
               variant="contained"
               className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
-              onClick={handleAddClick}
+             
             >
               Add Category
-            </Button>
+            </Button> */}
+            <a href="projects_category/addcategory">
+              <Button
+                size="small"
+                variant="contained"
+                className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
+              >
+                + Add Category
+              </Button>
+            </a>
             <TextField
               size="small"
               variant="outlined"
@@ -172,16 +204,16 @@ export default function ProjectCategory() {
             <TableHeader>
               <TableRow>
                 <TableCell className="columtext">Sr. No</TableCell>
-                {isColumnVisible("siteName") && (
+                {isColumnVisible("name") && (
                   <TableCell className="columtext">Project Category</TableCell>
                 )}
-                {isColumnVisible("siteName") && (
+                {isColumnVisible("action") && (
                   <TableCell className="columtext">Action</TableCell>
                 )}
               </TableRow>
             </TableHeader>
 
-            <TableBody>
+            {/* <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell className="justify-between py-12 text-gray-500">
@@ -207,6 +239,44 @@ export default function ProjectCategory() {
                           </Badge>
                           <Badge variant="light">
                             <FaEdit className="text-2xl cursor-pointer" />
+                          </Badge>
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )}
+            </TableBody> */}
+            <TableBody>
+              {paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell className="justify-between py-12 text-gray-500">
+                    No data available
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="rowtext">
+                      {page * rowsPerPage + index + 1}
+                    </TableCell>
+                    {isColumnVisible("name") && (
+                      <TableCell className="rowtext">{item.name}</TableCell>
+                    )}
+                    {isColumnVisible("action") && (
+                      <TableCell className="rowtext">
+                        <div className="flex gap-2 mt-1">
+                          <Badge variant="light">
+                            <FaEdit
+                              className="text-2xl cursor-pointer"
+                              onClick={() => handleEditClick(item)}
+                            />
+                          </Badge>
+                          <Badge variant="light" color="error">
+                            <MdDelete
+                              className="text-2xl cursor-pointer"
+                              onClick={() => handleDelete(item.id.toString())}
+                            />
                           </Badge>
                         </div>
                       </TableCell>
@@ -255,6 +325,35 @@ export default function ProjectCategory() {
           </div>
         </div>
       </div>
+      <Dialog
+        className="swal2-container"
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Edit Project Category</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Project Category"
+            name="name"
+            value={editData?.name || ""}
+            onChange={handleEditChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleEditSave}
+            variant="contained"
+            className="!bg-blue-600 hover:!bg-blue-700"
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

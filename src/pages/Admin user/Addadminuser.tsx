@@ -26,7 +26,7 @@ const Addadminuser = () => {
       {/* Page Title */}
       <PageMeta title="" />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         {/* Card 1: Payment Info */}
         <div className="space-y-6">
           <ComponentCard title="User Information">

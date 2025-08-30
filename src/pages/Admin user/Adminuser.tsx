@@ -108,7 +108,7 @@ export default function Adminuser() {
       .includes(searchTerm);
 
     const matchesSite = siteFilter
-      ? item.sitename.trim() === siteFilter.trim()
+      ? item.sitename === siteFilter
       : true;
 
     return matchesSearch && matchesSite;

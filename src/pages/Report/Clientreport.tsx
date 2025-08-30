@@ -6,67 +6,86 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   TextField,
   Button,
   Select,
   MenuItem,
-  InputLabel,
   FormControl,
   Checkbox,
   ListItemText,
 } from "@mui/material";
+import {
+  fetchClientReports,
+  fetchClientReportSummary,
+} from "../../utils/Handlerfunctions/getdata";
 
-interface Approval {
-  id: number;
+// interface for your API response row
+interface ClientReport {
+  id: string;
   clientName: string;
   purchasedSiteName: string;
   unitType: string;
   unitNumber: string;
-  principalAmount: number;
-  gstAmount: number;
-  receivedPrincipalAmount: number;
-  receivedGstAmount: number;
-  remainingPrincipalAmount: number;
+  principalAmount: string;
+  gstAmount: string;
+  receivedPrincipalAmount: string;
+  receivedGstAmount: string;
+  remainingPrincipalAmount: string;
+  remainingGstAmount: string;
+  ledger: string;
 }
-
-const tableData: Approval[] = [
-  {
-    id: 1,
-    clientName: "Ramesh Patel",
-    purchasedSiteName: "Green Acres",
-    unitType: "2BHK",
-    unitNumber: "A-101",
-    principalAmount: 2500000,
-    gstAmount: 125000,
-    receivedPrincipalAmount: 1500000,
-    receivedGstAmount: 75000,
-    remainingPrincipalAmount: 1000000,
-  },
-  {
-    id: 2,
-    clientName: "Sunita Sharma",
-    purchasedSiteName: "Skyline Residency",
-    unitType: "3BHK",
-    unitNumber: "B-203",
-    principalAmount: 3200000,
-    gstAmount: 160000,
-    receivedPrincipalAmount: 2200000,
-    receivedGstAmount: 110000,
-    remainingPrincipalAmount: 1000000,
-  },
-];
-
 export default function Clientreport() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Approval;
-    direction: "asc" | "desc";
-  } | null>(null);
   const [search, setSearch] = useState("");
+  const [tableData, setTableData] = useState<ClientReport[]>([]);
+  const [summary, setSummary] = useState({
+    total_principal_amount: "₹0",
+    total_gst_amount: "₹0",
+    total_received_principal_amount: "₹0",
+    total_received_gst_amount: "₹0",
+    total_remaining_principal_amount: "₹0",
+    total_remaining_gst_amount: "₹0",
+  });
+
+  const columns = [
+    { key: "clientName", label: "Client Name" },
+    { key: "purchasedSiteName", label: "Purchased Site Name" },
+    { key: "unitType", label: "Unit Type" },
+    { key: "unitNumber", label: "Unit Number" },
+    { key: "principalAmount", label: "Principal Amount" },
+    { key: "gstAmount", label: "GST Amount" },
+    { key: "receivedPrincipalAmount", label: "Received Principal Amount" },
+    { key: "receivedGstAmount", label: "Received GST Amount" },
+    { key: "remainingPrincipalAmount", label: "Remaining Principal Amount" },
+    { key: "remainingGstAmount", label: "Remaining GST Amount" },
+    { key: "ledger", label: "Ledger" },
+  ];
+
+  // fetch reports
+  useEffect(() => {
+    const loadData = async () => {
+      const reports = await fetchClientReports("1"); // pass adminId dynamically
+      if (reports) {
+        setTableData(reports);
+      }
+    };
+    loadData();
+  }, []);
+
+  // fetch summary
+  useEffect(() => {
+    const loadSummary = async () => {
+      const data = await fetchClientReportSummary("");
+      if (data) {
+        setSummary(data);
+      }
+    };
+    loadSummary();
+  }, []);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -82,36 +101,11 @@ export default function Clientreport() {
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
 
-  // const filteredData = useMemo(() => {
-  //   let data = [...tableData];
-
-  //   if (search) {
-  //     const searchTerm = search.toLowerCase();
-  //     data = data.filter((item) =>
-  //       Object.values(item).some((val) =>
-  //         String(val).toLowerCase().includes(searchTerm)
-  //       )
-  //     );
-  //   }
-
-  //   if (sortConfig) {
-  //     data.sort((a, b) => {
-  //       const aValue = a[sortConfig.key];
-  //       const bValue = b[sortConfig.key];
-  //       if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-  //       if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-  //       return 0;
-  //     });
-  //   }
-
-  //   return data;
-  // }, [search, sortConfig]);
-
+  // Search filter
   const filteredData = tableData.filter((item) => {
-    const searchTerm = search.trim().toLowerCase(); // remove spaces at start & end
-
+    const searchTerm = search.trim().toLowerCase();
     const matchesSearch = Object.values(item)
-      .map((val) => String(val).trim().toLowerCase()) // trim each value
+      .map((val) => String(val).trim().toLowerCase())
       .join(" ")
       .includes(searchTerm);
 
@@ -124,19 +118,6 @@ export default function Clientreport() {
       page * rowsPerPage + rowsPerPage
     );
   }, [filteredData, page, rowsPerPage]);
-
-  const handleSort = (key: keyof Approval) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
 
   return (
     <>
@@ -196,36 +177,10 @@ export default function Clientreport() {
                     },
                   }}
                 >
-                  {[
-                    "clientName",
-                    "purchasedSiteName",
-                    "unitType",
-                    "unitNumber",
-                    "principalAmount",
-                    "gstAmount",
-                    "receivedPrincipalAmount",
-                    "receivedGstAmount",
-                    "remainingPrincipalAmount",
-                  ].map((col) => (
-                    <MenuItem key={col} value={col}>
-                      <Checkbox checked={selectedColumns.includes(col)} />
-                      <ListItemText
-                        primary={
-                          {
-                            clientName: "Client Name",
-                            purchasedSiteName: "Purchased Site Name",
-                            unitType: "Unit Type",
-                            unitNumber: "Unit Number",
-                            principalAmount: "Principal Amount",
-                            gstAmount: "GST Amount",
-                            receivedPrincipalAmount:
-                              "Received Principal Amount",
-                            receivedGstAmount: "Received GST Amount",
-                            remainingPrincipalAmount:
-                              "Remaining Principal Amount",
-                          }[col]
-                        }
-                      />
+                  {columns.map((col) => (
+                    <MenuItem key={col.key} value={col.key}>
+                      <Checkbox checked={selectedColumns.includes(col.key)} />
+                      <ListItemText primary={col.label} />
                     </MenuItem>
                   ))}
                 </Select>
@@ -245,6 +200,7 @@ export default function Clientreport() {
           </div>
 
           {/* Table */}
+
           <div className="max-w-full overflow-x-auto mt-8">
             <Table>
               <TableHeader>
@@ -292,7 +248,7 @@ export default function Clientreport() {
                       Remaining GST Amount
                     </TableCell>
                   )}
-                  {isColumnVisible("Ledger") && (
+                  {isColumnVisible("ledger") && (
                     <TableCell className="columtext">Ledger</TableCell>
                   )}
                 </TableRow>
@@ -322,7 +278,7 @@ export default function Clientreport() {
                         </TableCell>
                       )}
                       {isColumnVisible("unitType") && (
-                        <TableCell className="rowtext">
+                        <TableCell className="rowtext unitTypeCell">
                           {item.unitType}
                         </TableCell>
                       )}
@@ -356,14 +312,25 @@ export default function Clientreport() {
                           {item.remainingPrincipalAmount}
                         </TableCell>
                       )}
-                      {isColumnVisible("remainingPrincipalAmount") && (
+                      {isColumnVisible("remainingGstAmount") && (
                         <TableCell className="rowtext">
-                          {item.remainingPrincipalAmount}
+                          {item.remainingGstAmount}
                         </TableCell>
                       )}
-                      {isColumnVisible("remainingPrincipalAmount") && (
+                      {isColumnVisible("ledger") && (
                         <TableCell className="rowtext">
-                          {item.remainingPrincipalAmount}
+                          {item.ledger ? (
+                            <a
+                              href={item.ledger}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 underline"
+                            >
+                              View
+                            </a>
+                          ) : (
+                            "-"
+                          )}
                         </TableCell>
                       )}
                     </TableRow>
@@ -387,27 +354,44 @@ export default function Clientreport() {
               onPageChange={handleChangePage}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[5, 10, 25, 30]}
               labelRowsPerPage="Rows per page:"
             />
           </div>
         </div>
       </div>
+
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
         {[
-          { title: "Total Principal Amount", value: "₹0" },
-          { title: "Total GST Amount", value: "₹0" },
-          { title: "Received Principal Amount", value: "₹0" },
-          { title: "Received GST Amount", value: "₹0" },
-          { title: "Remaining Principal Amount", value: "₹0" },
-          { title: "Remaining GST Amount", value: "₹0" },
+          {
+            title: "Total Principal Amount",
+            value: summary.total_principal_amount,
+          },
+          { title: "Total GST Amount", value: summary.total_gst_amount },
+          {
+            title: "Received Principal Amount",
+            value: summary.total_received_principal_amount,
+          },
+          {
+            title: "Received GST Amount",
+            value: summary.total_received_gst_amount,
+          },
+          {
+            title: "Remaining Principal Amount",
+            value: summary.total_remaining_principal_amount,
+          },
+          {
+            title: "Remaining GST Amount",
+            value: summary.total_remaining_gst_amount,
+          },
         ].map((item, index) => (
           <div
             key={index}
             className="bg-[#0d2250] text-white rounded-sm shadow-md p-5 flex flex-col justify-center"
           >
             <h6 className="text-sm font-semibold mb-1">{item.title}</h6>
-            <p className="text-lg font-bold">{item.value}</p>
+            <p className="text-lg font-semibold">{item.value}</p>
           </div>
         ))}
       </div>

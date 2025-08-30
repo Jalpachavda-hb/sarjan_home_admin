@@ -19,6 +19,7 @@ import {
   Checkbox,
   ListItemText,
 } from "@mui/material";
+import SiteFilter from "../../components/form/input/FilterbySite";
 
 interface MyTiket {
   id: number;
@@ -101,37 +102,37 @@ export default function Tikethistory() {
 
   //   return data;
   // }, [search, siteFilter, sortConfig]);
-    const filteredData = useMemo(() => {
-  let data = [...tableData];
+  const filteredData = useMemo(() => {
+    let data = [...tableData];
 
-  const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
+    const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
 
-  if (searchTerm) {
-    data = data.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTerm)
-      )
-    );
-  }
+    if (searchTerm) {
+      data = data.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-  if (sortConfig) {
-    data.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+    if (sortConfig) {
+      data.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
 
-      if (aValue < bValue) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }
+        if (aValue < bValue) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
 
-  return data;
-}, [search, sortConfig]);
-  
+    return data;
+  }, [search, sortConfig]);
+
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -268,27 +269,11 @@ export default function Tikethistory() {
           </div>
 
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Filter by Site</InputLabel>
-              <Select
-                value={siteFilter}
-                onChange={(e) => setSiteFilter(e.target.value)}
-                label="Filter by Site"
-                MenuProps={{
-                  PaperProps: {
-                    sx: { fontFamily: "Poppins", fontSize: "14px" },
-                  },
-                }}
-              >
-                <MenuItem value="">All Sites</MenuItem>
-                {uniqueSites.map((site) => (
-                  <MenuItem key={site} value={site}>
-                    {site}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
+               
+            <SiteFilter
+              value={siteFilter}
+              onChange={(e) => setSiteFilter(e.target.value)}
+            />
             <TextField
               size="small"
               variant="outlined"
@@ -296,14 +281,17 @@ export default function Tikethistory() {
               value={search}
               onChange={(e) => setSearch(e.target.value.trimStart())}
             />
-             <a href="/admin/ticket-request/mytiket/addtiket" className="text-blue-500 hover:text-blue-700">
+            <a
+              href="/admin/ticket-request/mytiket/addtiket"
+              className="text-blue-500 hover:text-blue-700"
+            >
               <Button
                 size="small"
                 variant="contained"
                 className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
               >
                 <FaPlus />
-                Add New Clients
+                Add New Ticket
               </Button>
             </a>
           </div>

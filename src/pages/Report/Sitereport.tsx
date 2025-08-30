@@ -1,13 +1,3 @@
-// import React from 'react'
-
-// const Sitereport = () => {
-//   return (
-//     <div>Sitereport</div>
-//   )
-// }
-
-// export default Sitereport
-
 import {
   Table,
   TableBody,
@@ -15,9 +5,11 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import Badge from "../../components/ui/badge/Badge";
+
+import { fetchSiteReports } from "../../utils/Handlerfunctions/getdata";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
+
 import {
   TextField,
   Button,
@@ -29,39 +21,18 @@ import {
   ListItemText,
 } from "@mui/material";
 
-interface Aprovel {
-  id: number;
-  siteName: string;
-  projecttype: string;
-  projectcategory: number;
-  allocateduser: string;
+interface SiteReport {
+  project_type: string;
+  project_category_name: string;
+  site_name: string;
+  admin_name: string;
 }
-
-const tableData: Aprovel[] = [
-  {
-    id: 1,
-    projecttype: "Ramesh Patel",
-    siteName: "Green Acres",
-    projectcategory: 9313061960,
-    allocateduser: "RameshPatel@gmail.com",
-  },
-  {
-    id: 2,
-    projecttype: "Sunita Sharma",
-    siteName: "Skyline Residency",
-    projectcategory: 5259658569,
-    allocateduser: "sunitasharna@gmail.com",
-  },
-];
 
 export default function Pandingforaprovel() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Aprovel;
-    direction: "asc" | "desc";
-  } | null>(null);
+  const [tableData, setTableData] = useState<SiteReport[]>([]);
   // use for search
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
@@ -80,35 +51,13 @@ export default function Pandingforaprovel() {
     setPage(0);
   };
 
-  // const filteredData = useMemo(() => {
-  //   let data = [...tableData];
-
-  //   if (search) {
-  //     const searchTerm = search.toLowerCase();
-  //     data = data.filter((item) =>
-  //       Object.values(item).some((val) =>
-  //         String(val).toLowerCase().includes(searchTerm)
-  //       )
-  //     );
-  //   }
-
-  //   if (sortConfig) {
-  //     data.sort((a, b) => {
-  //       const aValue = a[sortConfig.key];
-  //       const bValue = b[sortConfig.key];
-
-  //       if (aValue < bValue) {
-  //         return sortConfig.direction === "asc" ? -1 : 1;
-  //       }
-  //       if (aValue > bValue) {
-  //         return sortConfig.direction === "asc" ? 1 : -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-
-  //   return data;
-  // }, [search, sortConfig]);
+  useEffect(() => {
+    const loadReports = async () => {
+      const data = await fetchSiteReports("1"); // Pass adminId dynamically
+      setTableData(data);
+    };
+    loadReports();
+  }, []);
 
   const filteredData = tableData.filter((item) => {
     const searchTerm = search.trim().toLowerCase(); // remove spaces at start & end
@@ -125,8 +74,12 @@ export default function Pandingforaprovel() {
     return matchesSearch && matchesSite;
   });
 
-
-
+  const columns = [
+    { key: "project_type", label: "Project Type" },
+    { key: "project_category_name", label: "Project Category" },
+    { key: "site_name", label: "Site Name" },
+    { key: "admin_name", label: "Allocated User" },
+  ];
 
   const paginatedData = useMemo(() => {
     return filteredData.slice(
@@ -136,19 +89,6 @@ export default function Pandingforaprovel() {
   }, [filteredData, page, rowsPerPage]);
 
   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
-
-  const handleSort = (key: keyof Aprovel) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -181,10 +121,6 @@ export default function Pandingforaprovel() {
 
             {/* Select Columns Dropdown */}
             <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel
-                className="text-gray-700 dark:text-white"
-                sx={{ fontFamily: "Poppins" }}
-              ></InputLabel>
               <Select
                 multiple
                 value={selectedColumns}
@@ -210,34 +146,10 @@ export default function Pandingforaprovel() {
                   },
                 }}
               >
-                {[
-                  "siteName",
-                  "projecttype",
-                  "projectcategory",
-                  "allocateduser",
-                  "blocknumber",
-                  "blocknumberType",
-                  "receivedDate",
-                ].map((col) => (
-                  <MenuItem
-                    key={col}
-                    value={col}
-                    sx={{ fontFamily: "Poppins" }}
-                  >
-                    <Checkbox checked={selectedColumns.includes(col)} />
-                    <ListItemText
-                      primary={
-                        {
-                          projecttype: "Client Name",
-                          siteName: "Site Name",
-                          projectcategory: "projectcategory",
-                          allocateduser: "Unit No.",
-                          blocknumber: "Received blocknumber",
-                          blocknumberType: "blocknumber Type",
-                          receivedDate: "Received Date",
-                        }[col]
-                      }
-                    />
+                {columns.map((col) => (
+                  <MenuItem key={col.key} value={col.key}>
+                    <Checkbox checked={selectedColumns.includes(col.key)} />
+                    <ListItemText primary={col.label} />
                   </MenuItem>
                 ))}
               </Select>
@@ -299,21 +211,17 @@ export default function Pandingforaprovel() {
               <TableRow>
                 <TableCell className="columtext">Sr. No</TableCell>
 
-                {isColumnVisible("siteName") && (
+                {isColumnVisible("project_type") && (
                   <TableCell className="columtext">Project Type</TableCell>
                 )}
-
-                {isColumnVisible("projecttype") && (
+                {isColumnVisible("project_category_name") && (
                   <TableCell className="columtext">Project Category</TableCell>
                 )}
-                {isColumnVisible("siteName") && (
+                {isColumnVisible("site_name") && (
                   <TableCell className="columtext">Site Name</TableCell>
                 )}
-                {isColumnVisible("allocateduser") && (
-                  <TableCell className="columtext">Allocatd user</TableCell>
-                )}
-                {isColumnVisible("allocateduser") && (
-                  <TableCell className="columtext">Allocatd user</TableCell>
+                {isColumnVisible("admin_name") && (
+                  <TableCell className="columtext">Allocated User</TableCell>
                 )}
               </TableRow>
             </TableHeader>
@@ -336,22 +244,24 @@ export default function Pandingforaprovel() {
                       {page * rowsPerPage + index + 1}
                     </TableCell>
 
-                    {isColumnVisible("siteName") && (
-                      <TableCell className="rowtext">{item.siteName}</TableCell>
-                    )}
-                    {isColumnVisible("projecttype") && (
+                    {isColumnVisible("project_type") && (
                       <TableCell className="rowtext">
-                        {item.projecttype}
+                        {item.project_type}
                       </TableCell>
                     )}
-                    {isColumnVisible("projectcategory") && (
+                    {isColumnVisible("project_category_name") && (
                       <TableCell className="rowtext">
-                        {item.projectcategory}
+                        {item.project_category_name}
                       </TableCell>
                     )}
-                    {isColumnVisible("allocateduser") && (
+                    {isColumnVisible("site_name") && (
                       <TableCell className="rowtext">
-                        {item.allocateduser}
+                        {item.site_name}
+                      </TableCell>
+                    )}
+                    {isColumnVisible("admin_name") && (
+                      <TableCell className="rowtext">
+                        {item.admin_name}
                       </TableCell>
                     )}
                   </TableRow>
@@ -378,7 +288,7 @@ export default function Pandingforaprovel() {
               onPageChange={handleChangePage}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[5, 10, 25, 30, 35, 40, 50]}
               labelRowsPerPage="Rows per page:"
               sx={{
                 color: "inherit",

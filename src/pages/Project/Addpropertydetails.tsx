@@ -16,10 +16,10 @@ import FileInput from "../../components/form/input/FileInput";
 import Select from "../../components/form/Select";
 import DatePicker from "../../components/form/date-picker";
 import Button from "../../components/ui/button/Button";
-
+import SiteSelector from "../../components/form/input/SelectSiteinput";
 const Addpropertydetails = () => {
   const [receiptPreview, setReceiptPreview] = useState(null);
-
+ const [selectedSite, setSelectedSite] = useState(null);
   // Dropdown options
   const siteOptions = [
     { value: "site1", label: "Site 1" },
@@ -53,12 +53,9 @@ const Addpropertydetails = () => {
             <div className="space-y-6">
               {/* Select Site */}
               <div>
-                <Label>Select Site</Label>
-                <Select
-                  options={siteOptions}
-                  placeholder="Select a site"
-                  className="dark:bg-dark-900"
-                />
+                 <SiteSelector
+                onChange={(site) => setSelectedSite(site?.value || null)}
+              />
               </div>
               <div>
                 <Label>Unit </Label>

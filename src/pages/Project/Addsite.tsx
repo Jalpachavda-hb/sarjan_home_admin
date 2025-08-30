@@ -1,14 +1,4 @@
-// import React from 'react'
-
-// const Addsite = () => {
-//   return (
-//     <div>Addsite</div>
-//   )
-// }
-
-// export default Addsite
-
-import React, { useState } from "react";
+import { useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
@@ -17,15 +7,14 @@ import FileInput from "../../components/form/input/FileInput";
 import Select from "../../components/form/Select";
 
 import Button from "../../components/ui/button/Button";
-import { FaRegEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
+
 import TextArea from "../../components/form/input/TextArea";
-import TitleDescriptionList from "../../components/form/form-elements/Dynamicgroup";
+
 import DynamicInputFields from "../../components/form/form-elements/DynamicInputFields ";
 import Dynamicgroup from "../../components/form/form-elements/Dynamicgroup";
 const Addsite = () => {
-  const [receiptPreview, setReceiptPreview] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [setReceiptPreview] = useState(null);
+
   // Dropdown options
   const siteOptions = [
     { value: "site1", label: "Ongoing site" },
@@ -247,4 +236,3 @@ const Addsite = () => {
 };
 
 export default Addsite;
- 

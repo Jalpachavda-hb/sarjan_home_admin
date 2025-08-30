@@ -14,13 +14,13 @@ import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import FileInput from "../../components/form/input/FileInput";
-import Select from "../../components/form/Select";
+import SiteSelector from "../../components/form/input/SelectSiteinput";
 
 import Button from "../../components/ui/button/Button";
 
 const Addcommunoc = () => {
   const [receiptPreview, setReceiptPreview] = useState(null);
-
+ const [selectedSite, setSelectedSite] = useState(null);
   // Dropdown options
   const siteOptions = [
     { value: "site1", label: "Site 1" },
@@ -41,19 +41,21 @@ const Addcommunoc = () => {
       {/* Page Title */}
       <PageMeta title="Add CommunDocument Details" />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         {/* Card 1: Payment Info */}
         <div className="space-y-6">
           <ComponentCard title="Add Commun Document Details">
             <div className="space-y-6">
               {/* Select Site */}
               <div>
-                <Label>Select Site</Label>
-                <Select
+               
+                {/* <Select
                   options={siteOptions}
                   placeholder="Select a site"
                   className="dark:bg-dark-900"
-                />
+                /> */}  <SiteSelector
+                onChange={(site) => setSelectedSite(site?.value || null)}
+              />
               </div>
 
               {/* Received Amount */}

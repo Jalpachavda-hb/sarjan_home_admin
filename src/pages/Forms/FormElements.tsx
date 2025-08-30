@@ -12,7 +12,7 @@ export default function FormElements() {
         description="This is React.js Form Elements  Dashboard page for Sarjan_Admin - React.js Tailwind CSS Admin Dashboard Template"
       />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         <div className="space-y-6">
           <DefaultInputs />
 
