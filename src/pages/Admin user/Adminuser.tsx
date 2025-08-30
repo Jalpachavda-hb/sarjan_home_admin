@@ -7,40 +7,29 @@ import {
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
+import { useState, useMemo ,useEffect} from "react";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
-
+import { fetchAdminUsers } from "../../utils/Handlerfunctions/getdata"; 
 import { TextField, Button } from "@mui/material";
 
-interface Adminuser {
-  id: number;
-  sitename: string;
+interface AdminUser {
+  id: string;
+  title: string;
   name: string;
   email: string;
-  contactnumber: number;
+  contact_no: number;
+  role_id: number;
+  created_at: string;
+  updated_at: string;
 }
 
-const tableData: Adminuser[] = [
-  {
-    id: 1,
-    sitename: "Completed Project",
-    name: "Residential Commercial Mix",
-    email: "Sarjan Tower",
-    contactnumber: 5656859656,
-  },
-  {
-    id: 2,
-    sitename: "Completed Project",
-    name: "Residential Commercial Mix",
-    email: "Sarjan Tower",
-    contactnumber: 5656859656,
-  },
-];
+
 export default function Adminuser() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns] = useState<string[]>([]);
+   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   // const [editOpen, setEditOpen] = useState(false);
   // const [editData, setEditData] = useState<Adminuser | null>(null);
 
@@ -52,22 +41,21 @@ export default function Adminuser() {
   // use for search
   const [search, setSearch] = useState("");
   const [siteFilter] = useState("");
-
+  const [loading, setLoading] = useState(false);
   // const [newCategory, setNewCategory] = useState("");
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+
 
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+
+  const handleChangePage = (_: unknown, newPage: number) => setPage(newPage);
+  const handleChangeRowsPerPage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(e.target.value, 10));
     setPage(0);
   };
+
 
   // const filteredData = useMemo(() => {
   //   let data = [...tableData];
@@ -99,27 +87,47 @@ export default function Adminuser() {
   //   return data;
   // }, [search, sortConfig]);
 
-  const filteredData = tableData.filter((item) => {
-    const searchTerm = search.trim().toLowerCase(); // remove spaces at start & end
 
+
+ useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const res = await fetchAdminUsers(1); // 🔹 Pass admin_id (dynamic later)
+        if (res?.status === 200) {
+          setAdminUsers(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+
+
+
+ const filteredData = adminUsers.filter((item) => {
+    const searchTerm = search.trim().toLowerCase();
     const matchesSearch = Object.values(item)
-      .map((val) => String(val).trim().toLowerCase()) 
+      .map((val) => String(val).trim().toLowerCase())
       .join(" ")
       .includes(searchTerm);
-
-    const matchesSite = siteFilter
-      ? item.sitename === siteFilter
-      : true;
-
+    const matchesSite = siteFilter ? item.title === siteFilter : true;
     return matchesSearch && matchesSite;
   });
 
-  const paginatedData = useMemo(() => {
-    return filteredData.slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage
-    );
-  }, [filteredData, page, rowsPerPage]);
+ const paginatedData = useMemo(
+    () =>
+      filteredData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      ),
+    [filteredData, page, rowsPerPage]
+  );
 
   //   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
 
@@ -318,7 +326,7 @@ export default function Adminuser() {
                     </TableCell>
 
                     {isColumnVisible("count") && (
-                      <TableCell className="rowtext">{item.sitename}</TableCell>
+                      <TableCell className="rowtext">{item.title}</TableCell>
                     )}
 
                     {isColumnVisible("count") && (
@@ -329,7 +337,7 @@ export default function Adminuser() {
                     )}
                     {isColumnVisible("count") && (
                       <TableCell className="rowtext">
-                        {item.contactnumber}
+                        {item.contact_no}
                       </TableCell>
                     )}
 

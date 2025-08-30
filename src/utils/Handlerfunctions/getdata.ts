@@ -354,14 +354,12 @@ export const fetchProjectcategory = async (adminId?: string) => {
   }
 };
 
-
-
-
 export const fetchCommonDocuments = async (adminId: string) => {
   try {
-    const res = await axiosInstance.get(API_PATHS.COMMONDOCUMENTS.SHOWCOMMUNDOCUMENT,
+    const res = await axiosInstance.get(
+      API_PATHS.COMMONDOCUMENTS.SHOWCOMMUNDOCUMENT,
       {
-        params: adminId ? { admin_id: adminId } : {}, 
+        params: adminId ? { admin_id: adminId } : {},
       }
     );
     return res.data?.data || [];
@@ -371,20 +369,20 @@ export const fetchCommonDocuments = async (adminId: string) => {
   }
 };
 
-
-
 export const getClientCountOfSite = async () => {
   const adminId = getAdminId();
   if (!adminId) throw new Error("Admin ID not found");
 
   // ✅ Send admin_id as query param
-  const res = await axiosInstance.get(API_PATHS.CLIENTDATA.GETCLIENTECOUNTOFSITE, {
-    params: { admin_id: adminId },
-  });
+  const res = await axiosInstance.get(
+    API_PATHS.CLIENTDATA.GETCLIENTECOUNTOFSITE,
+    {
+      params: { admin_id: adminId },
+    }
+  );
 
   return res.data?.data || [];
 };
-
 
 export const showclientlist = async (siteId: string) => {
   const adminId = getAdminId();
@@ -396,7 +394,7 @@ export const showclientlist = async (siteId: string) => {
   try {
     const res = await axiosInstance.get(
       API_PATHS.CLIENTDATA.SHOWCLIENTLIST,
-      { params: { admin_id: adminId, site_id: siteId } } // 🔥 FIXED
+      { params: { admin_id: adminId, site_id: siteId } } 
     );
     return res.data || null;
   } catch (error) {
@@ -406,4 +404,75 @@ export const showclientlist = async (siteId: string) => {
   }
 };
 
+export const showPropertyDetailsList = async () => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return null;
+  }
 
+  try {
+    const res = await axiosInstance.get(
+      API_PATHS.SITEDETAILS.PROPERTYDETAILSLIST,
+      { params: { admin_id: adminId } } 
+    );
+
+    // Correct: use res.data.details
+    const mappedData = res.data?.details?.map((item: any) => ({
+      id: item.block_detail_id,
+      siteName: item.title,
+      unit: item.block,
+      unitNumber: item.block_number,
+    }));
+
+    return mappedData || [];
+  } catch (error) {
+    console.error("Error fetching property details:", error);
+    toast.error("Failed to fetch property details");
+    return null;
+  }
+};
+
+
+export const fetchAdminUsers = async () => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return null;
+  }
+
+  try {
+    const res = await axiosInstance.get(API_PATHS.ADMINUSERAPI.SHOWADMINUSER, {
+      params: { admin_id: adminId },
+    });
+
+    return res.data; // return only API response
+  } catch (error) {
+    console.error("Error fetching admin users:", error);
+    toast.error("Failed to fetch admin users");
+    throw error;
+  }
+};
+
+
+export const fetchAdminTickets = async () => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return null;
+  }
+
+  try {
+    const res = await axiosInstance.get(API_PATHS.TICKET.SHOWADMINTICKET, {
+      params: { admin_id: adminId },
+    });
+
+    return res.data; // return raw API response
+  } catch (error) {
+    console.error("Error fetching admin tickets:", error);
+    toast.error("Failed to fetch tickets");
+    throw error;
+  }
+};

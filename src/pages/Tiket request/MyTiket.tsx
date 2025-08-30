@@ -8,10 +8,11 @@ import {
 import SiteFilter from "../../components/form/input/FilterbySite";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
+import { fetchAdminTickets } from "../../utils/Handlerfunctions/getdata";
 import {
   TextField,
   Button,
@@ -23,7 +24,7 @@ import {
   ListItemText,
 } from "@mui/material";
 
-interface MyTiket {
+interface MyTicket {
   id: number;
   clientName: string;
   unitNo: string;
@@ -31,42 +32,49 @@ interface MyTiket {
   title: string;
   date: string;
   status: string;
-  reply: string;
+  reply?: string;
 }
-
-const tableData: MyTiket[] = [
-  {
-    id: 1,
-    clientName: "John Doe",
-    unitNo: "A-101",
-    siteName: "Downtown Complex",
-    title: "Complaint",
-    date: "2025-08-11",
-    status: "Pending",
-    reply: "Awaiting review",
-  },
-  {
-    id: 2,
-    clientName: "Jane Smith",
-    unitNo: "B-202",
-    siteName: "Riverside Towers",
-    title: "Maintenance Request",
-    date: "2025-08-10",
-    status: "Completed",
-    reply: "Fixed",
-  },
-];
 
 export default function MyTiket() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof MyTiket;
-    direction: "asc" | "desc";
-  } | null>(null);
+  const [tickets, setTickets] = useState<MyTicket[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
+
+  // Fetch API data
+  useEffect(() => {
+    const loadTickets = async () => {
+      try {
+        const res = await fetchAdminTickets();
+
+        if (res?.status === 200 && Array.isArray(res.data)) {
+          const mapped = res.data.map((t: any) => ({
+            id: t.id,
+            clientName: t.client_name,
+            unitNo: t.unit_number,
+            siteName: t.site_name,
+            title: t.title,
+            date: t.created_at,
+            status: t.status,
+            reply: t.is_read === "1" ? "Read" : "Unread",
+          }));
+          setTickets(mapped);
+        } else {
+          setTickets([]);
+        }
+      } catch (err) {
+        console.error("Error loading tickets:", err);
+        setTickets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTickets();
+  }, []);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -82,39 +90,10 @@ export default function MyTiket() {
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
 
-  // const filteredData = useMemo(() => {
-  //   let data = [...tableData];
-
-  //   if (search) {
-  //     const searchTerm = search.toLowerCase();
-  //     data = data.filter((item) =>
-  //       Object.values(item).some((val) =>
-  //         String(val).toLowerCase().includes(searchTerm)
-  //       )
-  //     );
-  //   }
-
-  //   if (siteFilter) {
-  //     data = data.filter((item) => item.siteName === siteFilter);
-  //   }
-
-  //   if (sortConfig) {
-  //     data.sort((a, b) => {
-  //       const aValue = a[sortConfig.key];
-  //       const bValue = b[sortConfig.key];
-  //       if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-  //       if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-  //       return 0;
-  //     });
-  //   }
-
-  //   return data;
-  // }, [search, siteFilter, sortConfig]);
-
+  // Filtering
   const filteredData = useMemo(() => {
-    let data = [...tableData];
-
-    const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
+    let data = [...tickets];
+    const searchTerm = search.trim().toLowerCase();
 
     if (searchTerm) {
       data = data.filter((item) =>
@@ -124,24 +103,14 @@ export default function MyTiket() {
       );
     }
 
-    if (sortConfig) {
-      data.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-
-        if (aValue < bValue) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
+    if (siteFilter) {
+      data = data.filter((item) => item.siteName === siteFilter);
     }
 
     return data;
-  }, [search, sortConfig]);
+  }, [tickets, search, siteFilter]);
 
+  // Pagination
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -149,97 +118,15 @@ export default function MyTiket() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
-
-  const handleSort = (key: keyof MyTiket) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
-
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">My Ticket</h3>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] px-4 pb-3 pt-4 sm:px-6">
+        {/* Filters + Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-wrap gap-2 items-center">
-            {/* <Button
-              size="small"
-              variant="contained"
-              className="!bg-green-600 hover:!bg-green-700 text-white"
-            >
-              Copy
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              className="!bg-blue-600 hover:!bg-blue-700 text-white"
-            >
-              CSV
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              className="!bg-amber-500 hover:!bg-amber-600 text-white"
-            >
-              Print
-            </Button> */}
-
-            {/* <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Select Columns</InputLabel>
-              <Select
-                multiple
-                value={selectedColumns}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSelectedColumns(
-                    typeof value === "string" ? value.split(",") : value
-                  );
-                }}
-                renderValue={() => "Select Columns"}
-                className="bg-white dark:bg-gray-200 rounded-md"
-                MenuProps={{
-                  PaperProps: { sx: { maxHeight: 300, fontFamily: "Poppins" } },
-                }}
-              >
-                {[
-                  "clientName",
-                  "unitNo",
-                  "siteName",
-                  "title",
-                  "date",
-                  "status",
-                  "reply",
-                  "blocknumberType",
-                ].map((col) => (
-                  <MenuItem key={col} value={col}>
-                    <Checkbox checked={selectedColumns.includes(col)} />
-                    <ListItemText
-                      primary={
-                        {
-                          clientName: "Client Name",
-                          unitNo: "Unit No.",
-                          siteName: "Site Name",
-                          title: "Title",
-                          date: "Date",
-                          status: "Status",
-                          reply: "Reply",
-                          blocknumberType: "Manage",
-                        }[col]
-                      }
-                    />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl> */}
+            {/* Column Selector */}
             <FormControl size="small" sx={{ minWidth: 200 }}>
               <InputLabel
                 className="text-gray-700 dark:text-white"
@@ -280,11 +167,7 @@ export default function MyTiket() {
                   "reply",
                   "blocknumberType",
                 ].map((col) => (
-                  <MenuItem
-                    key={col}
-                    value={col}
-                    sx={{ fontFamily: "Poppins" }}
-                  >
+                  <MenuItem key={col} value={col} sx={{ fontFamily: "Poppins" }}>
                     <Checkbox checked={selectedColumns.includes(col)} />
                     <ListItemText
                       primary={
@@ -304,13 +187,15 @@ export default function MyTiket() {
                 ))}
               </Select>
             </FormControl>
-               
+
+            {/* Site Filter */}
             <SiteFilter
               value={siteFilter}
               onChange={(e) => setSiteFilter(e.target.value)}
             />
           </div>
 
+          {/* Search + Add New */}
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
             <TextField
               size="small"
@@ -319,7 +204,10 @@ export default function MyTiket() {
               value={search}
               onChange={(e) => setSearch(e.target.value.trimStart())}
             />
-            <a href="/admin/ticket-request/mytiket/addtiket" className="text-blue-500 hover:text-blue-700">
+            <a
+              href="/admin/ticket-request/mytiket/addtiket"
+              className="text-blue-500 hover:text-blue-700"
+            >
               <Button
                 size="small"
                 variant="contained"
@@ -332,6 +220,7 @@ export default function MyTiket() {
           </div>
         </div>
 
+        {/* Table */}
         <div className="max-w-full overflow-x-auto mt-8">
           <Table>
             <TableHeader>
@@ -365,10 +254,19 @@ export default function MyTiket() {
             </TableHeader>
 
             <TableBody>
-              {paginatedData.length === 0 ? (
+              {loading ? (
                 <TableRow>
                   <TableCell
-                    // colSpan={8}
+                    colSpan={9}
+                    className="text-center py-12 text-gray-500"
+                  >
+                    Loading tickets...
+                  </TableCell>
+                </TableRow>
+              ) : paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={9}
                     className="text-center py-12 text-gray-500"
                   >
                     No data available
@@ -381,9 +279,7 @@ export default function MyTiket() {
                       {page * rowsPerPage + index + 1}
                     </TableCell>
                     {isColumnVisible("clientName") && (
-                      <TableCell className="rowtext">
-                        {item.clientName}
-                      </TableCell>
+                      <TableCell className="rowtext">{item.clientName}</TableCell>
                     )}
                     {isColumnVisible("unitNo") && (
                       <TableCell className="rowtext">{item.unitNo}</TableCell>
@@ -426,6 +322,7 @@ export default function MyTiket() {
           </Table>
         </div>
 
+        {/* Pagination */}
         <div className="mt-4 flex justify-between items-center w-full">
           <p className="text-sm">
             Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–

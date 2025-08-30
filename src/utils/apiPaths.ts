@@ -19,20 +19,17 @@ export const API_PATHS = {
   ADMINAUTH: {
     ADMINLOGIN: "adminLogin", // POST
 
-  
-
     GET_PROFILE: "adminProfile", //GET
-    
+
     UPDATE_PROFIL: "updateProfile", //PUT
 
     ADMINROLEPERMISSION: "adminRolePermissions", //GET
-    },
+  },
   //  PROJECT TYPE API
 
   PROJECTTYPE: {
     GETPROJECTTYPE: "showProjectTypeList", //GET
     EDITPROJECTTYPE: "editProjectType", //POST
-
 
     DELETEPROJECTTYPE: "deleteProjectType", //POST
   },
@@ -44,23 +41,17 @@ export const API_PATHS = {
 
     EDITPROJECTCATEGORY: "editProjectCategory", //POST
 
-
-
     ADDPROJECTCATEGORY: "addProjectCategory", // POST
 
-
-
     DELETPROJECTCATEGORY: "deleteProjectCategory", //POST
-
-
   },
 
   // SITE DETAILS API
-
+  
   SITEDETAILS: {
     GETSITEDETAILS: "showSiteList", //GET
     ADDSITE: "addSite", //POST
-    
+
     EDITSITEDETAILS: "editSite", //POST
     DELETESITE: "deleteSite", //POST
     SITEDETAILSBYID: "showSiteDetails", // change url when use
@@ -117,7 +108,7 @@ export const API_PATHS = {
   CLIENTREPORT: {
     VIEWLEDGER: " viewLedger", //"raw": "{{url}}viewLedger?clientid&block_detail_id",
     SHOWCLIENTREPORT: "showClientReports", //raw": "{{url}}getClientReportSummary?siteFilter=1",
-     SHOWCLIENTREPORTSUMMERY: "getClientReportSummary",
+    SHOWCLIENTREPORTSUMMERY: "getClientReportSummary",
   },
 
   // PAYMENT
