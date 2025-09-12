@@ -167,7 +167,11 @@ export default function MyTiket() {
                   "reply",
                   "blocknumberType",
                 ].map((col) => (
-                  <MenuItem key={col} value={col} sx={{ fontFamily: "Poppins" }}>
+                  <MenuItem
+                    key={col}
+                    value={col}
+                    sx={{ fontFamily: "Poppins" }}
+                  >
                     <Checkbox checked={selectedColumns.includes(col)} />
                     <ListItemText
                       primary={
@@ -279,7 +283,9 @@ export default function MyTiket() {
                       {page * rowsPerPage + index + 1}
                     </TableCell>
                     {isColumnVisible("clientName") && (
-                      <TableCell className="rowtext">{item.clientName}</TableCell>
+                      <TableCell className="rowtext">
+                        {item.clientName}
+                      </TableCell>
                     )}
                     {isColumnVisible("unitNo") && (
                       <TableCell className="rowtext">{item.unitNo}</TableCell>

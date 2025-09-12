@@ -565,7 +565,7 @@ export default function ClientList() {
         setClients(
           details.map((item: any) => ({
             id: item.id,
-            clientName: item.name, // ✅ renamed here
+            clientName: item.name, 
             unitNo: item.block_number,
             contactNumber: item.contact_no,
             email: item.email,

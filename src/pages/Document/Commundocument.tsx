@@ -11,7 +11,10 @@ import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
-import { fetchCommonDocuments ,getAdminId} from "../../utils/Handlerfunctions/getdata";
+import {
+  fetchCommonDocuments,
+  getAdminId,
+} from "../../utils/Handlerfunctions/getdata";
 import { deleteCommonDocument } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { FaRegEye } from "react-icons/fa";
 import { TextField, Button } from "@mui/material";
@@ -52,7 +55,7 @@ export default function Commundocument() {
     setPage(0);
   };
 
-   const filteredData = useMemo(() => {
+  const filteredData = useMemo(() => {
     return documents.filter((item) => {
       const searchTerm = search.trim().toLowerCase();
       const matchesSearch =
@@ -74,11 +77,10 @@ export default function Commundocument() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-
- useEffect(() => {
+  useEffect(() => {
     const loadDocs = async () => {
-       const adminId = getAdminId(); 
-    if (!adminId) return;
+      const adminId = getAdminId();
+      if (!adminId) return;
 
       const data = await fetchCommonDocuments(adminId);
       setDocuments(data);
@@ -86,33 +88,32 @@ export default function Commundocument() {
     loadDocs();
   }, []);
 
-const handleDelete = async (id: string) => {
-  const result = await Swal.fire({
-    title: "Are you sure?",
-    text: "You won’t be able to revert this!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, delete it!",
-  });
+  const handleDelete = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won’t be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
 
-  if (result.isConfirmed) {
-    try {
-      await deleteCommonDocument(id);
+    if (result.isConfirmed) {
+      try {
+        await deleteCommonDocument(id);
 
-      // ✅ Update state
-      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+        // ✅ Update state
+        setDocuments((prev) => prev.filter((doc) => doc.id !== id));
 
-      // ✅ Show success
-      toast.success("Document deleted successfully!");
-    } catch (err) {
-      console.error("Delete failed:", err);
-      toast.error("Failed to delete document. Please try again.");
+        // ✅ Show success
+        // toast.success("Document deleted successfully!");
+      } catch (err) {
+        console.error("Delete failed:", err);
+        toast.error("Failed to delete document. Please try again.");
+      }
     }
-  }
-};
-
+  };
 
   // ✅ View handler
   const handleView = (fileUrl: string) => {
@@ -286,49 +287,51 @@ const handleDelete = async (id: string) => {
                   <TableCell className="columtext">DocType</TableCell>
                 )}
 
-                {isColumnVisible("contactnumber") && (
+                {isColumnVisible("Action") && (
                   <TableCell className="columtext">Action</TableCell>
                 )}
               </TableRow>
             </TableHeader>
 
-                 <TableBody>
-            {paginatedData.length === 0 ? (
-              <TableRow>
-                <TableCell className="py-12 text-gray-500">
-                  No data available
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedData.map((item, index) => (
-                <TableRow key={item.id}>
-                  <TableCell className="rowtext">
-                    {page * rowsPerPage + index + 1}
-                  </TableCell>
-                  <TableCell className="rowtext">{item.site_title}</TableCell>
-                  <TableCell className="rowtext">
-                    {item.common_document_name}
-                  </TableCell>
-                  <TableCell className="rowtext">
-                    <div className="flex gap-2 mt-1">
-                      <Badge variant="light" color="error">
-                        <MdDelete
-                          className="text-2xl cursor-pointer"
-                          onClick={() => handleDelete(item.id)}
-                        />
-                      </Badge>
-                      <Badge variant="light">
-                        <FaRegEye
-                          className="text-2xl cursor-pointer"
-                          onClick={() => handleView(item.common_document_file)}
-                        />
-                      </Badge>
-                    </div>
+            <TableBody>
+              {paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell className="py-12 text-gray-500">
+                    No data available
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
+              ) : (
+                paginatedData.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="rowtext">
+                      {page * rowsPerPage + index + 1}
+                    </TableCell>
+                    <TableCell className="rowtext">{item.site_title}</TableCell>
+                    <TableCell className="rowtext">
+                      {item.common_document_name}
+                    </TableCell>
+                    <TableCell className="rowtext">
+                      <div className="flex gap-2 mt-1">
+                        <Badge variant="light" color="error">
+                          <MdDelete
+                            className="text-2xl cursor-pointer"
+                            onClick={() => handleDelete(item.id)}
+                          />
+                        </Badge>
+                        <Badge variant="light">
+                          <FaRegEye
+                            className="text-2xl cursor-pointer"
+                            onClick={() =>
+                              handleView(item.common_document_file)
+                            }
+                          />
+                        </Badge>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
           </Table>
         </div>
 

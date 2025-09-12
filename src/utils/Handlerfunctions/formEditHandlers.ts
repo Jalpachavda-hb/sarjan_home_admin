@@ -142,3 +142,292 @@ export const editProjectCategory = async (formData: FormData) => {
     throw error;
   }
 };
+
+
+
+// export const updateAdminUser = async (
+//   id: string,
+//   name: string,
+//   email: string,
+//   contact: string,
+//   site_detail_id: number,
+//   role_id: number,
+//   permissions: { [feature: string]: string[] },
+//   clients: string[] = []
+// ) => {
+//   if (!getAdminId()) {
+//     toast.error("Admin ID not found. Please login again.");
+//     return null;
+//   }
+
+//   try {
+//     const payload = {
+//       admin_id: id, // editing this user
+//       updated_by: getAdminId(),
+//       name,
+//       email,
+//       contact,
+//       site_detail_id,
+//       role_id,
+//       clients,
+//       permissions,
+//     };
+
+//     const res = await axiosInstance.post(
+//       API_PATHS.ADMINUSERAPI.UPDATEADMINUSER,
+//       payload
+//     );
+
+//     if (res.data.status === 200) {
+//       toast.success("Admin user updated successfully!");
+//       return res.data;
+//     } else {
+//       toast.error(res.data.message || "Failed to update admin user");
+//       return null;
+//     }
+//   } catch (error: any) {
+//     console.error("Error while updating admin user:", error);
+//     toast.error(error.response?.data?.message || "Something went wrong");
+//     return null;
+//   }
+// };
+
+
+
+
+
+export const updatePropertyDetails = async (
+  block_detail_id: number,
+  formData: any
+) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    const payload = {
+      block_detail_id,           // which block to update
+      site_detail_id: formData.site_detail_id,
+      block: formData.block,
+      block_number: formData.block_number,
+      rera_area: formData.rera_area,
+      balcony_area: formData.balcony_area,
+      wash_area: formData.wash_area,
+      terrace_area: formData.terrace_area,
+      undivided_landshare: formData.undivided_landshare,
+      north: formData.north,
+      south: formData.south,
+      east: formData.east,
+      west: formData.west,
+    };
+
+    // Pass admin_id in URL as query param
+    const res = await axiosInstance.post(
+      `${API_PATHS.SITEDETAILS.EDITPROPERTYDETAILS}?admin_id=${adminId}`,
+      payload
+    );
+
+    if (res.data.status === 200) {
+      // toast.success("Property Detail updated successfully!");
+      return res.data;
+    } else {
+      toast.error(res.data.message || "Failed to update Property Detail");
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error while updating Property Detail:", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+    return null;
+  }
+};
+
+// export const updateAdminUser = async (
+//   id: string,
+//   name: string,
+//   email: string,
+//   contact: string,
+//   site_detail_id: number,
+//   role_id: number,
+//   permissions: { [feature: string]: string[] },
+//   clients: string[] = []
+// ) => {
+//   const adminId = getAdminId();
+//   if (!adminId) {
+//     toast.error("Admin ID not found. Please login again.");
+//     return null;
+//   }
+
+//   try {
+//     const formData = new FormData();
+//     formData.append("admin_id", adminId);
+//     formData.append("id", id);
+//     formData.append("name", name);
+//     formData.append("email", email);
+//     formData.append("contact", contact);
+//     formData.append("site_detail_id", String(site_detail_id));
+//     formData.append("role_id", String(role_id));
+
+//     // ✅ Clients
+//     clients.forEach((c) => {
+//       formData.append("clients[]", c);
+//     });
+
+//     // ✅ Permissions
+//     Object.entries(permissions).forEach(([feature, values]) => {
+//       if (Array.isArray(values)) {
+//         values.forEach((val) => {
+//           formData.append(`permissions[${feature}][]`, val);
+//         });
+//       }
+//     });
+
+//     const res = await axiosInstance.post(
+//       API_PATHS.ADMINUSERAPI.UPDATEADMINUSER,
+//       formData,
+//       { headers: { "Content-Type": "multipart/form-data" } }
+//     );
+
+//     if (res.data.status === 200) {
+//       return res.data;
+//     } else {
+//       toast.error(res.data.message || "Failed to update admin user");
+//       return null;
+//     }
+//   } catch (error: any) {
+//     console.error("Error while updating admin user:", error);
+//     toast.error(error.response?.data?.message || "Something went wrong");
+//     return null;
+//   }
+// };
+
+
+// export const updateAdminUser = async (
+//   id: string,
+//   name: string,
+//   email: string,
+//   contact: string,
+//   site_detail_id: number,
+//   role_id: number,
+//   permissions: { [feature: string]: string[] },
+//   clients: string[] = []
+// ) => {
+//   const adminId = getAdminId();
+//   if (!adminId) {
+//     toast.error("Admin ID not found. Please login again.");
+//     return null;
+//   }
+
+//   try {
+//     const formData = new FormData();
+//     formData.append("admin_id", adminId);
+//     formData.append("id", id);
+//     formData.append("name", name);
+//     formData.append("email", email);
+//     formData.append("contact", contact);
+//     formData.append("site_detail_id", String(site_detail_id));
+//     formData.append("role_id", String(role_id));
+
+//     // ✅ Clients
+//     clients.forEach((c) => formData.append("clients[]", c));
+
+//     // ✅ Permissions (flat arrays like Postman)
+//     Object.entries(permissions).forEach(([feature, values]) => {
+//       if (Array.isArray(values)) {
+//         values.forEach((val) => {
+//           formData.append(`${feature}[]`, val);
+//         });
+//       }
+//     });
+
+//     // Debugging – log what’s being sent
+//     for (let [k, v] of formData.entries()) {
+//       console.log(k, v);
+//     }
+
+//     const res = await axiosInstance.post(
+//       API_PATHS.ADMINUSERAPI.UPDATEADMINUSER,
+//       formData,
+//       { headers: { "Content-Type": "multipart/form-data" } }
+//     );
+
+//     if (res.data.status === 200) {
+//       toast.success("Admin user updated successfully!");
+//       return res.data;
+//     } else {
+//       toast.error(res.data.message || "Failed to update admin user");
+//       return null;
+//     }
+//   } catch (error: any) {
+//     console.error("Error while updating admin user:", error);
+//     toast.error(error.response?.data?.message || "Something went wrong");
+//     return null;
+//   }
+// };
+export const updateAdminUser = async (
+  id: string,
+  name: string,
+  email: string,
+  contact: string,
+  site_detail_id: number,
+  role_id: number,
+  permissions: { [feature: string]: string[] },
+  clients: string[] = []
+) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    const formData = new FormData();
+    // formData.append("admin_id", adminId);
+    formData.append("admin_user_id", id);
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("contact", contact);
+    formData.append("site_detail_id", String(site_detail_id));
+    formData.append("role_id", String(role_id));
+
+    // ✅ Clients
+    clients.forEach((c) => formData.append("clients[]", c));
+
+    // ✅ Permissions - same handling as addAdminUser
+    Object.entries(permissions).forEach(([feature, values]) => {
+      const lowercaseFeature = feature.toLowerCase(); // convert to lowercase
+      if (Array.isArray(values) && values.length > 0) {
+        values.forEach((val) => {
+          formData.append(`${lowercaseFeature}[]`, val);
+        });
+      } else {
+        // Send empty array if no permissions selected
+        formData.append(`${lowercaseFeature}[]`, "");
+      }
+    });
+
+    // Debugging – log what's being sent
+    for (let [k, v] of formData.entries()) {
+      console.log(k, v);
+    }
+
+    const res = await axiosInstance.post(
+      API_PATHS.ADMINUSERAPI.UPDATEADMINUSER,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (res.data.status === 200) {
+      toast.success("Admin user updated successfully!");
+      return res.data;
+    } else {
+      toast.error(res.data.message || "Failed to update admin user");
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error while updating admin user:", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+    return null;
+  }
+};

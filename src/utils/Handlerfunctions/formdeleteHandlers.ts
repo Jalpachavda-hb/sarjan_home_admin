@@ -92,3 +92,131 @@ export const deleteCommonDocument = async (id: string) => {
 
   return res;
 };
+
+export const deletePersonalDocument = async (id: string) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return false;
+  }
+
+  console.log("delete call");
+
+  const formData = new FormData();
+  formData.append("id", id);
+  formData.append("admin_id", adminId);
+
+  const res = await axiosInstance.post(
+    API_PATHS.PERSONALDOCUMENT.DELETEPersonalDocuments,
+    formData
+  );
+
+  return res;
+};
+
+export const deleteAdminUser = async (id: string) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return false;
+  }
+
+  try {
+    console.log("Deleting Admin User ID:", id);
+
+    const formData = new FormData();
+    formData.append("adminuser_id", id); 
+    formData.append("admin_id", adminId);
+
+    const res = await axiosInstance.post(
+      API_PATHS.ADMINUSERAPI.DELETEADMINUSER,
+      formData
+    );
+
+    if (res?.status === 200) {
+      toast.success("Admin user deleted successfully!");
+      return true;
+    } else {
+      toast.error(res?.data?.message || "Failed to delete admin user");
+      return false;
+    }
+  } catch (error: any) {
+    console.error("Delete Admin User failed:", error);
+    toast.error("Failed to delete admin user");
+    return false;
+  }
+};
+
+
+
+export const deletePropertyDetails = async (block_detail_id: string) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return false;
+  }
+
+  try {
+    console.log("Deleting ProprtyDetail ID:", block_detail_id);
+
+    const formData = new FormData();
+    formData.append("block_detail_id", block_detail_id); 
+    formData.append("admin_id", adminId);
+
+    const res = await axiosInstance.post(
+      API_PATHS.SITEDETAILS.DELETEPROPERTYDETAILS,
+      formData
+    );
+
+    if (res?.status === 200) {
+      toast.success("Property Detail deleted successfully!");
+      return true;
+    } else {
+      toast.error(res?.data?.message || "Failed to delete Property Detail");
+      return false;
+    }
+  } catch (error: any) {
+    console.error("Delete Property Detail failed:", error);
+    toast.error("Failed to delete Property Detail");
+    return false;
+  }
+};
+
+
+
+
+
+
+
+export const destroyPaymentDetails = async (payment_id: number) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return false;
+  }
+
+  try {
+    console.log("Deleting ProprtyDetail ID:", payment_id);
+
+    const formData = new FormData();
+    formData.append("payment_id", payment_id); 
+    formData.append("admin_id", adminId);
+
+    const res = await axiosInstance.post(
+      API_PATHS. PAYMENT.DESTROYPAYMENTDETAILS,
+      formData
+    );
+
+    if (res?.status === 200) {
+      // toast.success("Payment Details deleted successfully!");
+      return true;
+    } else {
+      toast.error(res?.data?.message || "Failed to delete PaymentDetails");
+      return false;
+    }
+  } catch (error: any) {
+    console.error("Delete Payment Details failed:", error);
+    toast.error("Failed to delete Payment Details");
+    return false;
+  }
+};

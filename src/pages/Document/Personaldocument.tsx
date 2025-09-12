@@ -1,32 +1,3 @@
-// import React from 'react'
-
-// const Personaldocument = () => {
-//   return (
-//     <div>Personaldocument</div>
-//   )
-// }
-
-// export default Personaldocument
-
-// import React from 'react'
-
-// const Commundocument = () => {
-//   return (
-//     <div>Commundocument</div>
-//   )
-// }
-
-// export default Commundocument
-// import React from 'react'
-
-// const Adminuser = () => {
-//   return (
-//     <div>Adminuser</div>
-//   )
-// }
-
-// export default Adminuser
-
 import {
   Table,
   TableBody,
@@ -36,121 +7,91 @@ import {
 } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
-import { FaEdit } from "react-icons/fa";
-import { FaRegEye } from "react-icons/fa";
-import {
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Checkbox,
-  ListItemText,
-} from "@mui/material";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
+import { FaRegEye, FaRegEdit } from "react-icons/fa";
+import { fetchPersonalDocuments } from "../../utils/Handlerfunctions/getdata";
+import { TextField, Button } from "@mui/material";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+import { deletePersonalDocument } from "../../utils/Handlerfunctions/formdeleteHandlers";
 
 interface Adminuser {
   id: number;
-  sitename: string;
-  personaldocname: string;
-  clientname: string;
+  site_title: string;
+  personal_document_name: string;
+  client_name: string;
+  personal_document_file?: string;
 }
 
-const tableData: Adminuser[] = [
-  {
-    id: 1,
-    sitename: "sarjan era",
-    clientname: "abc",
-    personaldocname: "Residential Commercial Mix",
-  },
-  {
-    id: 2,
-    sitename: "sarjan era",
-    clientname: "abc",
-    personaldocname: "Residential Commercial Mix",
-  },
-];
 export default function Personaldocument() {
+  const [tableData, setTableData] = useState<Adminuser[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState<Adminuser | null>(null);
   const [sortConfig, setSortConfig] = useState<{
     key: keyof Adminuser;
     direction: "asc" | "desc";
   } | null>(null);
-  // use for search
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
+
+  // ✅ Load data
+  useEffect(() => {
+    const loadDocs = async () => {
+      const data = await fetchPersonalDocuments();
+      if (Array.isArray(data)) {
+        setTableData(data);
+      } else {
+        toast.error("Failed to load documents");
+      }
+    };
+    loadDocs();
+  }, []);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  const isColumnVisible = (column: string) =>
-    selectedColumns.length === 0 || selectedColumns.includes(column);
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  // const filteredData = useMemo(() => {
-  //   let data = [...tableData];
+  const isColumnVisible = (column: string) =>
+    selectedColumns.length === 0 || selectedColumns.includes(column);
 
-  //   if (search) {
-  //     const searchTerm = search.toLowerCase();
-  //     data = data.filter((item) =>
-  //       Object.values(item).some((val) =>
-  //         String(val).toLowerCase().includes(searchTerm)
-  //       )
-  //     );
-  //   }
+  const filteredData = useMemo(() => {
+    let data = [...tableData];
 
-  //   if (sortConfig) {
-  //     data.sort((a, b) => {
-  //       const aValue = a[sortConfig.key];
-  //       const bValue = b[sortConfig.key];
+    if (search) {
+      const searchTerm = search.toLowerCase();
+      data = data.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-  //       if (aValue < bValue) {
-  //         return sortConfig.direction === "asc" ? -1 : 1;
-  //       }
-  //       if (aValue > bValue) {
-  //         return sortConfig.direction === "asc" ? 1 : -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
+    if (siteFilter) {
+      data = data.filter(
+        (item) => item.site_title.toLowerCase() === siteFilter.toLowerCase()
+      );
+    }
 
-  //   return data;
-  // }, [search, sortConfig]);
-   const filteredData = tableData.filter((item) => {
-    const searchTerm = search.trim().toLowerCase(); // remove spaces at start & end
+    if (sortConfig) {
+      data.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
 
-    const matchesSearch = Object.values(item)
-      .map((val) => String(val).trim().toLowerCase()) // trim each value
-      .join(" ")
-      .includes(searchTerm);
+    return data;
+  }, [tableData, search, siteFilter, sortConfig]);
 
-    const matchesSite = siteFilter
-      ? item.siteName.trim() === siteFilter.trim()
-      : true;
-
-    return matchesSearch && matchesSite;
-  });
- 
- 
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -158,158 +99,66 @@ export default function Personaldocument() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  //   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
-
   const handleSort = (key: keyof Adminuser) => {
     let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
       direction = "desc";
     }
     setSortConfig({ key, direction });
     setPage(0);
   };
 
+  // ✅ Delete
+  const handleDelete = async (id: number) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won’t be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deletePersonalDocument(id);
+        setTableData((prev) => prev.filter((doc) => doc.id !== id));
+        toast.success("Document deleted successfully!");
+      } catch (err) {
+        console.error("Delete failed:", err);
+        toast.error("Failed to delete document. Please try again.");
+      }
+    }
+  };
+
+  // ✅ View in new tab
+  const handleView = (fileUrl?: string) => {
+    if (!fileUrl) {
+      toast.error("File not available");
+      return;
+    }
+    window.open(fileUrl, "_blank");
+  };
+
+  // ✅ Edit in new tab
+  
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">Personal Document Types</h3>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] px-4 pb-3 pt-4 sm:px-6">
+        {/* Top controls */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div className="flex flex-wrap gap-2 items-center">
-            {/* <Button
-              size="small"
-              variant="contained"
-              className="!bg-green-600 hover:!bg-green-700 text-white"
-            >
-              Copy
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              className="!bg-blue-600 hover:!bg-blue-700 text-white"
-            >
-              CSV
-            </Button> */}
-            {/* <Button
-              size="small"
-              variant="contained"
-              className="!bg-amber-500 hover:!bg-amber-600 text-white"
-            >
-              Print
-            </Button> */}
-
-            {/* Select Columns Dropdown */}
-            {/* <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel
-                className="text-gray-700 dark:text-white"
-                sx={{ fontFamily: "Poppins" }}
-              ></InputLabel>
-              <Select
-                multiple
-                value={selectedColumns}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSelectedColumns(
-                    typeof value === "string" ? value.split(",") : value
-                  );
-                }}
-                displayEmpty
-                renderValue={() => "Select Columns"}
-                className="bg-white dark:bg-gray-200 rounded-md"
-                sx={{
-                  fontFamily: "Poppins",
-                  "& .MuiSelect-select": {
-                    color: "#6B7280",
-                    fontWeight: 300,
-                  },
-                }}
-                MenuProps={{
-                  PaperProps: {
-                    sx: { maxHeight: 300, fontFamily: "Poppins" },
-                  },
-                }}
-              >
-                {[
-                  "siteName",
-                  "clientName",
-                  "contactNumber",
-                  "Email",
-                  "blocknumber",
-                  "blocknumberType",
-                  "receivedDate",
-                ].map((col) => (
-                  <MenuItem
-                    key={col}
-                    value={col}
-                    sx={{ fontFamily: "Poppins" }}
-                  >
-                    <Checkbox checked={selectedColumns.includes(col)} />
-                    <ListItemText
-                      primary={
-                        {
-                          clientName: "Client Name",
-                          siteName: "Site Name",
-                          contactNumber: "contactNumber",
-                          Email: "Unit No.",
-                          blocknumber: "Received blocknumber",
-                          blocknumberType: "blocknumber Type",
-                          receivedDate: "Received Date",
-                        }[col]
-                      }
-                    />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl> */}
-          </div>
-
-          {/* Right Column */}
+          <div />
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-            {/* Filter by Site Dropdown */}
-
-            {/* <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel
-                className="text-gray-500 dark:text-white"
-                sx={{ fontFamily: "Poppins" }}
-              >
-                Filter by Site
-              </InputLabel>
-              <Select
-                value={siteFilter}
-                label="Filter by Site"
-                onChange={(e) => setSiteFilter(e.target.value)}
-                sx={{ fontFamily: "Poppins" }}
-                MenuProps={{
-                  PaperProps: {
-                    sx: { fontFamily: "Poppins", fontSize: "14px" },
-                  },
-                }}
-              >
-                <MenuItem value="">All Sites</MenuItem>
-                {uniqueSites.map((site) => (
-                  <MenuItem
-                    key={site}
-                    value={site}
-                    sx={{ fontFamily: "Poppins", fontSize: "14px" }}
-                  >
-                    {site}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl> */}
-
-            {/* Search Input */}
             <a href="/admin/personal_documents/add">
               <Button
                 size="small"
                 variant="contained"
                 className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
               >
-                +Add Document Types
+                + Add Document Types
               </Button>
             </a>
             <TextField
@@ -324,25 +173,37 @@ export default function Personaldocument() {
           </div>
         </div>
 
+        {/* Table */}
         <div className="max-w-full overflow-x-auto mt-8">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableCell className="columtext">Sr. No</TableCell>
-
-                {isColumnVisible("sitename") && (
-                  <TableCell className="columtext">Site Name</TableCell>
-                )}
-                {isColumnVisible("clientname") && (
-                  <TableCell className="columtext">Clientname</TableCell>
-                )}
-                {isColumnVisible("personaldocname") && (
-                  <TableCell className="columtext">
-                    personal Document Name
+                {isColumnVisible("site_title") && (
+                  <TableCell
+                    className="columtext cursor-pointer"
+                    onClick={() => handleSort("site_title")}
+                  >
+                    Site Name
                   </TableCell>
                 )}
-
-                {isColumnVisible("contactnumber") && (
+                {isColumnVisible("client_name") && (
+                  <TableCell
+                    className="columtext cursor-pointer"
+                    onClick={() => handleSort("client_name")}
+                  >
+                    Client Name
+                  </TableCell>
+                )}
+                {isColumnVisible("personal_document_name") && (
+                  <TableCell
+                    className="columtext cursor-pointer"
+                    onClick={() => handleSort("personal_document_name")}
+                  >
+                    Personal Document Name
+                  </TableCell>
+                )}
+                {isColumnVisible("action") && (
                   <TableCell className="columtext">Action</TableCell>
                 )}
               </TableRow>
@@ -351,11 +212,7 @@ export default function Personaldocument() {
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    // colSpan={}
-                    className="justify-between py-12 text-gray-500  "
-                    // style={{ fontSize: "16px" }}
-                  >
+                  <TableCell className="py-12 text-gray-500">
                     No data available
                   </TableCell>
                 </TableRow>
@@ -365,34 +222,35 @@ export default function Personaldocument() {
                     <TableCell className="rowtext">
                       {page * rowsPerPage + index + 1}
                     </TableCell>
-
-                    {isColumnVisible("sitename") && (
-                      <TableCell className="rowtext">{item.sitename}</TableCell>
+                    {isColumnVisible("site_title") && (
+                      <TableCell className="rowtext">{item.site_title}</TableCell>
                     )}
-                    {isColumnVisible("clientname") && (
+                    {isColumnVisible("client_name") && (
+                      <TableCell className="rowtext">{item.client_name}</TableCell>
+                    )}
+                    {isColumnVisible("personal_document_name") && (
                       <TableCell className="rowtext">
-                        {item.clientname}
+                        {item.personal_document_name}
                       </TableCell>
                     )}
-
-                    {isColumnVisible("personaldocname") && (
-                      <TableCell className="rowtext">
-                        {item.personaldocname}
-                      </TableCell>
-                    )}
-
-                    {isColumnVisible("Action") && (
+                    {isColumnVisible("action") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
                           <Badge variant="light" color="error">
-                            <MdDelete className="text-2xl cursor-pointer" />
-                          </Badge>
-                          <Badge variant="light">
-                            <FaRegEye
+                            <MdDelete
                               className="text-2xl cursor-pointer"
-                              onClick={() => handleEditClick(item)}
+                              onClick={() => handleDelete(item.id)}
                             />
                           </Badge>
+                          <Badge variant="light" >
+                            <FaRegEye
+                              className="text-2xl cursor-pointer"
+                              onClick={() =>
+                                handleView(item.personal_document_file)
+                              }
+                            />
+                          </Badge>
+                         
                         </div>
                       </TableCell>
                     )}
@@ -403,6 +261,7 @@ export default function Personaldocument() {
           </Table>
         </div>
 
+        {/* Pagination */}
         <div className="mt-4 flex justify-between items-center w-full">
           <div className="w-1/2">
             <p className="text-sm">
@@ -411,7 +270,6 @@ export default function Personaldocument() {
               {filteredData.length} entries
             </p>
           </div>
-
           <div className="w-1/2 flex justify-end">
             <TablePagination
               component="div"
@@ -424,17 +282,9 @@ export default function Personaldocument() {
               labelRowsPerPage="Rows per page:"
               sx={{
                 color: "inherit",
-                ".MuiSelect-select": {
-                  color: "inherit",
-                  backgroundColor: "transparent",
-                },
-                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                  {
-                    color: "inherit",
-                  },
-                ".MuiSvgIcon-root": {
-                  color: "inherit",
-                },
+                ".MuiSelect-select": { color: "inherit", backgroundColor: "transparent" },
+                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": { color: "inherit" },
+                ".MuiSvgIcon-root": { color: "inherit" },
               }}
             />
           </div>

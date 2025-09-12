@@ -2,6 +2,7 @@ import axiosInstance from "../axiosinstance";
 import { toast } from "react-toastify";
 import { API_PATHS } from "../apiPaths";
 
+
 export const getAdminId = (): string | null => {
   const user = sessionStorage.getItem("user");
   if (user) {
@@ -27,6 +28,7 @@ export const fetchProfile = async () => {
       admin_id: data.admin_id, // 👈 include admin_id
       name: data.name,
       email: data.email,
+      role_id: data.role_id,
       contact_no: data.contact_no?.toString() || "",
     };
   } catch (err: any) {
@@ -62,16 +64,6 @@ export const fetchDashboardCount = async () => {
 // ==============5=======================//
 
 // USER LOG FATCH DATA API
-
-export const fetchAdminLogs = async () => {
-  try {
-    const res = await axiosInstance.get(API_PATHS.USERLOG.GETUSERADMINLOG);
-    return res.data; // will return all logs
-  } catch (err: any) {
-    toast.error("Failed to fetch admin logs");
-    throw err;
-  }
-};
 
 // WITH PAGINATION LOGIC
 
@@ -173,9 +165,7 @@ export const fetchInquiryThrough = async (adminId: string) => {
   }
 };
 
-// ==========================
 
-// GET SITE SITE NAME
 
 export const fetchSiteList = async () => {
   try {
@@ -185,8 +175,8 @@ export const fetchSiteList = async () => {
 
     return (
       response.data?.data?.map((site: { id: number; title: string }) => ({
-        value: site.id, // use id as value
-        label: site.title, // show title in dropdown
+        value: site.id, // ✅ react-select expects "value"
+        label: site.title, // ✅ react-select expects "label"
       })) || []
     );
   } catch (error) {
@@ -215,14 +205,14 @@ export interface PaymentDetails {
 
 export const fetchPaymentDetails = async (
   adminId: string,
-  siteFilter?: string,
+  site_id?: string,
   dateFilter?: number
 ): Promise<PaymentDetails[]> => {
   try {
     const params = new URLSearchParams();
 
     if (adminId) params.append("admin_id", adminId);
-    if (siteFilter) params.append("siteFilter", siteFilter);
+    if (site_id) params.append("site_id", site_id);
     if (dateFilter && dateFilter > 0)
       params.append("searchByDays", dateFilter.toString());
 
@@ -392,10 +382,9 @@ export const showclientlist = async (siteId: string) => {
   }
 
   try {
-    const res = await axiosInstance.get(
-      API_PATHS.CLIENTDATA.SHOWCLIENTLIST,
-      { params: { admin_id: adminId, site_id: siteId } } 
-    );
+    const res = await axiosInstance.get(API_PATHS.CLIENTDATA.SHOWCLIENTLIST, {
+      params: { admin_id: adminId, site_id: siteId },
+    });
     return res.data || null;
   } catch (error) {
     console.error(`Error fetching site data for siteId ${siteId}:`, error);
@@ -404,35 +393,34 @@ export const showclientlist = async (siteId: string) => {
   }
 };
 
-export const showPropertyDetailsList = async () => {
-  const adminId = getAdminId();
-  if (!adminId) {
-    toast.error("Admin ID not found");
-    return null;
-  }
+// export const showPropertyDetailsList = async () => {
+//   const adminId = getAdminId();
+//   if (!adminId) {
+//     toast.error("Admin ID not found");
+//     return null;
+//   }
 
-  try {
-    const res = await axiosInstance.get(
-      API_PATHS.SITEDETAILS.PROPERTYDETAILSLIST,
-      { params: { admin_id: adminId } } 
-    );
+//   try {
+//     const res = await axiosInstance.get(
+//       API_PATHS.SITEDETAILS.PROPERTYDETAILSLIST,
+//       { params: { admin_id: adminId } }
+//     );
 
-    // Correct: use res.data.details
-    const mappedData = res.data?.details?.map((item: any) => ({
-      id: item.block_detail_id,
-      siteName: item.title,
-      unit: item.block,
-      unitNumber: item.block_number,
-    }));
+//     // Correct: use res.data.details
+//     const mappedData = res.data?.details?.map((item: any) => ({
+//       id: item.block_detail_id,
+//       siteName: item.title,
+//       unit: item.block,
+//       unitNumber: item.block_number,
+//     }));
 
-    return mappedData || [];
-  } catch (error) {
-    console.error("Error fetching property details:", error);
-    toast.error("Failed to fetch property details");
-    return null;
-  }
-};
-
+//     return mappedData || [];
+//   } catch (error) {
+//     console.error("Error fetching property details:", error);
+//     toast.error("Failed to fetch property details");
+//     return null;
+//   }
+// };
 
 export const fetchAdminUsers = async () => {
   const adminId = getAdminId();
@@ -455,7 +443,6 @@ export const fetchAdminUsers = async () => {
   }
 };
 
-
 export const fetchAdminTickets = async () => {
   const adminId = getAdminId();
 
@@ -474,5 +461,215 @@ export const fetchAdminTickets = async () => {
     console.error("Error fetching admin tickets:", error);
     toast.error("Failed to fetch tickets");
     throw error;
+  }
+};
+
+export const fetchClientList = async () => {
+  try {
+    const res = await axiosInstance.get(API_PATHS.CLIENTDATA.SHOWCLIENTLIST);
+
+    if (res.data.status === 200) {
+      // Transform to usable structure
+      return res.data.details.map((client: any) => ({
+        ...client,
+        site_detail_id: client.site_detail_id, // ✅ keep site_detail_id accessible
+      }));
+    } else {
+      toast.error(res.data.message || "Failed to fetch client list");
+      return [];
+    }
+  } catch (error: any) {
+    console.error("Error fetching client list:", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+    return [];
+  }
+};
+
+export const fetchUnitNumbersBySite = async (siteId: number) => {
+  try {
+    const response = await axiosInstance.get(
+      `${API_PATHS.PAYMENT.GETBLOCKDETAILSFROMSITE}?site_id=${siteId}`
+    );
+
+    return (
+      response.data?.data?.map(
+        (unit: { id: number; block_number: string }) => ({
+          value: unit.id.toString(),
+          label: unit.block_number, // ✅ use block_number for dropdown label
+        })
+      ) || []
+    );
+  } catch (error) {
+    console.error("Error fetching unit numbers:", error);
+    return [];
+  }
+};
+
+export const fetchClientNamesByBlockId = async (blockId: number) => {
+  try {
+    const response = await axiosInstance.get(
+      `${API_PATHS.MULTITIMEUSEAPI.GETCLIENTNAMEFROMBLOCKID}?block_details_id=${blockId}`
+    );
+
+    return (
+      response.data?.data?.map((client: { id: number; name: string }) => ({
+        value: client.id.toString(),
+        label: client.name, // ✅ client name in dropdown
+      })) || []
+    );
+  } catch (error) {
+    console.error("Error fetching client names:", error);
+    return [];
+  }
+};
+
+export const fetchPersonalDocuments = async () => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return [];
+  }
+
+  try {
+    const res = await axiosInstance.get(
+      `${API_PATHS.PERSONALDOCUMENT.GETPERSONALDOCUMENT}?admin_id=${adminId}`
+    );
+
+    if (res.data.status === 200) {
+      return res.data.data; // array of docs
+    } else {
+      toast.error(res.data.message || "Failed to fetch documents");
+      return [];
+    }
+  } catch (error: any) {
+    console.error("Error fetching personal documents:", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+    return [];
+  }
+};
+
+export const fetchRolePermissions = async () => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return null;
+  }
+
+  try {
+    const response = await axiosInstance.get(
+      API_PATHS.ADMINAUTH.ADMINROLEPERMISSION,
+      {
+        params: { admin_id: adminId },
+      }
+    );
+
+    if (response.data.status === 200) {
+      return response.data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching role permissions:", error);
+    toast.error("Error fetching role permissions");
+    throw error;
+  }
+};
+
+export const getAdminUserById = async (id: string) => {
+  try {
+    const res = await axiosInstance.get(
+      `${API_PATHS.ADMINUSERAPI.GETADMINUSER}?admin_id=${id}`
+    );
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching admin user:", err);
+    throw err;
+  }
+};
+
+export const showPropertyDetailsList = async (
+  site_id: number | string,
+  page: number
+) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return null;
+  }
+
+  try {
+    const res = await axiosInstance.get(
+      API_PATHS.SITEDETAILS.PROPERTYDETAILSLIST,
+      { params: { admin_id: adminId, site_id, page } }
+    );
+
+    const mappedData = res.data?.details?.map((item: any) => ({
+      id: item.block_detail_id,
+      siteName: item.title,
+      unit: item.block,
+      unitNumber: item.block_number,
+    }));
+
+    return {
+      data: mappedData || [],
+      total: res.data.pagination?.total || 0,
+      per_page: res.data.pagination?.per_page || 12,
+      current_page: res.data.pagination?.current_page || 1,
+    };
+  } catch (error) {
+    console.error("Error fetching property details:", error);
+    toast.error("Failed to fetch property details");
+    return null;
+  }
+};
+
+export const fetchAdminLogs = async (page: number) => {
+  try {
+    const res = await axiosInstance.get(
+      `${API_PATHS.USERLOG.GETUSERADMINLOG}?page=${page}`
+    );
+    return res.data;
+  } catch (err: any) {
+    toast.error("Failed to fetch admin logs");
+    throw err;
+  }
+};
+
+
+
+export const getpropertydetailsByblockId = async (blockDetailId: string) => {
+  try {
+    const adminId = getAdminId(); // 👈 fetch from local/session storage
+    if (!adminId) {
+      throw new Error("Admin ID not found");
+    }
+
+    const res = await axiosInstance.get(
+      `${API_PATHS.SITEDETAILS.GETBLOCKDETAILS}?admin_id=${adminId}&block_detail_id=${blockDetailId}`
+    );
+
+    return res;
+  } catch (err) {
+    console.error("Error fetching property detail:", err);
+    throw err;
+  }
+};
+
+
+export const TodayReceivedpayment = async (siteId: string) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return null;
+  }
+
+  try {
+    const res = await axiosInstance.get(API_PATHS.DASHBOARD.TODAYRECEIVEDPAYMENT, {
+      params: { admin_id: adminId, site_id: siteId },
+    });
+    return res.data || null;
+  } catch (error) {
+    console.error(`Error fetching Payment data for siteId ${siteId}:`, error);
+    toast.error("Failed to fetch Payment data");
+    return null;
   }
 };

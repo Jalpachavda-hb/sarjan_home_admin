@@ -54,7 +54,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         {label}
       </label>
 
-      <div className="relative z-20 inline-block w-full">
+      <div className=" w-full">
         <div className="relative flex flex-col items-center">
           <div onClick={toggleDropdown} className="w-full">
             <div className="mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pl-3 pr-3 shadow-theme-xs outline-hidden transition focus:border-brand-300 focus:shadow-focus-ring dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-300">
@@ -128,34 +128,52 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
             </div>
           </div>
 
-          {isOpen && (
-            <div
-              className="absolute left-0 z-40 w-full overflow-y-auto bg-white rounded-lg shadow-sm top-full max-h-select dark:bg-gray-900"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex flex-col">
-                {options.map((option, index) => (
-                  <div
-                    key={index}
-                    className={`hover:bg-primary/5 w-full cursor-pointer rounded-t border-b border-gray-200 dark:border-gray-800`}
-                    onClick={() => handleSelect(option.value)}
-                  >
-                    <div
-                      className={`relative flex w-full items-center p-2 pl-2 ${
-                        selectedOptions.includes(option.value)
-                          ? "bg-primary/10"
-                          : ""
-                      }`}
-                    >
-                      <div className="mx-2 leading-6 text-gray-800 dark:text-white/90">
-                        {option.text}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          {/* Dropdown list */}
+
+          {/* Dropdown list */}
+          <div
+            className={`relative inline-block w-full ${
+              isOpen ? "z-[99999]  " : "z-0"
+            }`}
+          >
+            <div className="relative flex flex-col items-center">
+              <div onClick={toggleDropdown} className="w-full">
+                {/* trigger input */}
               </div>
+
+              {/* Dropdown list */}
+              {isOpen && (
+                <div
+                  className="absolute left-0 top-full mt-1 w-full max-h-60 overflow-y-auto 
+                   rounded-lg border border-gray-200 bg-white shadow-lg 
+                   z-[9999] dark:bg-gray-900"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex flex-col">
+                    {options.map((option, idx) => (
+                      <div
+                        key={idx}
+                        className="hover:bg-primary/5 w-full cursor-pointer border-b border-gray-200 dark:border-gray-800"
+                        onClick={() => handleSelect(option.value)}
+                      >
+                        <div
+                          className={`relative flex w-full items-center p-2 ${
+                            selectedOptions.includes(option.value)
+                              ? "bg-primary/10"
+                              : ""
+                          }`}
+                        >
+                          <div className="mx-2 text-gray-800 dark:text-white/90">
+                            {option.text}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

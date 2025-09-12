@@ -1,28 +1,48 @@
+
+
 import { useEffect, useState } from "react";
 import Select from "../Select";
-import Label from "../Label"; 
-import { fetchSiteList } from "../../../utils/Handlerfunctions/getdata"; 
+import Label from "../Label";
+import { fetchSiteList } from "../../../utils/Handlerfunctions/getdata";
 
-const SiteSelector = ({ onChange }) => {
-  const [siteOptions, setSiteOptions] = useState([]);
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface SiteSelectorProps {
+  onChange: (value: string) => void;
+  value: string;
+  label?: string;
+}
+
+const SiteSelector: React.FC<SiteSelectorProps> = ({
+  onChange,
+  value,
+  label = "Select Site",
+}) => {
+  const [siteOptions, setSiteOptions] = useState<Option[]>([]);
 
   useEffect(() => {
     const loadSites = async () => {
-      const sites = await fetchSiteList(); // API call
-      setSiteOptions(sites);              // [{ value, label }]
+      const sites = await fetchSiteList();
+      const options = sites.map((site) => ({
+        value: site.value.toString(),
+        label: site.label,
+      }));
+      setSiteOptions(options);
     };
     loadSites();
   }, []);
 
   return (
     <div>
-      <Label>Select Site</Label>
+      <Label>{label}</Label>
       <Select
         options={siteOptions}
-        placeholder="Select a site"
-        className="dark:bg-dark-900"
-        onChange={onChange} 
-      
+        value={value}         
+        onChange={onChange}    
+        placeholder={label}
       />
     </div>
   );

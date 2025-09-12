@@ -8,102 +8,201 @@ import Select from "../../components/form/Select";
 import DatePicker from "../../components/form/date-picker";
 import Button from "../../components/ui/button/Button";
 import SiteSelector from "../../components/form/input/SelectSiteinput";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { addPaymentDetail } from "../../utils/Handlerfunctions/formSubmitHandlers";
+import { fetchUnitNumbersBySite, fetchClientNamesByBlockId } from "../../utils/Handlerfunctions/getdata";
 
-const Addpaymentdetails = () => {
-  const [receiptPreview, setReceiptPreview] = useState(null);
-  const [selectedSite, setSelectedSite] = useState(null);
-  // Dropdown options
-  const siteOptions = [
-    { value: "site1", label: "Site 1" },
-    { value: "site2", label: "Site 2" },
-    { value: "site3", label: "Site 3" },
-  ];
+const AddPaymentDetails = () => {
+  const navigate = useNavigate();
+
+  const [selectedSite, setSelectedSite] = useState<string>("");
+  const [unitOptions, setUnitOptions] = useState<{ value: string; label: string }[]>([]);
+  const [selectedUnit, setSelectedUnit] = useState<string>("");
+  const [clientOptions, setClientOptions] = useState<{ value: string; label: string }[]>([]);
+  const [selectedClient, setSelectedClient] = useState<string>("");
+
+  const [receivedAmount, setReceivedAmount] = useState<number | "">("");
+  const [amountType, setAmountType] = useState<string>("");
+  const [paymentDate, setPaymentDate] = useState<string>("");
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const amountTypeOptions = [
-    { value: "cash", label: "Cash" },
-    { value: "bank", label: "Bank Transfer" },
-    { value: "cheque", label: "Cheque" },
+    { value: "Principal Amount", label: "Principal Amount" },
+    { value: "GST Amount", label: "GST Amount" },
+    
   ];
 
-  // File upload preview
-  const handleReceiptChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setReceiptPreview(URL.createObjectURL(file));
+  // Fetch units when site changes
+  useEffect(() => {
+    if (!selectedSite) {
+      setUnitOptions([]);
+      setSelectedUnit("");
+      setClientOptions([]);
+      setSelectedClient("");
+      return;
+    }
+    const loadUnits = async () => {
+      const units = await fetchUnitNumbersBySite(Number(selectedSite));
+      setUnitOptions(units);
+      setSelectedUnit("");
+      setClientOptions([]);
+      setSelectedClient("");
+    };
+    loadUnits();
+  }, [selectedSite]);
+
+  // Fetch clients when unit changes
+  useEffect(() => {
+    if (!selectedUnit) return;
+    const loadClients = async () => {
+      const clients = await fetchClientNamesByBlockId(Number(selectedUnit));
+      setClientOptions(clients);
+      setSelectedClient("");
+    };
+    loadClients();
+  }, [selectedUnit]);
+
+  const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setReceiptFile(file);
+    setReceiptPreview(file ? URL.createObjectURL(file) : null);
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedSite) return toast.error("Please select a site");
+    if (!selectedUnit) return toast.error("Please select a Unit Number");
+    if (!selectedClient) return toast.error("Please select a Client");
+    if (!receivedAmount) return toast.error("Please enter the amount");
+    if (!amountType) return toast.error("Please select amount type");
+    if (!paymentDate) return toast.error("Please select payment date");
+
+    setLoading(true);
+    try {
+      await addPaymentDetail({
+        adminId: "1", // replace with dynamic admin id
+        clientId: selectedClient,
+        siteDetailId: selectedSite,
+        blockDetailsId: selectedUnit,
+        receivedAmountType: amountType,
+        receivedAmount,
+        paymentDate,
+        receiptFile,
+      });
+
+      toast.success("Payment added successfully!");
+      // reset form
+      setSelectedSite("");
+      setSelectedUnit("");
+      setSelectedClient("");
+      setReceivedAmount("");
+      setAmountType("");
+      setPaymentDate("");
+      setReceiptFile(null);
+      setReceiptPreview(null);
+
+      navigate("/admin/payments", { replace: true });
+    } catch (err) {
+      console.error(err);
+      toast.error("Submission failed");
+    } finally {
+      setLoading(false);
     }
   };
 
-  
   return (
     <div>
-      {/* Page Title */}
       <PageMeta title="Add Payment Details" />
-
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
-        {/* Card 1: Payment Info */}
         <div className="space-y-6">
           <ComponentCard title="Add Payment Details">
             <div className="space-y-6">
               {/* Select Site */}
-              {/* <div>
-                <Label>Select Site</Label>
-                <Select
-                  options={siteOptions}
-                  placeholder="Select a site"
-                  className="dark:bg-dark-900"
-                />
-              </div> */}
-              <SiteSelector
-                onChange={(site) => setSelectedSite(site?.value || null)}
-              />
+              <SiteSelector value={selectedSite} onChange={setSelectedSite} />
 
-              {/* Received Amount */}
+              {/* Unit Number */}
+              {selectedSite && (
+                <div>
+                  <Label>Unit Number</Label>
+                  <Select
+                    options={unitOptions}
+                    value={selectedUnit}
+                    onChange={setSelectedUnit}
+                    placeholder="Select Unit Number"
+                  />
+                </div>
+              )}
+
+              {/* Client */}
+              {selectedUnit && (
+                <div>
+                  <Label>Select Client</Label>
+                  <Select
+                    options={clientOptions}
+                    value={selectedClient}
+                    onChange={setSelectedClient}
+                    placeholder="Select Client"
+                  />
+                </div>
+              )}
+
+              {/* Amount */}
               <div>
                 <Label>Received Amount</Label>
-                <Input type="number" placeholder="Enter amount" />
+                <Input
+                  type="number"
+                  value={receivedAmount}
+                  onChange={(e) => setReceivedAmount(Number(e.target.value))}
+                  placeholder="Enter amount"
+                />
               </div>
+
+              {/* Amount Type */}
               <div>
                 <Label>Amount Type</Label>
                 <Select
-                  options={siteOptions}
-                  placeholder="Select a site"
-                  className="dark:bg-dark-900"
+                  options={amountTypeOptions}
+                  value={amountType}
+                  onChange={setAmountType}
+                  placeholder="Select Amount Type"
                 />
               </div>
-              {/* Received Payment Date */}
+
+              {/* Payment Date */}
               <div>
                 <Label>Received Payment Date</Label>
                 <DatePicker
                   id="payment-date"
                   placeholder="Select payment date"
-                  onChange={(dates, currentDateString) =>
-                    console.log({ dates, currentDateString })
-                  }
+                  onChange={(dates, currentDateString) => setPaymentDate(currentDateString)}
                 />
               </div>
+
+              {/* Upload Receipt */}
               <div>
                 <Label>Upload Receipt</Label>
                 <FileInput id="fileUpload" onChange={handleReceiptChange} />
-                {/* {receiptPreview && (
+                {receiptPreview && (
                   <div className="mt-2 w-40 h-40 border rounded overflow-hidden">
-                    <img
-                      src={receiptPreview}
-                      alt="Receipt Preview"
-                      className="w-full h-full object-contain"
-                    />
+                    <img src={receiptPreview} alt="Receipt Preview" className="w-full h-full object-contain" />
                   </div>
-                )} */}
+                )}
               </div>
             </div>
           </ComponentCard>
         </div>
       </div>
 
-      {/* Buttons */}
-      <Button className="Submitbtn">Submit</Button>
-      <Button className="canclebtn">Cancel</Button>
+      <Button className="Submitbtn" onClick={handleSubmit} disabled={loading}>
+        {loading ? "Submitting..." : "Submit"}
+      </Button>
+      <Button className="canclebtn" onClick={() => navigate(-1)}>
+        Cancel
+      </Button>
     </div>
   );
 };
 
-export default Addpaymentdetails;
+export default AddPaymentDetails;

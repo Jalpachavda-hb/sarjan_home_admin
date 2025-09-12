@@ -4,10 +4,9 @@ export const API_PATHS = {
   // PENDINGFORAPPROVALS
 
   DASHBOARD: {
-    RECEIVEDPAYMENT: {
-      TODAYRECEIVEDPAYMENT: "todayReceivedPayment", // "raw": "{{url}}todayReceivedPayment?admin_id=1&site_id",
-    },
-    DASHBOARDCOUNT: "dashboardCount", //{{url}}dashboardCount?admin_id=1"
+    TODAYRECEIVEDPAYMENT: "todayReceivedPayment",
+
+    DASHBOARDCOUNT: "dashboardCount",
   },
 
   PENDINGFORAPPROVALSTABLE: {
@@ -47,11 +46,10 @@ export const API_PATHS = {
   },
 
   // SITE DETAILS API
-  
+
   SITEDETAILS: {
     GETSITEDETAILS: "showSiteList", //GET
     ADDSITE: "addSite", //POST
-
     EDITSITEDETAILS: "editSite", //POST
     DELETESITE: "deleteSite", //POST
     SITEDETAILSBYID: "showSiteDetails", // change url when use
@@ -97,7 +95,7 @@ export const API_PATHS = {
   PERSONALDOCUMENT: {
     GETPERSONALDOCUMENT: "showPersonalDocuments", //GET
     ADDPERSONALDOCUMENT: "addPersonalDocuments", //POST
-    DELETEaddPersonalDocuments: "deletePersonalDocuments",
+    DELETEPersonalDocuments: "deletePersonalDocuments",
   },
 
   // REPORT
@@ -171,7 +169,7 @@ export const API_PATHS = {
     SHOWCODESITELIST: "showdecodeSiteList", //  "raw": "{{url}}showdecodeSiteList?site_id",
     GETBLOCKFROMSITEID: " getBlockFromSiteId", //"raw": "{{url}}getBlockFromSiteId?site_id=jR",
     GETBLOCKNUMBERFROMBLOCK: "getBlockNumberFromBlock", //"raw": "{{url}}getBlockNumberFromBlock?block_id=k5",
-    GETADMINUSERROLE: "getAdminUserRoles", //"raw": "{{url}}getAdminUserRoles?admin_id=1",
+    GETADMINUSERROLE: "getAdminUserRoles", //"raw": "{{url}}getAdminUserRoles?admin_id=1",  this Api work for other admin login show delete permission
     GETBLOCKFROMDECODESITEID: "getBlockFromDecodeSiteId",
     GETCLIENTNAMEFROMBLOCKID: "getClientNameFromBlockId",
     UNITTYPE: "unitType",

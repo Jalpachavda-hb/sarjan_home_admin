@@ -54,7 +54,7 @@ export default function Allfile() {
         <Route path="blank" element={<Blank />} />
 
         {/* Forms */}
-      <Route path="clients/:id/addnewclient" element={<Addnewclient />} />
+        <Route path="clients/:id/addnewclient" element={<Addnewclient />} />
         <Route path="ticket-request/mytiket" element={<MyTiket />} />
         <Route
           path="ticket-request/mytiket/addtiket"
@@ -71,10 +71,19 @@ export default function Allfile() {
         <Route path="projects/site_details" element={<Sitedetails />} />
         <Route path="projects/site_details/addsite" element={<Addsite />} />
         <Route path="projects/property_details" element={<PropertyDetails />} />
-        <Route path="projects/add_property" element={<Addpropertydetails />} />
+
+        <Route path="projects/add_property" element={<Addpropertydetails  mode="add"/>} />
+        <Route
+          path="projects/add_property/:id"
+          element={<Addpropertydetails  mode="edit"/>}
+        />
 
         <Route path="admin_users" element={<Adminuser />} />
-        <Route path="admin_users/add" element={<Addadminuser />} />
+        <Route path="admin_users/add" element={<Addadminuser mode="add" />} />
+        <Route
+          path="admin_users/edit/:id"
+          element={<Addadminuser mode="edit" />}
+        />
 
         <Route path="common_documents" element={<Commundocument />} />
         <Route path="common_documents/add" element={<Addcommunoc />} />
