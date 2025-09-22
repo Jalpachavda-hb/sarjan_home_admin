@@ -21,6 +21,8 @@ import AddpersonalDoc from "./pages/Document/AddpersonalDoc";
 import Clientreport from "./pages/Report/Clientreport";
 import Sitereport from "./pages/Report/Sitereport";
 import Addnewclient from "./pages/client/Addnewclient";
+import EditClient from "./pages/client/EditClient";
+import Addclientpayment from "./pages/client/Addclientpayment";
 import TodayReceivedpayment from "./pages/Pandingforaprovel";
 import ClientsProperty from "./pages/client/ClientsProperty";
 import Client from "./pages/client/Client";
@@ -54,12 +56,16 @@ export default function Allfile() {
         <Route path="blank" element={<Blank />} />
 
         {/* Forms */}
+
         <Route path="clients/:id/addnewclient" element={<Addnewclient />} />
+        <Route path="clients/:id/:id/edit" element={<EditClient />} />
+         <Route path="clients/:id/:id/payment_details/add" element={<Addclientpayment />} />
         <Route path="ticket-request/mytiket" element={<MyTiket />} />
         <Route
           path="ticket-request/mytiket/addtiket"
           element={<AddnewTiket />}
         />
+
         <Route path="ticket-request/client" element={<ClientTiket />} />
         <Route path="ticket-request/history" element={<Tikethistory />} />
 
@@ -72,10 +78,13 @@ export default function Allfile() {
         <Route path="projects/site_details/addsite" element={<Addsite />} />
         <Route path="projects/property_details" element={<PropertyDetails />} />
 
-        <Route path="projects/add_property" element={<Addpropertydetails  mode="add"/>} />
+        <Route
+          path="projects/add_property"
+          element={<Addpropertydetails mode="add" />}
+        />
         <Route
           path="projects/add_property/:id"
-          element={<Addpropertydetails  mode="edit"/>}
+          element={<Addpropertydetails mode="edit" />}
         />
 
         <Route path="admin_users" element={<Adminuser />} />

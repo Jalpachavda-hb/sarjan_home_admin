@@ -15,15 +15,7 @@ const WebSetting = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
 
-  // const handleUpdate = async () => {
-  //   try {
-  //     const adminId = getAdminId(); // your helper
-  //     await updateWebSetting(adminId, groupName, logoFile, faviconFile);
-      
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
+
 
 const handleUpdate = async () => {
   try {

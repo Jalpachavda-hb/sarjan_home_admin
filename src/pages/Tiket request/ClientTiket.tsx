@@ -9,6 +9,8 @@ import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo } from "react";
 import { FaPlus } from "react-icons/fa6";
+
+import { FaRegEye } from "react-icons/fa";
 import SiteFilter from "../../components/form/input/FilterbySite";
 import {
   TextField,

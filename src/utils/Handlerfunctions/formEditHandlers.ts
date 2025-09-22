@@ -106,15 +106,11 @@ export const editProjectType = async (
     formData.append("id", id);
     formData.append("project_type_name", project_type_name);
 
-    const response = await axiosInstance.post(
-      "/editProjectType",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const response = await axiosInstance.post("/editProjectType", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     return response.data; // { status, message, data }
   } catch (error) {
@@ -123,11 +119,10 @@ export const editProjectType = async (
   }
 };
 
-
 export const editProjectCategory = async (formData: FormData) => {
   try {
     const response = await axiosInstance.post(
-      API_PATHS.PROJECTCATEGORY.EDITPROJECTCATEGORY, 
+      API_PATHS.PROJECTCATEGORY.EDITPROJECTCATEGORY,
       formData,
       {
         headers: {
@@ -143,59 +138,6 @@ export const editProjectCategory = async (formData: FormData) => {
   }
 };
 
-
-
-// export const updateAdminUser = async (
-//   id: string,
-//   name: string,
-//   email: string,
-//   contact: string,
-//   site_detail_id: number,
-//   role_id: number,
-//   permissions: { [feature: string]: string[] },
-//   clients: string[] = []
-// ) => {
-//   if (!getAdminId()) {
-//     toast.error("Admin ID not found. Please login again.");
-//     return null;
-//   }
-
-//   try {
-//     const payload = {
-//       admin_id: id, // editing this user
-//       updated_by: getAdminId(),
-//       name,
-//       email,
-//       contact,
-//       site_detail_id,
-//       role_id,
-//       clients,
-//       permissions,
-//     };
-
-//     const res = await axiosInstance.post(
-//       API_PATHS.ADMINUSERAPI.UPDATEADMINUSER,
-//       payload
-//     );
-
-//     if (res.data.status === 200) {
-//       toast.success("Admin user updated successfully!");
-//       return res.data;
-//     } else {
-//       toast.error(res.data.message || "Failed to update admin user");
-//       return null;
-//     }
-//   } catch (error: any) {
-//     console.error("Error while updating admin user:", error);
-//     toast.error(error.response?.data?.message || "Something went wrong");
-//     return null;
-//   }
-// };
-
-
-
-
-
 export const updatePropertyDetails = async (
   block_detail_id: number,
   formData: any
@@ -208,7 +150,7 @@ export const updatePropertyDetails = async (
 
   try {
     const payload = {
-      block_detail_id,           // which block to update
+      block_detail_id, // which block to update
       site_detail_id: formData.site_detail_id,
       block: formData.block,
       block_number: formData.block_number,
@@ -243,128 +185,6 @@ export const updatePropertyDetails = async (
   }
 };
 
-// export const updateAdminUser = async (
-//   id: string,
-//   name: string,
-//   email: string,
-//   contact: string,
-//   site_detail_id: number,
-//   role_id: number,
-//   permissions: { [feature: string]: string[] },
-//   clients: string[] = []
-// ) => {
-//   const adminId = getAdminId();
-//   if (!adminId) {
-//     toast.error("Admin ID not found. Please login again.");
-//     return null;
-//   }
-
-//   try {
-//     const formData = new FormData();
-//     formData.append("admin_id", adminId);
-//     formData.append("id", id);
-//     formData.append("name", name);
-//     formData.append("email", email);
-//     formData.append("contact", contact);
-//     formData.append("site_detail_id", String(site_detail_id));
-//     formData.append("role_id", String(role_id));
-
-//     // ✅ Clients
-//     clients.forEach((c) => {
-//       formData.append("clients[]", c);
-//     });
-
-//     // ✅ Permissions
-//     Object.entries(permissions).forEach(([feature, values]) => {
-//       if (Array.isArray(values)) {
-//         values.forEach((val) => {
-//           formData.append(`permissions[${feature}][]`, val);
-//         });
-//       }
-//     });
-
-//     const res = await axiosInstance.post(
-//       API_PATHS.ADMINUSERAPI.UPDATEADMINUSER,
-//       formData,
-//       { headers: { "Content-Type": "multipart/form-data" } }
-//     );
-
-//     if (res.data.status === 200) {
-//       return res.data;
-//     } else {
-//       toast.error(res.data.message || "Failed to update admin user");
-//       return null;
-//     }
-//   } catch (error: any) {
-//     console.error("Error while updating admin user:", error);
-//     toast.error(error.response?.data?.message || "Something went wrong");
-//     return null;
-//   }
-// };
-
-
-// export const updateAdminUser = async (
-//   id: string,
-//   name: string,
-//   email: string,
-//   contact: string,
-//   site_detail_id: number,
-//   role_id: number,
-//   permissions: { [feature: string]: string[] },
-//   clients: string[] = []
-// ) => {
-//   const adminId = getAdminId();
-//   if (!adminId) {
-//     toast.error("Admin ID not found. Please login again.");
-//     return null;
-//   }
-
-//   try {
-//     const formData = new FormData();
-//     formData.append("admin_id", adminId);
-//     formData.append("id", id);
-//     formData.append("name", name);
-//     formData.append("email", email);
-//     formData.append("contact", contact);
-//     formData.append("site_detail_id", String(site_detail_id));
-//     formData.append("role_id", String(role_id));
-
-//     // ✅ Clients
-//     clients.forEach((c) => formData.append("clients[]", c));
-
-//     // ✅ Permissions (flat arrays like Postman)
-//     Object.entries(permissions).forEach(([feature, values]) => {
-//       if (Array.isArray(values)) {
-//         values.forEach((val) => {
-//           formData.append(`${feature}[]`, val);
-//         });
-//       }
-//     });
-
-//     // Debugging – log what’s being sent
-//     for (let [k, v] of formData.entries()) {
-//       console.log(k, v);
-//     }
-
-//     const res = await axiosInstance.post(
-//       API_PATHS.ADMINUSERAPI.UPDATEADMINUSER,
-//       formData,
-//       { headers: { "Content-Type": "multipart/form-data" } }
-//     );
-
-//     if (res.data.status === 200) {
-//       toast.success("Admin user updated successfully!");
-//       return res.data;
-//     } else {
-//       toast.error(res.data.message || "Failed to update admin user");
-//       return null;
-//     }
-//   } catch (error: any) {
-//     console.error("Error while updating admin user:", error);
-//     toast.error(error.response?.data?.message || "Something went wrong");
-//     return null;
-//   }
-// };
 export const updateAdminUser = async (
   id: string,
   name: string,
@@ -429,5 +249,92 @@ export const updateAdminUser = async (
     console.error("Error while updating admin user:", error);
     toast.error(error.response?.data?.message || "Something went wrong");
     return null;
+  }
+};
+
+export const editPaymentfromAdmin = async (
+  admin_id: string,
+  id: string,
+  received_amount_type: string,
+  received_amount: number,
+  received_payment_date: string,
+  receipt: File | null // only File or null
+) => {
+  try {
+    const formData = new FormData();
+    formData.append("admin_id", admin_id);
+    formData.append("id", id);
+    formData.append("received_amount_type", received_amount_type);
+    formData.append("received_amount", received_amount.toString());
+    formData.append("received_payment_date", received_payment_date);
+
+    // ✅ Only attach if a new file is selected
+    if (receipt) {
+      formData.append("receipt", receipt);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.PAYMENT.EDITPAYMENTFROMADMIN,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    return response.data; // { status, message, data }
+  } catch (error) {
+    console.error("Error editing payment:", error);
+    throw error;
+  }
+};
+
+
+
+
+export const editClient = async (
+  clientData: any,
+  originalData: any,
+  aadharCard: File | null,
+  panCard: File | null
+) => {
+  try {
+    const formData = new FormData();
+
+    // ✅ Map to exact field names expected by backend
+    formData.append("admin_id", clientData.admin_id);
+    formData.append("clientid", clientData.clientid);
+    formData.append("site_detail_id", clientData.site_detail_id || "");
+    formData.append("client_name", clientData.name || "");
+    formData.append("edit_email", clientData.email || "");
+    formData.append("edit_contact", clientData.contact || "");
+    formData.append("edit_address", clientData.address || "");
+    formData.append("update_password", clientData.password || "");
+    formData.append("client_milestone_id", clientData.client_milestone_id || "");
+    formData.append("edit_unit_type_option", clientData.unit_type || "");
+    formData.append("edit_property_amount", clientData.property_amount || "");
+    formData.append("edit_gst_slab", clientData.gst_slab || "");
+    formData.append("edit_gst_amount", clientData.gst_amount || "");
+    formData.append("edit_total_amount", clientData.total_amount || "");
+
+    // ✅ Only attach if a new file is selected
+    if (aadharCard) {
+      formData.append("edit_aadhar_card", aadharCard);
+    }
+    if (panCard) {
+      formData.append("edit_pan_card", panCard);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.CLIENTDATA.UPDATECLIENTDATA,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    return response.data; // { status, message, data }
+  } catch (error) {
+    console.error("Error editing client:", error);
+    throw error;
   }
 };

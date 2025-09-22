@@ -25,17 +25,17 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
   //   [feature: string]: string[];
   // }>({});
   const [selectedPermissions, setSelectedPermissions] = useState<{
-  [feature: string]: string[];
-}>({
-  clients: [],
-  user_log: [],
-  properties: [],
-  admin_users: [],
-  documents: [],
-  reports: [],
-  payments: [],
-  app_settings: []
-});
+    [feature: string]: string[];
+  }>({
+    clients: [],
+    user_log: [],
+    properties: [],
+    admin_users: [],
+    documents: [],
+    reports: [],
+    payments: [],
+    app_settings: [],
+  });
   const [profile, setProfile] = useState<any>(null);
   const [step, setStep] = useState(1);
 
@@ -124,12 +124,6 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
     if (res) navigate("/admin/admin_users");
   };
 
-  // const handlePermissionChange = (feature: string, values: string[]) => {
-  //   setSelectedPermissions((prev) => ({
-  //     ...prev,
-  //     [feature]: values,
-  //   }));
-  // };
   const handlePermissionChange = (feature: string, values: string[]) => {
     setSelectedPermissions((prev) => ({
       ...prev,
@@ -201,26 +195,46 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
                 />
               )}
 
-              {!isEdit && (
-                <>
-                  <Label>Password</Label>
-                  <div className="relative">
-                    <Input
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2"
-                    >
-                      {showPassword ? <FaRegEye /> : <FaEyeSlash />}
-                    </button>
-                  </div>
-                </>
-              )}
+             {isEdit ? (
+  <>
+    <Label>Password</Label>
+    <div className="relative">
+      <Input
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        type={showPassword ? "text" : "password"}
+        placeholder="Update password (leave empty to keep old)"
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-4 top-1/2 -translate-y-1/2"
+      >
+        {showPassword ? <FaRegEye /> : <FaEyeSlash />}
+      </button>
+    </div>
+  </>
+) : (
+  <>
+    <Label>Password</Label>
+    <div className="relative">
+      <Input
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        type={showPassword ? "text" : "password"}
+        placeholder="Enter your password"
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-4 top-1/2 -translate-y-1/2"
+      >
+        {showPassword ? <FaRegEye /> : <FaEyeSlash />}
+      </button>
+    </div>
+  </>
+)}
+
             </div>
           </ComponentCard>
         )}
@@ -228,39 +242,24 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
         {step === 2 && (
           <ComponentCard title="User Permissions">
             <div className="space-y-6">
-             {Object.entries(selectedPermissions).map(([feature, perms]) => (
-  <div key={feature} className="space-y-2">
-    <Label>
-      {String(feature).replace(/_/g, " ").toUpperCase()}
-    </Label>
-                  {/* <MultiSelect
-                    options={["view", "create", "edit", "delete"].map((perm) => ({
-                      value: perm,
-                      text: perm.charAt(0).toUpperCase() + perm.slice(1),
-                    }))}
-                    defaultSelected={perms}
-                    onChange={(values) => handlePermissionChange(feature, values)}
-                  /> */}
-                  {/* <MultiSelect
+              {Object.entries(selectedPermissions).map(([feature, perms]) => (
+                <div key={feature} className="space-y-2">
+                  <Label>
+                    {String(feature).replace(/_/g, " ").toUpperCase()}
+                  </Label>
+
+                  <MultiSelect
                     options={["view", "create", "edit", "delete"].map(
                       (perm) => ({
                         value: perm,
                         text: perm.charAt(0).toUpperCase() + perm.slice(1),
                       })
                     )}
-                    defaultSelected={perms}
+                    defaultSelected={Array.isArray(perms) ? perms : []}
                     onChange={(values) =>
                       handlePermissionChange(feature, values)
                     }
-                  /> */}
-                   <MultiSelect
-      options={["view", "create", "edit", "delete"].map((perm) => ({
-        value: perm,
-        text: perm.charAt(0).toUpperCase() + perm.slice(1),
-      }))}
-      defaultSelected={Array.isArray(perms) ? perms : []}
-      onChange={(values) => handlePermissionChange(feature, values)}
-    />
+                  />
                 </div>
               ))}
             </div>

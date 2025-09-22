@@ -5,14 +5,21 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
+import { FaRegEye } from "react-icons/fa";
 import SiteFilter from "../../components/form/input/FilterbySite";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo, useEffect } from "react";
-import { MdDelete } from "react-icons/md";
-import { FaEdit } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import { fetchAdminTickets } from "../../utils/Handlerfunctions/getdata";
+import { closeTicket } from "../../utils/Handlerfunctions/formdeleteHandlers";
+import { getTicketMessages } from "../../utils/Handlerfunctions/getdata";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import {
   TextField,
   Button,
@@ -43,38 +50,47 @@ export default function MyTiket() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [replies, setReplies] = useState<any[]>([]);
+  const loadTickets = async () => {
+    try {
+      const res = await fetchAdminTickets();
 
+      if (res?.status === 200 && Array.isArray(res.data)) {
+        const mapped = res.data.map((t: any) => ({
+          id: t.id,
+          clientName: t.client_name,
+          unitNo: t.unit_number,
+          siteName: t.site_name,
+          title: t.title,
+          date: t.created_at,
+          status: t.status,
+          reply: t.is_read === "1" ? "Read" : "Unread",
+        }));
+        setTickets(mapped);
+      } else {
+        setTickets([]);
+      }
+    } catch (err) {
+      console.error("Error loading tickets:", err);
+      setTickets([]);
+    } finally {
+      setLoading(false);
+    }
+  };
   // Fetch API data
   useEffect(() => {
-    const loadTickets = async () => {
-      try {
-        const res = await fetchAdminTickets();
-
-        if (res?.status === 200 && Array.isArray(res.data)) {
-          const mapped = res.data.map((t: any) => ({
-            id: t.id,
-            clientName: t.client_name,
-            unitNo: t.unit_number,
-            siteName: t.site_name,
-            title: t.title,
-            date: t.created_at,
-            status: t.status,
-            reply: t.is_read === "1" ? "Read" : "Unread",
-          }));
-          setTickets(mapped);
-        } else {
-          setTickets([]);
-        }
-      } catch (err) {
-        console.error("Error loading tickets:", err);
-        setTickets([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadTickets();
   }, []);
+
+  const handleClose = async (id: string) => {
+    const res = await closeTicket(id);
+    if (res.success) {
+      // refresh ticket list
+      loadTickets();
+    }
+  };
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -117,6 +133,27 @@ export default function MyTiket() {
       page * rowsPerPage + rowsPerPage
     );
   }, [filteredData, page, rowsPerPage]);
+
+  const handleOpenModal = async (ticket: any) => {
+    setSelectedTicket(ticket);
+    setOpenModal(true);
+
+    try {
+      const res = await getTicketMessages(ticket.id); // <-- API call
+      if (res?.status === 200) {
+        setReplies(res.data.data); // ✅ only the array
+      }
+    } catch (err) {
+      console.error("Error fetching replies", err);
+      setReplies([]); // fallback
+    }
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedTicket(null);
+    setReplies([]);
+  };
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -300,22 +337,31 @@ export default function MyTiket() {
                       <TableCell className="rowtext">{item.date}</TableCell>
                     )}
                     {isColumnVisible("status") && (
-                      <TableCell className="rowtext">{item.status}</TableCell>
+                      <TableCell className="rowtext">
+                        <Badge
+                          variant="light"
+                          color={item.status === "Active" ? "success" : "error"}
+                        >
+                          {item.status}
+                        </Badge>
+                      </TableCell>
                     )}
                     {isColumnVisible("reply") && (
-                      <TableCell className="rowtext">{item.reply}</TableCell>
+                      <TableCell className="rowtext">
+                        {/* {item.reply} */}
+                       <button onClick={() => handleOpenModal(item)}>
+                            <Badge variant="light" color="success">
+                              View <FaRegEye />
+                            </Badge>
+                          </button>
+                      </TableCell>
                     )}
                     {isColumnVisible("blocknumberType") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
-                          <button>
-                            <Badge variant="light">
-                              <FaEdit className="text-2xl cursor-pointer" />
-                            </Badge>
-                          </button>
-                          <button>
+                          <button onClick={() => handleClose(item.id)}>
                             <Badge variant="light" color="error">
-                              <MdDelete className="text-2xl cursor-pointer" />
+                              Close Ticket
                             </Badge>
                           </button>
                         </div>
@@ -326,6 +372,48 @@ export default function MyTiket() {
               )}
             </TableBody>
           </Table>
+          <Dialog
+            className="swal2-container "
+            open={openModal}
+            onClose={handleCloseModal}
+            maxWidth="md"
+            fullWidth
+          >
+            {/* <DialogTitle>Client Reply ({selectedTicket?.unitNo})
+           <Button   onClick={handleCloseModal}>✕</Button>
+        </DialogTitle> */}
+            <DialogTitle className="flex justify-between items-center">
+              <span>Client Reply ({selectedTicket?.unitNo})</span>
+              <Button onClick={handleCloseModal}>✕</Button>
+            </DialogTitle>
+            <DialogContent dividers>
+              {replies.length === 0 ? (
+                <p className="text-gray-500">No replies found</p>
+              ) : (
+                replies.map((reply, idx) => (
+                  <div key={idx} className="mb-4">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">{reply.request_by}</span>
+                      <span className="text-sm text-gray-500">
+                        {reply.created_at}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {reply.user_type}
+                    </span>
+                    <div className="bg-gray-200 rounded-lg p-2 mt-1">
+                      {reply.message}
+                    </div>
+                  </div>
+                ))
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseModal} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
 
         {/* Pagination */}

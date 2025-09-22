@@ -125,7 +125,7 @@ export const deleteAdminUser = async (id: string) => {
     console.log("Deleting Admin User ID:", id);
 
     const formData = new FormData();
-    formData.append("adminuser_id", id); 
+    formData.append("adminuser_id", id);
     formData.append("admin_id", adminId);
 
     const res = await axiosInstance.post(
@@ -147,8 +147,6 @@ export const deleteAdminUser = async (id: string) => {
   }
 };
 
-
-
 export const deletePropertyDetails = async (block_detail_id: string) => {
   const adminId = getAdminId();
   if (!adminId) {
@@ -160,7 +158,7 @@ export const deletePropertyDetails = async (block_detail_id: string) => {
     console.log("Deleting ProprtyDetail ID:", block_detail_id);
 
     const formData = new FormData();
-    formData.append("block_detail_id", block_detail_id); 
+    formData.append("block_detail_id", block_detail_id);
     formData.append("admin_id", adminId);
 
     const res = await axiosInstance.post(
@@ -182,12 +180,6 @@ export const deletePropertyDetails = async (block_detail_id: string) => {
   }
 };
 
-
-
-
-
-
-
 export const destroyPaymentDetails = async (payment_id: number) => {
   const adminId = getAdminId();
   if (!adminId) {
@@ -199,11 +191,11 @@ export const destroyPaymentDetails = async (payment_id: number) => {
     console.log("Deleting ProprtyDetail ID:", payment_id);
 
     const formData = new FormData();
-    formData.append("payment_id", payment_id); 
+    formData.append("payment_id", payment_id);
     formData.append("admin_id", adminId);
 
     const res = await axiosInstance.post(
-      API_PATHS. PAYMENT.DESTROYPAYMENTDETAILS,
+      API_PATHS.PAYMENT.DESTROYPAYMENTDETAILS,
       formData
     );
 
@@ -218,5 +210,106 @@ export const destroyPaymentDetails = async (payment_id: number) => {
     console.error("Delete Payment Details failed:", error);
     toast.error("Failed to delete Payment Details");
     return false;
+  }
+};
+
+export const deleteClient = async (id: string) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return false;
+  }
+
+  try {
+    console.log("Deleting Client ID:", id);
+
+    const formData = new FormData();
+    formData.append("client_milestone_id", id);
+    formData.append("admin_id", adminId);
+
+    const res = await axiosInstance.post(
+      API_PATHS.CLIENTDATA.DELETECLIENTDAT,
+      formData
+    );
+
+    if (res?.status === 200) {
+      toast.success("Client deleted successfully!");
+      return true;
+    } else {
+      toast.error(res?.data?.message || "Failed to delete Client");
+      return false;
+    }
+  } catch (error: any) {
+    console.error("Delete Client failed:", error);
+    toast.error("Failed to delete Client");
+    return false;
+  }
+};
+
+
+export const closeTicket = async (ticketId: string) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return { success: false };
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("ticket_id", ticketId);
+    formData.append("admin_id", adminId);
+
+    const res = await axiosInstance.post(API_PATHS.TICKET.CLOSETICKET,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (res?.status === 200) {
+      toast.success(res?.data?.message || "Ticket closed successfully!");
+      return { success: true, data: res.data };
+    } else {
+      toast.error(res?.data?.message || "Failed to close ticket");
+      return { success: false };
+    }
+  } catch (error: any) {
+    console.error("Close ticket failed:", error);
+    toast.error("Something went wrong while closing ticket");
+    return { success: false };
+  }
+};
+
+// pending for Approvals
+export const reject = async (client_milestone_id: number, description?: string) => {
+  try {
+    const adminId = getAdminId();
+    if (!adminId) throw new Error("Admin ID not found");
+
+    const res = await axiosInstance.post(API_PATHS.PENDINGFORAPPROVALSTABLE.REJECT, {
+      admin_id: adminId,
+      client_milestone_id,
+      description, // optional reject reason
+    });
+
+    return res.data;
+  } catch (err) {
+    console.error("Error rejecting:", err);
+    throw err;
+  }
+};
+
+export const approve = async (client_milestone_id: number) => {
+  try {
+    const adminId = getAdminId();
+    if (!adminId) throw new Error("Admin ID not found");
+
+    const res = await axiosInstance.post(API_PATHS.PENDINGFORAPPROVALSTABLE.APPROVALS, {
+      admin_id: adminId,
+      client_milestone_id,
+    });
+
+    return res.data;
+  } catch (err) {
+    console.error("Error approving:", err);
+    throw err;
   }
 };

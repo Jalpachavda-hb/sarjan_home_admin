@@ -121,26 +121,13 @@ export const API_PATHS = {
   // TICKET
 
   TICKET: {
-    SHOWADMINTICKET: "showAdminTicket", // GET    "raw": "{{url}}showAdminTicket?admin_id=1",
-    //  "query": [
-    //             {
-    //               "key": "admin_id",
-    //               "value": "1",
-    //               "description": "login time admin id"
-    //             },
-    //             {
-    //               "key": "requestSiteFilter",
-    //               "value": "3",
-    //               "description": "use this api \"showdecodeSiteList\"",
-    //               "disabled": true
-    //             }
-    //           ]
+    SHOWADMINTICKET: "showAdminTicket",
     SHOWCLIENTTICKET: "showClientTicket", //"raw": "{{url}}showClientTicket?admin_id=1",
     ADDADMINTICKET: "addAdminTicket", //POST
     SHOWTICKETGISTORY: "showTicketHistory",
     GETTICKETMESSAGES: "getTicketMessages", //    "raw": "{{url}}getTicketMessages?admin_id=1&ticket_id=14",
     REPLAYTOTICKET: "replyToTicket", //POST
-    CLOSETICKET: "  closeTicket", //POST
+    CLOSETICKET:"closeTicket", //POST
   },
 
   // USERLOG API
@@ -167,7 +154,7 @@ export const API_PATHS = {
   MULTITIMEUSEAPI: {
     GETBLOCKDETAILSFROMSITE_ID: "getBlockDetailsFromSite_Id", //          "raw": "{{url}}getBlockDetailsFromSite_Id?site_id=1",
     SHOWCODESITELIST: "showdecodeSiteList", //  "raw": "{{url}}showdecodeSiteList?site_id",
-    GETBLOCKFROMSITEID: " getBlockFromSiteId", //"raw": "{{url}}getBlockFromSiteId?site_id=jR",
+    GETBLOCKFROMSITEID: "getBlockFromSiteId", //"raw": "{{url}}getBlockFromSiteId?site_id=jR",
     GETBLOCKNUMBERFROMBLOCK: "getBlockNumberFromBlock", //"raw": "{{url}}getBlockNumberFromBlock?block_id=k5",
     GETADMINUSERROLE: "getAdminUserRoles", //"raw": "{{url}}getAdminUserRoles?admin_id=1",  this Api work for other admin login show delete permission
     GETBLOCKFROMDECODESITEID: "getBlockFromDecodeSiteId",

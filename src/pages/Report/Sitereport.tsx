@@ -30,7 +30,7 @@ interface SiteReport {
 
 export default function Pandingforaprovel() {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [tableData, setTableData] = useState<SiteReport[]>([]);
   // use for search

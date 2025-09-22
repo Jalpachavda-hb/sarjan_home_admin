@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -5,11 +6,10 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 import Badge from "../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
-// import SiteFilter from "../../components/form/input/FilterbySite";
-import SiteFilter from "../components/form/input/FilterbySite";
 import {
   TextField,
   Button,
@@ -20,7 +20,8 @@ import {
   Checkbox,
   ListItemText,
 } from "@mui/material";
-
+import { pendingForApprovals } from "../utils/Handlerfunctions/getdata"; // your API function
+import { approve, reject } from "../utils/Handlerfunctions/formdeleteHandlers";
 interface Aprovel {
   id: number;
   siteName: string;
@@ -30,66 +31,8 @@ interface Aprovel {
   blocknumber: string;
 }
 
-const tableData: Aprovel[] = [
-  {
-    id: 1,
-    clientName: "Ramesh Patel",
-    siteName: "Green Acres",
-    contactNumber: 9313061960,
-    Email: "RameshPatel@gmail.com",
-    blocknumber: "1",
-  },
-  {
-    id: 2,
-    clientName: "Sunita Sharma",
-    siteName: "Skyline Residency",
-    contactNumber: 5259658569,
-    Email: "sunitasharna@gmail.com",
-    blocknumber: "90",
-  },
-  {
-    id: 3,
-    clientName: "Manish Mehta",
-    siteName: "Sunshine Valley",
-    contactNumber: 8596748596,
-    Email: "manish@gmail.com",
-    blocknumber: "2",
-  },
-  {
-    id: 4,
-    clientName: "Nirali Desai",
-    siteName: "Emerald Heights",
-    contactNumber: 8596965896,
-    Email: "emerald@gmail.com",
-    blocknumber: "1",
-  },
-  {
-    id: 5,
-    clientName: "Amita Shah",
-    siteName: "Harmony Homes",
-    contactNumber: 5698569569,
-    Email: "amita@gmail.com",
-    blocknumber: "3",
-  },
-  {
-    id: 6,
-    clientName: "Kajal Trivedi",
-    siteName: "Silver Estate",
-    contactNumber: 5689325896,
-    Email: "kajal@gmail.com",
-    blocknumber: "2",
-  },
-  {
-    id: 7,
-    clientName: "Devanshi Shah",
-    siteName: "Golden Villa",
-    contactNumber: 5896963526,
-    Email: "devanshi@gmail.com",
-    blocknumber: "1",
-  },
-];
-
 export default function Pandingforaprovel() {
+  const [tableData, setTableData] = useState<Aprovel[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -97,16 +40,21 @@ export default function Pandingforaprovel() {
     key: keyof Aprovel;
     direction: "asc" | "desc";
   } | null>(null);
-  // use for search
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await pendingForApprovals();
+      setTableData(data);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
 
-  const isColumnVisible = (column: string) =>
-    selectedColumns.length === 0 || selectedColumns.includes(column);
+  const handleChangePage = (_: unknown, newPage: number) => setPage(newPage);
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -115,12 +63,14 @@ export default function Pandingforaprovel() {
     setPage(0);
   };
 
+  const isColumnVisible = (column: string) =>
+    selectedColumns.length === 0 || selectedColumns.includes(column);
+
   const filteredData = useMemo(() => {
     let data = [...tableData];
 
-    const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
-
-    if (searchTerm) {
+    if (search.trim()) {
+      const searchTerm = search.trim().toLowerCase();
       data = data.filter((item) =>
         Object.values(item).some((val) =>
           String(val).toLowerCase().includes(searchTerm)
@@ -132,19 +82,14 @@ export default function Pandingforaprovel() {
       data.sort((a, b) => {
         const aValue = a[sortConfig.key];
         const bValue = b[sortConfig.key];
-
-        if (aValue < bValue) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
+        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
         return 0;
       });
     }
 
     return data;
-  }, [search, sortConfig]);
+  }, [tableData, search, sortConfig]);
 
   const paginatedData = useMemo(() => {
     return filteredData.slice(
@@ -152,21 +97,6 @@ export default function Pandingforaprovel() {
       page * rowsPerPage + rowsPerPage
     );
   }, [filteredData, page, rowsPerPage]);
-
-  const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
-
-  const handleSort = (key: keyof Aprovel) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -183,7 +113,6 @@ export default function Pandingforaprovel() {
               Print
             </Button>
 
-            {/* Select Columns Dropdown */}
             <FormControl size="small" sx={{ minWidth: 200 }}>
               <InputLabel
                 className="text-gray-700 dark:text-white"
@@ -203,15 +132,10 @@ export default function Pandingforaprovel() {
                 className="bg-white dark:bg-gray-200 rounded-md"
                 sx={{
                   fontFamily: "Poppins",
-                  "& .MuiSelect-select": {
-                    color: "#6B7280",
-                    fontWeight: 300,
-                  },
+                  "& .MuiSelect-select": { color: "#6B7280", fontWeight: 300 },
                 }}
                 MenuProps={{
-                  PaperProps: {
-                    sx: { maxHeight: 300, fontFamily: "Poppins" },
-                  },
+                  PaperProps: { sx: { maxHeight: 300, fontFamily: "Poppins" } },
                 }}
               >
                 {[
@@ -234,10 +158,10 @@ export default function Pandingforaprovel() {
                         {
                           clientName: "Client Name",
                           siteName: "Site Name",
-                          contactNumber: "contactNumber",
-                          Email: "Unit No.",
-                          blocknumber: "Received blocknumber",
-                          blocknumberType: "blocknumber Type",
+                          contactNumber: "Contact Number",
+                          Email: "Email",
+                          blocknumber: "Block Number",
+                          blocknumberType: "Manage",
                           receivedDate: "Received Date",
                         }[col]
                       }
@@ -248,14 +172,7 @@ export default function Pandingforaprovel() {
             </FormControl>
           </div>
 
-          {/* Right Column */}
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-            {/* Filter by Site Dropdown */}
-
-            {/* <SiteFilter
-              value={siteFilter}
-              onChange={(e) => setSiteFilter(e.target.value)}
-            /> */}
             <TextField
               size="small"
               variant="outlined"
@@ -269,93 +186,141 @@ export default function Pandingforaprovel() {
         </div>
 
         <div className="max-w-full overflow-x-auto mt-8">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell className="columtext">Sr. No</TableCell>
-
-                {isColumnVisible("siteName") && (
-                  <TableCell className="columtext">Site Name</TableCell>
-                )}
-
-                {isColumnVisible("clientName") && (
-                  <TableCell className="columtext">Client Name</TableCell>
-                )}
-                {isColumnVisible("contactNumber") && (
-                  <TableCell className="columtext">Contact Number</TableCell>
-                )}
-                {isColumnVisible("Email") && (
-                  <TableCell className="columtext">Email</TableCell>
-                )}
-                {isColumnVisible("blocknumber") && (
-                  <TableCell className="columtext">Block Number</TableCell>
-                )}
-                {isColumnVisible("blocknumberType") && (
-                  <TableCell className="columtext">Manage</TableCell>
-                )}
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {paginatedData.length === 0 ? (
+          {loading ? (
+            <p className="text-center py-12">Loading...</p>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell
-                    // colSpan={}
-                    className="justify-between py-12 text-gray-500  "
-                    // style={{ fontSize: "16px" }}
-                  >
-                    No data available
-                  </TableCell>
+                  <TableCell className="columtext">Sr. No</TableCell>
+                  {isColumnVisible("siteName") && (
+                    <TableCell className="columtext">Site Name</TableCell>
+                  )}
+                  {isColumnVisible("clientName") && (
+                    <TableCell className="columtext">Client Name</TableCell>
+                  )}
+                  {isColumnVisible("contactNumber") && (
+                    <TableCell className="columtext">Contact Number</TableCell>
+                  )}
+                  {isColumnVisible("Email") && (
+                    <TableCell className="columtext">Email</TableCell>
+                  )}
+                  {isColumnVisible("blocknumber") && (
+                    <TableCell className="columtext">Block Number</TableCell>
+                  )}
+                  {isColumnVisible("blocknumberType") && (
+                    <TableCell className="columtext">Manage</TableCell>
+                  )}
                 </TableRow>
-              ) : (
-                paginatedData.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="rowtext">
-                      {page * rowsPerPage + index + 1}
-                    </TableCell>
+              </TableHeader>
 
-                    {isColumnVisible("siteName") && (
-                      <TableCell className="rowtext">{item.siteName}</TableCell>
-                    )}
-                    {isColumnVisible("clientName") && (
-                      <TableCell className="rowtext">
-                        {item.clientName}
-                      </TableCell>
-                    )}
-                    {isColumnVisible("contactNumber") && (
-                      <TableCell className="rowtext">
-                        {item.contactNumber}
-                      </TableCell>
-                    )}
-                    {isColumnVisible("Email") && (
-                      <TableCell className="rowtext">{item.Email}</TableCell>
-                    )}
-                    {isColumnVisible("blocknumber") && (
-                      <TableCell className="rowtext">
-                        {item.blocknumber}
-                      </TableCell>
-                    )}
-                    {isColumnVisible("blocknumberType") && (
-                      <TableCell className="rowtext">
-                        <div className="flex gap-2 mt-1">
-                          <button>
-                            <Badge variant="light" color="success">
-                              Approve
-                            </Badge>
-                          </button>
-                          <button>
-                            <Badge variant="light" color="error">
-                              Reject
-                            </Badge>
-                          </button>
-                        </div>
-                      </TableCell>
-                    )}
+              <TableBody>
+                {paginatedData.length === 0 ? (
+                  <TableRow>
+                    <TableCell className="justify-between py-12 text-gray-500">
+                      No data available
+                    </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  paginatedData.map((item, index) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="rowtext">
+                        {page * rowsPerPage + index + 1}
+                      </TableCell>
+                      {isColumnVisible("siteName") && (
+                        <TableCell className="rowtext">
+                          {item.siteName}
+                        </TableCell>
+                      )}
+                      {isColumnVisible("clientName") && (
+                        <TableCell className="rowtext">
+                          {item.clientName}
+                        </TableCell>
+                      )}
+                      {isColumnVisible("contactNumber") && (
+                        <TableCell className="rowtext">
+                          {item.contactNumber}
+                        </TableCell>
+                      )}
+                      {isColumnVisible("Email") && (
+                        <TableCell className="rowtext">{item.Email}</TableCell>
+                      )}
+                      {isColumnVisible("blocknumber") && (
+                        <TableCell className="rowtext">
+                          {item.blocknumber}
+                        </TableCell>
+                      )}
+                      {isColumnVisible("blocknumberType") && (
+                        <TableCell className="rowtext">
+                          <div className="flex gap-2 mt-1">
+                            <button
+                              onClick={async () => {
+                                const result = await Swal.fire({
+                                  title: "Are you sure?",
+                                  text: "Do you want to approve this item?",
+                                  icon: "warning",
+                                  showCancelButton: true,
+                                  confirmButtonText: "Yes, approve it!",
+                                  cancelButtonText: "Cancel",
+                                });
+
+                                if (result.isConfirmed) {
+                                  try {
+                                    await approve(item.id); // your API call
+                                    toast.success("Approved successfully!");
+                                    const updatedData =
+                                      await pendingForApprovals();
+                                    setTableData(updatedData);
+                                  } catch (err) {
+                                    console.error(err);
+                                    toast.error("Failed to approve");
+                                  }
+                                }
+                              }}
+                            >
+                              <Badge variant="light" color="success">
+                                Approve
+                              </Badge>
+                            </button>
+
+                            <button
+                              onClick={async () => {
+                                const result = await Swal.fire({
+                                  title: "Are you sure?",
+                                  text: "Do you want to reject this item?",
+                                  icon: "warning",
+
+                                  showCancelButton: true,
+                                  confirmButtonText: "Yes, reject it!",
+                                  cancelButtonText: "Cancel",
+                                });
+
+                                if (result.isConfirmed) {
+                                  try {
+                                    toast.success("Rejected successfully!");
+                                    const updatedData =
+                                      await pendingForApprovals();
+                                    setTableData(updatedData);
+                                  } catch (err) {
+                                    console.error(err);
+                                    toast.error("Failed to reject");
+                                  }
+                                }
+                              }}
+                            >
+                              <Badge variant="light" color="error">
+                                Reject
+                              </Badge>
+                            </button>
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
         </div>
 
         <div className="mt-4 flex justify-between items-center w-full">
@@ -384,12 +349,8 @@ export default function Pandingforaprovel() {
                   backgroundColor: "transparent",
                 },
                 ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                  {
-                    color: "inherit",
-                  },
-                ".MuiSvgIcon-root": {
-                  color: "inherit",
-                },
+                  { color: "inherit" },
+                ".MuiSvgIcon-root": { color: "inherit" },
               }}
             />
           </div>

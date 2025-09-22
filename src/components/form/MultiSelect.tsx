@@ -181,3 +181,23 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 };
 
 export default MultiSelect;
+
+
+// const CustomMultiSelect = ({ options, value, onChange, placeholder }) => {
+//     const [isOpen, setIsOpen] = useState(false);
+//     const selectedValues = Array.isArray(value) ? value : [];
+
+//     const handleSelect = (optionValue) => {
+//       const newValue = selectedValues.includes(optionValue)
+//         ? selectedValues.filter((v) => v !== optionValue)
+//         : [...selectedValues, optionValue];
+
+//       // Convert to the format expected by the parent component
+//       const selectedOptions = newValue
+//         .map((v) => options.find((o) => o.value === v))
+//         .filter(Boolean);
+
+//       onChange(selectedOptions);
+//     };
+
+

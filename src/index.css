@@ -913,8 +913,25 @@ span.flatpickr-weekday,
 }
 
 
-.disablefeildset {
- font-weight: 600 !important;
- font-weight: 200; 
- color: black;
+.disabledInput {
+  font-weight:530;   
+  font-size: 15px;      /* Make text bold */
+  color: #000000;               /* Darker color for readability */
+  background-color: #f5f5f5; /* Slightly grey background */
+  border: 1px solid #ccc;    /* Keep border visible */
+  padding: 8px 10px;         /* Optional padding for better look */
+  border-radius: 4px;
+}
+
+.inputClasses {
+  height: 2.75rem; /* h-11 */
+  width: 100%; /* w-full */
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid #d1d5db; /* default border color from Tailwind border */
+  padding: 0.625rem 1rem; /* py-2.5 px-4 */
+  font-size: 0.875rem; /* text-sm */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* approximate shadow-theme-xs */
+  appearance: none; /* appearance-none */
+  color: #f9fafb; /* dark:text-white/90 for dark mode, fallback */
+ 
 }

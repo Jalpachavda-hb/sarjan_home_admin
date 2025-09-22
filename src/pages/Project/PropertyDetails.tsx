@@ -224,7 +224,7 @@ export default function PropertyDetails() {
                     {isColumnVisible("siteName") && (
                       <TableCell className="rowtext">{item.siteName}</TableCell>
                     )}
-                    
+
                     {isColumnVisible("unit") && (
                       <TableCell className="rowtext">{item.unit}</TableCell>
                     )}

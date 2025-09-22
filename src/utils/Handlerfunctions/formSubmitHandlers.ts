@@ -323,8 +323,6 @@ export const addPropertyDetails = async (formData: FormData) => {
   }
 };
 
-
-
 export const addPaymentDetail = async ({
   adminId,
   clientId,
@@ -337,16 +335,20 @@ export const addPaymentDetail = async ({
 }) => {
   try {
     const formData = new FormData();
-    formData.append("admin_id", adminId); // dynamic admin ID
-    formData.append("client_id", clientId);
-    formData.append("site_detail_id", siteDetailId);
-    formData.append("block_details_id", blockDetailsId);
+    formData.append("admin_id", String(adminId));
+    formData.append("client_id", String(clientId));
+    formData.append("site_detail_id", String(siteDetailId));
+    formData.append("block_details_id", String(blockDetailsId));
+
     formData.append("received_amount_type", receivedAmountType);
     formData.append("received_amount", receivedAmount);
     formData.append("received_payment_date", paymentDate);
 
     if (receiptFile) {
       formData.append("receipt", receiptFile);
+    }
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
     }
 
     const response = await axiosInstance.post(
@@ -356,10 +358,94 @@ export const addPaymentDetail = async ({
     );
 
     console.log("✅ Payment Added:", response.data);
-    return response.data; // return response for further use
+    return response.data;
   } catch (error) {
     console.error("❌ Error submitting payment:", error);
-    throw error; // throw error so caller can handle it
+    throw error;
   }
 };
 
+export const addnewTicket = async (formData: FormData) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    // Ensure admin_id is always included
+    if (!formData.has("admin_id")) {
+      formData.append("admin_id", adminId);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.TICKET.ADDADMINTICKET,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error adding ticket details:", error);
+    toast.error("Failed to add ticket details");
+    return null;
+  }
+};
+
+export const addNewClient = async (
+  clientData: any,
+  aadharCard: File | null,
+  panCard: File | null
+) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("admin_id", adminId.toString());
+
+    // ✅ Loop through clientData fields
+    Object.entries(clientData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== "") {
+        if (Array.isArray(value)) {
+          // ✅ Handle arrays like block_detail_id[]
+          value.forEach((item) => {
+            formData.append(`${key}[]`, item.toString());
+          });
+        } else {
+          formData.append(key, value.toString());
+        }
+      }
+    });
+
+    // ✅ Append File uploads
+    if (aadharCard) formData.append("aadhar_card", aadharCard);
+    if (panCard) formData.append("pan_card", panCard);
+
+    // Debugging: check values
+    // for (let pair of formData.entries()) {
+    //   console.log(pair[0], pair[1]);
+    // }
+
+    const res = await axiosInstance.post(
+      API_PATHS.CLIENTDATA.ADDCLIENT,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (res.data.status === 200) {
+      toast.success("Client added successfully!");
+      return res.data;
+    } else {
+      toast.error(res.data.message || "Failed to add client");
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error while adding Client:", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+    return null;
+  }
+};

@@ -5,29 +5,40 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import Badge from "../../components/ui/badge/Badge";
-import { MdFileDownload } from "react-icons/md";
-import TablePagination from "@mui/material/TablePagination";
-import { useState, useEffect } from "react";
-import { MdDelete } from "react-icons/md";
-import { getAdminId } from "../../utils/Handlerfunctions/getdata";
-import { fetchPaymentDetails } from "../../utils/Handlerfunctions/getdata";
-import { destroyPaymentDetails } from "../../utils/Handlerfunctions/formdeleteHandlers";
-import Swal from "sweetalert2";
-import { toast } from "react-toastify";
 
-import SiteFilter from "../../components/form/input/FilterbySite";
 import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
   Button,
-  Select,
   MenuItem,
   InputLabel,
   FormControl,
   Checkbox,
   ListItemText,
   IconButton,
+  // Select,
 } from "@mui/material";
+import { Select as MuiSelect } from "@mui/material";
+import Label from "../../components/form/Label";
+import Select from "../../components/form/Select";
+import Input from "../../components/form/input/InputField";
+import Badge from "../../components/ui/badge/Badge";
+import { MdEdit, MdFileDownload, MdDelete } from "react-icons/md";
+import TablePagination from "@mui/material/TablePagination";
+import { useState, useEffect } from "react";
+import {
+  getAdminId,
+  fetchPaymentDetails,
+} from "../../utils/Handlerfunctions/getdata";
+import { destroyPaymentDetails } from "../../utils/Handlerfunctions/formdeleteHandlers";
+import { editPaymentfromAdmin } from "../../utils/Handlerfunctions/formEditHandlers";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import FileInput from "../../components/form/input/FileInput";
+import SiteFilter from "../../components/form/input/FilterbySite";
 
 interface Payment {
   id: number;
@@ -49,8 +60,17 @@ export default function Payment() {
   const [siteFilter, setSiteFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [siteOptions, setSiteOptions] = useState<any[]>([]);
   const [tableData, setTableData] = useState<Payment[]>([]);
+  const [formError, setFormError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [amountType, setAmountType] = useState("");
+  const [receivedAmount, setReceivedAmount] = useState<number | "">("");
+  const [paymentDate, setPaymentDate] = useState<string>("");
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const [oldReceiptUrl, setOldReceiptUrl] = useState<string>("");
+  const [maxAllowedAmount, setMaxAllowedAmount] = useState<number>(0);
 
   useEffect(() => {
     const loadPayments = async () => {
@@ -66,14 +86,20 @@ export default function Payment() {
     };
     loadPayments();
   }, [siteFilter, dateFilter]);
+
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
+  const amountTypeOptions = [
+    { value: "Principal Amount", label: "Principal Amount" },
+    { value: "GST Amount", label: "GST Amount" },
+  ];
+
   const handleDelete = async (payment_id: number) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "You won’t be able to revert this!",
+      text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -84,8 +110,6 @@ export default function Payment() {
     if (result.isConfirmed) {
       try {
         await destroyPaymentDetails(payment_id);
-
-        // 🔥 Option 2 (better): refetch fresh data from backend
         const adminId = getAdminId();
         const updatedData = await fetchPaymentDetails(adminId);
         setTableData(updatedData);
@@ -121,6 +145,80 @@ export default function Payment() {
     page * rowsPerPage + rowsPerPage
   );
 
+  const handleEdit = (payment: Payment) => {
+    setSelectedPayment(payment);
+    setAmountType(payment.receivedAmountType);
+
+    // Extract numeric value from formatted string (e.g., "₹1,000" -> 1000)
+    const numericValue = Number(
+      payment.receivedAmount.replace(/[^0-9.-]+/g, "")
+    );
+
+    setReceivedAmount(numericValue || 0);
+    setPaymentDate(payment.receivedDate.split(" ")[0]);
+    setReceiptPreview(payment.receiptUrl || null);
+    setOldReceiptUrl(payment.receiptUrl || "");
+    setReceiptFile(null); // Reset file when opening modal
+    setFormError(""); // Clear any previous errors
+
+    // Set the maximum allowed amount based on amount type
+    if (payment.receivedAmountType === "GST Amount") {
+      const gstAmount = Number(payment.gstAmount.replace(/[^0-9.-]+/g, ""));
+      setMaxAllowedAmount(gstAmount);
+    } else {
+      const propertyAmount = Number(
+        payment.propertyAmount.replace(/[^0-9.-]+/g, "")
+      );
+      setMaxAllowedAmount(propertyAmount);
+    }
+
+    setIsModalOpen(true);
+  };
+
+  const handleAmountTypeChange = (val: string) => {
+    setAmountType(val);
+    setFormError(""); // Clear error when changing amount type
+
+    // Update max allowed amount when amount type changes
+    if (selectedPayment) {
+      if (val === "GST Amount") {
+        const gstAmount = Number(
+          selectedPayment.gstAmount.replace(/[^0-9.-]+/g, "")
+        );
+        setMaxAllowedAmount(gstAmount);
+      } else {
+        const propertyAmount = Number(
+          selectedPayment.propertyAmount.replace(/[^0-9.-]+/g, "")
+        );
+        setMaxAllowedAmount(propertyAmount);
+      }
+    }
+  };
+
+  const handleReceiptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setReceiptFile(file); // keep file for DB update
+      setReceiptPreview(URL.createObjectURL(file)); // show preview
+    }
+  };
+
+  const validateAmount = (amount: number): string => {
+    if (!amount || amount <= 0) {
+      return "Please enter a valid amount";
+    }
+
+    if (amount > maxAllowedAmount) {
+      if (amountType === "GST Amount") {
+        return "Received GST amount exceeds balance";
+      } else {
+        return "Received principal amount exceeds balance";
+      }
+    }
+
+    return "";
+  };
+
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">Payment Details</h3>
@@ -139,8 +237,7 @@ export default function Payment() {
 
             {/* Select Columns */}
             <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel sx={{ fontFamily: "Poppins" }}></InputLabel>
-              <Select
+              <MuiSelect
                 multiple
                 value={selectedColumns}
                 onChange={(e) =>
@@ -194,7 +291,7 @@ export default function Payment() {
                     />
                   </MenuItem>
                 ))}
-              </Select>
+              </MuiSelect>
             </FormControl>
 
             {/* Date Filter */}
@@ -205,7 +302,7 @@ export default function Payment() {
               >
                 Filter by Date
               </InputLabel>
-              <Select
+              <MuiSelect
                 labelId="date-filter-label"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(Number(e.target.value))}
@@ -221,7 +318,7 @@ export default function Payment() {
                 <MenuItem value={7} sx={{ fontFamily: "Poppins, sans-serif" }}>
                   Last 7 Days
                 </MenuItem>
-              </Select>
+              </MuiSelect>
             </FormControl>
           </div>
 
@@ -288,7 +385,7 @@ export default function Payment() {
                   <TableCell className="columtext">Receipt</TableCell>
                 )}
                 {isColumnVisible("Delete") && (
-                  <TableCell className="columtext">Delete</TableCell>
+                  <TableCell className="columtext">Action</TableCell>
                 )}
               </TableRow>
             </TableHeader>
@@ -323,7 +420,7 @@ export default function Payment() {
                     )}
                     {isColumnVisible("receivedDate") && (
                       <TableCell className="rowtext">
-                        {item.receivedDate.split(" ")[0]} {/* Only show date */}
+                        {item.receivedDate.split(" ")[0]}
                       </TableCell>
                     )}
                     {isColumnVisible("receivedAmountType") && (
@@ -364,6 +461,12 @@ export default function Payment() {
                     )}
                     {isColumnVisible("Delete") && (
                       <TableCell className="rowtext">
+                        <Badge variant="light">
+                          <MdEdit
+                            className="text-2xl cursor-pointer"
+                            onClick={() => handleEdit(item)}
+                          />
+                        </Badge>
                         <Badge variant="light" color="error">
                           <MdDelete
                             className="text-2xl cursor-pointer"
@@ -375,7 +478,7 @@ export default function Payment() {
                   </TableRow>
                 ))
               ) : (
-                <TableRow className="rowtext">
+                <TableRow>
                   <TableCell
                     colSpan={11}
                     className="text-center py-4 text-gray-500 font-poppins"
@@ -405,6 +508,155 @@ export default function Payment() {
             rowsPerPageOptions={[5, 10, 25]}
           />
         </div>
+
+        {/* Edit Modal */}
+        <Dialog
+          className="swal2-container"
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle className="flex justify-between items-center">
+            <span>Edit Payment</span>
+            <Button onClick={() => setIsModalOpen(false)}>✕</Button>
+          </DialogTitle>
+          <DialogContent dividers>
+            <div className="space-y-4">
+              <div>
+                <Label>Amount Type</Label>
+                <div>
+                  <Select
+                    options={amountTypeOptions}
+                    defaultValue={amountType}
+                    onChange={handleAmountTypeChange}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-gray-700 dark:text-gray-300">
+                  Received Amount
+                </Label>
+                <Input
+                  type="number"
+                  value={receivedAmount}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    setReceivedAmount(value);
+
+                    // Validate the amount in real-time
+                    const error = validateAmount(value);
+                    setFormError(error);
+                  }}
+                  placeholder="Enter amount"
+                  className="mt-1"
+                  error={!!formError} // Add error styling
+                />
+                {formError && (
+                  <p className="text-red-500 text-sm mt-1">{formError}</p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Maximum allowed:{" "}
+                  {maxAllowedAmount.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                  })}
+                </p>
+              </div>
+
+              <div>
+                <Label>Received Payment Date</Label>
+                <Input
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label>Upload Receipt</Label>
+                <FileInput onChange={handleReceiptChange} />
+
+                {/* Show NEW preview if user selects a file */}
+                {receiptPreview ? (
+                  <div className="mt-2 w-40 h-40 border rounded overflow-hidden">
+                    <img
+                      src={receiptPreview}
+                      alt="Receipt Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                ) : (
+                  // Otherwise fallback to OLD image from DB
+                  oldReceiptUrl && (
+                    <div className="mt-2 w-40 h-40 border rounded overflow-hidden">
+                      <img
+                        src={oldReceiptUrl}
+                        alt="Old Receipt"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button
+              variant="contained"
+              onClick={async () => {
+                if (!selectedPayment) return;
+
+                // Validate inputs
+                const amountError = validateAmount(Number(receivedAmount));
+                if (amountError) {
+                  setFormError(amountError);
+                  return;
+                }
+
+                if (!paymentDate) {
+                  setFormError("Please select a payment date");
+                  return;
+                }
+
+                try {
+                  const res = await editPaymentfromAdmin(
+                    getAdminId(),
+                    selectedPayment.id.toString(),
+                    amountType,
+                    Number(receivedAmount),
+                    paymentDate,
+                    receiptFile
+                  );
+
+                  if (res.status === 200) {
+                    toast.success(res.message);
+
+                    // Refresh table data
+                    const adminId = getAdminId();
+                    const updatedData = await fetchPaymentDetails(adminId);
+                    setTableData(updatedData);
+
+                    setIsModalOpen(false);
+                  }
+                } catch (error: any) {
+                  if (error.response && error.response.data?.message) {
+                    // Set the specific error message from the server
+                    setFormError(error.response.data.message);
+                    toast.error(error.response.data.message);
+                  } else {
+                    setFormError("Failed to update payment");
+                    toast.error("Failed to update payment");
+                  }
+                }
+              }}
+              disabled={!!formError} // Disable button if there's an error
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );

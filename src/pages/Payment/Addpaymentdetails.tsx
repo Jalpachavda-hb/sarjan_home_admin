@@ -11,15 +11,23 @@ import SiteSelector from "../../components/form/input/SelectSiteinput";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { addPaymentDetail } from "../../utils/Handlerfunctions/formSubmitHandlers";
-import { fetchUnitNumbersBySite, fetchClientNamesByBlockId } from "../../utils/Handlerfunctions/getdata";
+import {
+  fetchUnitNumbersBySite,
+  fetchClientNamesByBlockId,
+  getAdminId,
+} from "../../utils/Handlerfunctions/getdata";
 
 const AddPaymentDetails = () => {
   const navigate = useNavigate();
 
   const [selectedSite, setSelectedSite] = useState<string>("");
-  const [unitOptions, setUnitOptions] = useState<{ value: string; label: string }[]>([]);
+  const [unitOptions, setUnitOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [selectedUnit, setSelectedUnit] = useState<string>("");
-  const [clientOptions, setClientOptions] = useState<{ value: string; label: string }[]>([]);
+  const [clientOptions, setClientOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [selectedClient, setSelectedClient] = useState<string>("");
 
   const [receivedAmount, setReceivedAmount] = useState<number | "">("");
@@ -32,7 +40,6 @@ const AddPaymentDetails = () => {
   const amountTypeOptions = [
     { value: "Principal Amount", label: "Principal Amount" },
     { value: "GST Amount", label: "GST Amount" },
-    
   ];
 
   // Fetch units when site changes
@@ -72,6 +79,8 @@ const AddPaymentDetails = () => {
   };
 
   const handleSubmit = async () => {
+    const adminId = getAdminId();
+
     if (!selectedSite) return toast.error("Please select a site");
     if (!selectedUnit) return toast.error("Please select a Unit Number");
     if (!selectedClient) return toast.error("Please select a Client");
@@ -82,7 +91,7 @@ const AddPaymentDetails = () => {
     setLoading(true);
     try {
       await addPaymentDetail({
-        adminId: "1", // replace with dynamic admin id
+        adminId, // replace with dynamic admin id
         clientId: selectedClient,
         siteDetailId: selectedSite,
         blockDetailsId: selectedUnit,
@@ -176,7 +185,9 @@ const AddPaymentDetails = () => {
                 <DatePicker
                   id="payment-date"
                   placeholder="Select payment date"
-                  onChange={(dates, currentDateString) => setPaymentDate(currentDateString)}
+                  onChange={(dates, currentDateString) =>
+                    setPaymentDate(currentDateString)
+                  }
                 />
               </div>
 
@@ -186,7 +197,11 @@ const AddPaymentDetails = () => {
                 <FileInput id="fileUpload" onChange={handleReceiptChange} />
                 {receiptPreview && (
                   <div className="mt-2 w-40 h-40 border rounded overflow-hidden">
-                    <img src={receiptPreview} alt="Receipt Preview" className="w-full h-full object-contain" />
+                    <img
+                      src={receiptPreview}
+                      alt="Receipt Preview"
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 )}
               </div>
