@@ -14,22 +14,26 @@ import {
   fetchClientNamesByBlockId,
 } from "../../utils/Handlerfunctions/getdata";
 import { addnewTicket } from "../../utils/Handlerfunctions/formSubmitHandlers";
+
 const AddnewTiket = () => {
   const [selectedSite, setSelectedSite] = useState<string>("");
-  const [unitOptions, setUnitOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [unitOptions, setUnitOptions] = useState<{ value: string; label: string }[]>([]);
   const [selectedUnit, setSelectedUnit] = useState<string>("");
-
-  const [clientOptions, setClientOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [clientOptions, setClientOptions] = useState<{ value: string; label: string }[]>([]);
   const [selectedClient, setSelectedClient] = useState<string>("");
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  // ✅ Load unit numbers when site changes
+  const [errors, setErrors] = useState<{
+    site?: string;
+    unit?: string;
+    client?: string;
+    title?: string;
+    description?: string;
+  }>({});
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!selectedSite) {
       setUnitOptions([]);
@@ -50,7 +54,6 @@ const AddnewTiket = () => {
     loadUnits();
   }, [selectedSite]);
 
-  // ✅ Load clients when unit changes
   useEffect(() => {
     if (!selectedUnit) {
       setClientOptions([]);
@@ -67,9 +70,6 @@ const AddnewTiket = () => {
     loadClients();
   }, [selectedUnit]);
 
-  // ✅ Handle submit
-
-  // ✅ Handle cancel
   const handleCancel = () => {
     setSelectedSite("");
     setSelectedUnit("");
@@ -78,9 +78,28 @@ const AddnewTiket = () => {
     setDescription("");
     setUnitOptions([]);
     setClientOptions([]);
+    setErrors({});
   };
-  const navigate = useNavigate();
+
+  // Validate form
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+    if (!selectedSite) newErrors.site = "Please select a site";
+    if (!selectedUnit) newErrors.unit = "Please select a unit number";
+    if (!selectedClient) newErrors.client = "Please select a client";
+    if (!title.trim()) newErrors.title = "Title is required";
+    if (!description.trim()) newErrors.description = "Description is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast.error("Please fix the errors before submitting!");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("site_detail_id", selectedSite);
@@ -93,13 +112,39 @@ const AddnewTiket = () => {
 
       if (res.status === 200) {
         toast.success("Ticket submitted successfully!");
-        navigate("/admin/ticket-request/mytiket"); 
+        navigate("/admin/ticket-request/mytiket");
       } else {
         toast.error("Failed to submit ticket");
       }
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
+    }
+  };
+
+  // Helper to clear error when field changes
+  const handleFieldChange = (field: string, value: string) => {
+    switch (field) {
+      case "site":
+        setSelectedSite(value);
+        if (errors.site) setErrors(prev => ({ ...prev, site: undefined }));
+        break;
+      case "unit":
+        setSelectedUnit(value);
+        if (errors.unit) setErrors(prev => ({ ...prev, unit: undefined }));
+        break;
+      case "client":
+        setSelectedClient(value);
+        if (errors.client) setErrors(prev => ({ ...prev, client: undefined }));
+        break;
+      case "title":
+        setTitle(value);
+        if (errors.title) setErrors(prev => ({ ...prev, title: undefined }));
+        break;
+      case "description":
+        setDescription(value);
+        if (errors.description) setErrors(prev => ({ ...prev, description: undefined }));
+        break;
     }
   };
 
@@ -112,54 +157,61 @@ const AddnewTiket = () => {
           <ComponentCard title="Add Ticket">
             <div className="space-y-6">
               {/* Step 1: Select Site */}
-              <SiteSelector value={selectedSite} onChange={setSelectedSite} />
+              <SiteSelector value={selectedSite} onChange={(val) => handleFieldChange("site", val)} />
+              {errors.site && <p className="text-red-600 text-sm mt-1">{errors.site}</p>}
 
               {/* Step 2: Unit Number */}
               {selectedSite && (
                 <div>
-                  <Label>Unit Number</Label>
+                  <Label>Unit Number  <span className="text-red-500">*</span></Label>
                   <Select
                     options={unitOptions}
                     value={selectedUnit}
-                    onChange={setSelectedUnit}
+                    onChange={(val) => handleFieldChange("unit", val)}
                     placeholder="Select Unit Number"
                   />
+                  {errors.unit && <p className="text-red-600 text-sm mt-1">{errors.unit}</p>}
                 </div>
               )}
 
               {/* Step 3: Select Client */}
               {selectedUnit && (
                 <div>
-                  <Label>Select Client</Label>
+                  <Label>Select Client  <span className="text-red-500">*</span></Label>
                   <Select
                     options={clientOptions}
                     value={selectedClient}
-                    onChange={setSelectedClient}
+                    onChange={(val) => handleFieldChange("client", val)}
                     placeholder="Select Client"
                   />
+                  {errors.client && <p className="text-red-600 text-sm mt-1">{errors.client}</p>}
                 </div>
               )}
 
-              {/* Step 4: Title + Description */}
-
+              {/* Title */}
               <div>
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">Title  <span className="text-red-500">*</span></Label>
                 <Input
                   type="text"
                   id="title"
                   placeholder="Enter Title"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => handleFieldChange("title", e.target.value)}
                 />
+                {errors.title && <p className="text-red-600 text-sm mt-1">{errors.title}</p>}
               </div>
 
+              {/* Description */}
               <div>
-                <Label>Description</Label>
+                <Label>Description  <span className="text-red-500">*</span></Label>
                 <TextArea
                   placeholder="Enter description"
                   value={description}
                   onChange={setDescription}
                 />
+                {errors.description && (
+                  <p className="text-red-600 text-sm mt-1">{errors.description}</p>
+                )}
               </div>
             </div>
           </ComponentCard>

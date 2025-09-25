@@ -1,3 +1,6 @@
+
+
+
 export const validateEmail = (value: string): string | null => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(value)) {
@@ -6,7 +9,7 @@ export const validateEmail = (value: string): string | null => {
   return null;
 };
 
-export const validateContact = (value: string): string | null => {
+ export const validateContact = (value: string): string | null => {
   if (!/^\d+$/.test(value)) {
     return "Only numbers are allowed";
   }
@@ -15,7 +18,6 @@ export const validateContact = (value: string): string | null => {
   }
   return null; // valid
 };
-
 export const validatePassword = (value: string): string | null => {
   if (!value.trim()) return "Password is required";
   return null; // ✅ only required, no length check
@@ -30,4 +32,12 @@ export const validateCategory = (values) => {
   }
 
   return errors;
+};
+
+
+export const validateRequiredforselcet = (value: string, fieldName: string): string => {
+  if (!value || value.trim() === "") {
+    return `${fieldName} is required`;
+  }
+  return "";
 };

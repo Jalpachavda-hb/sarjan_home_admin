@@ -5,9 +5,11 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
+import { MdFileDownload } from "react-icons/md";
 import Swal from "sweetalert2";
 import Badge from "../../components/ui/badge/Badge";
-import TablePagination from "@mui/material/TablePagination";
+import Pagination from "@mui/material/Pagination";
+import Stack from "@mui/material/Stack";
 import { FaPlus } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import { MdAddCard } from "react-icons/md";
@@ -18,6 +20,10 @@ import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { TextField, Button } from "@mui/material";
 import { deleteClient } from "../../utils/Handlerfunctions/formdeleteHandlers";
+import {
+  IconButton,
+  // Select,
+} from "@mui/material";
 interface Client {
   id: string;
   clientName: string;
@@ -42,67 +48,44 @@ export default function ClientList() {
   } | null>(null);
   const [search, setSearch] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch data from API when id changes
+  const fetchClients = async () => {
+    setLoading(true);
+    try {
+      const res = await showclientlist(id, page + 1, rowsPerPage); // server-side page
+      const details = res?.details || [];
+      setClients(
+        details.map((item: any) => ({
+          id: item.id,
+          clientName: item.name,
+          block_detail_id: item.block_detail_id,
+          site_detail_id: item.site_detail_id,
+          unitNo: item.block_number,
+          contactNumber: item.contact_no,
+          email: item.email,
+          adharCard: item.adhar_card,
+          panCard: item.pan_card,
+          client_milestone_id: item.client_milestone_id,
+        }))
+      );
+      setTotalRecords(res?.totalRecords || details.length); // get total from API
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+      toast.error("Failed to load client list");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!id) return;
-    const fetchClients = async () => {
-      setLoading(true);
-      try {
-        const res = await showclientlist(id); // now this passes as site_id
-        const details = res?.details || [];
-        setClients(
-          details.map((item: any) => ({
-            id: item.id,
-            clientName: item.name,
-            block_detail_id: item.block_detail_id,
-            site_detail_id: item.site_detail_id,
-            // 🔥 FIXED: make sure these fields match your API response
-            // and contain full URLs for images if needed
-            unitNo: item.block_number,
-            contactNumber: item.contact_no,
-            email: item.email,
-            adharCard: item.adhar_card,
-            panCard: item.pan_card,
-            client_milestone_id: item.client_milestone_id,
-          }))
-        );
-      } catch (err) {
-        console.error("Error fetching clients:", err);
-        toast.error("Failed to load client list");
-      } finally {
-        setLoading(false);
-      }
-    };
+
     fetchClients();
-  }, [id]);
-
-  // ✅ Pagination
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  }, [id, page, rowsPerPage]);
 
   // ✅ Sorting
-  const handleSort = (key: keyof Client) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
 
   // ✅ inside ClientList component
   const handleDelete = async (clientId: string) => {
@@ -117,10 +100,10 @@ export default function ClientList() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const success = await deleteClient(clientId);
-        if (success) {
-          setClients((prev) => prev.filter((client) => client.id !== clientId));
 
-          toast.success("Client deleted successfully!");
+        if (success) {
+          await fetchClients();
+
           Swal.fire("Deleted!", "The client has been removed.", "success");
         } else {
           toast.error("Failed to delete client!");
@@ -212,12 +195,7 @@ export default function ClientList() {
             <TableHeader>
               <TableRow>
                 <TableCell className="columtext">Sr. No</TableCell>
-                <TableCell
-                  className="columtext"
-                  onClick={() => handleSort("clientName")}
-                >
-                  Client Name
-                </TableCell>
+                <TableCell className="columtext">Client Name</TableCell>
                 <TableCell className="columtext">Email</TableCell>
                 <TableCell className="columtext">Contact</TableCell>
                 <TableCell className="columtext">Unit No</TableCell>
@@ -255,21 +233,13 @@ export default function ClientList() {
                     <TableCell className="rowtext">
                       {item.panCard ? (
                         <a
-                          href={item.panCard}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={item.panCard} target="_blank"
+                          download={`PAN_${item.clientName}.pdf`} 
+                          className="text-blue-600 underline"
                         >
-                          <img
-                            src={item.panCard}
-                            alt="PAN"
-                            style={{
-                              width: "60px",
-                              height: "40px",
-                              objectFit: "cover",
-                              borderRadius: "4px",
-                              cursor: "pointer", // shows clickable pointer
-                            }}
-                          />
+                          <IconButton color="primary">
+                            <MdFileDownload />
+                          </IconButton>
                         </a>
                       ) : (
                         "-"
@@ -278,21 +248,13 @@ export default function ClientList() {
                     <TableCell className="rowtext">
                       {item.adharCard ? (
                         <a
-                          href={item.adharCard}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={item.adharCard} target="_blank"
+                          download={`Aadhar_${item.clientName}.pdf`}
+                          className="text-blue-600 underline"
                         >
-                          <img
-                            src={item.adharCard}
-                            alt="Aadhar"
-                            style={{
-                              width: "60px",
-                              height: "40px",
-                              objectFit: "cover",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                          />
+                          <IconButton color="primary">
+                            <MdFileDownload />
+                          </IconButton>
                         </a>
                       ) : (
                         "-"
@@ -345,22 +307,30 @@ export default function ClientList() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex justify-between items-center w-full">
+        <div className="mt-4 flex justify-between items-center w-full border-t border-gray-200 dark:border-gray-700 pt-3">
           <p className="text-sm">
-            Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–
-            {Math.min((page + 1) * rowsPerPage, filteredData.length)} of{" "}
-            {filteredData.length} entries
+            {totalRecords === 0 ? (
+              "Showing 0 entries"
+            ) : (
+              <>
+                Showing {page * rowsPerPage + 1}–
+                {page * rowsPerPage + filteredData.length} of {totalRecords}{" "}
+                entries
+              </>
+            )}
           </p>
 
-          <TablePagination
-            component="div"
-            count={filteredData.length}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 25]}
-          />
+          <Stack spacing={2}>
+            <Pagination
+              count={Math.ceil(totalRecords / rowsPerPage)}
+              page={page + 1}
+              onChange={(_, value) => setPage(value - 1)} // server expects 1-indexed
+              color="primary"
+              shape="rounded"
+              siblingCount={1}
+              boundaryCount={1}
+            />
+          </Stack>
         </div>
       </div>
     </div>

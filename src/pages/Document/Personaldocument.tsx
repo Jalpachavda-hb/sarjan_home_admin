@@ -133,34 +133,17 @@ export default function Personaldocument() {
     }
   };
 
-  // ✅ Helper function to construct full file URL
-  const getFileUrl = (filename?: string) => {
-    if (!filename) return null;
-    // Remove any existing path and just use the filename
-    const cleanFilename = filename.split('/').pop() || filename;
-    const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-    return `${baseUrl}/storage/uploads/${cleanFilename}`;
-  };
 
-  // ✅ View in new tab
-  const handleView = (item: Adminuser) => {
-    console.log("Viewing document for item:", item); // Debug log
-    
-    // Try different possible field names for the file
-    const filename = item.personal_document_file || 
-                    (item as any).document_file || 
-                    (item as any).file_path || 
-                    (item as any).file_name;
-    
-    const fileUrl = getFileUrl(filename);
-    console.log("Constructed file URL:", fileUrl); // Debug log
-    
-    if (!fileUrl) {
-      toast.error("File not available");
-      return;
-    }
-    window.open(fileUrl, "_blank");
-  };
+ const handleView = (item: Adminuser) => {
+  console.log("Viewing document for item:", item);
+
+  if (!item.personal_document_file) {
+    toast.error("File not available");
+    return;
+  }
+
+  window.open(item.personal_document_file, "_blank", "noopener,noreferrer");
+};
 
   // ✅ Edit in new tab
   

@@ -15,6 +15,19 @@ export const getAdminId = (): string | null => {
   return null;
 };
 
+export const getRoleId = (): string | null => {
+  const user = sessionStorage.getItem("user");
+  if (user) {
+    try {
+      const parsed = JSON.parse(user);
+      return parsed.role_id?.toString() || null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
 export const fetchProfile = async () => {
   try {
     const res = await axiosInstance.get(
@@ -377,7 +390,7 @@ export const fetchAdminUsers = async () => {
   }
 };
 
-export const fetchAdminTickets = async () => {
+export const fetchAdminTickets = async (siteId?: string) => {
   const adminId = getAdminId();
 
   if (!adminId) {
@@ -386,11 +399,16 @@ export const fetchAdminTickets = async () => {
   }
 
   try {
+    const params: any = { admin_id: adminId };
+    if (siteId) {
+      params.requestSiteFilter = siteId; // pass selected site filter if available
+    }
+
     const res = await axiosInstance.get(API_PATHS.TICKET.SHOWADMINTICKET, {
-      params: { admin_id: adminId },
+      params,
     });
 
-    return res.data; // return raw API response
+    return res.data;
   } catch (error) {
     console.error("Error fetching admin tickets:", error);
     toast.error("Failed to fetch tickets");
@@ -547,8 +565,6 @@ export const fetchAdminLogs = async (page: number) => {
   }
 };
 
-
-
 export const TodayReceivedpayment = async (siteId: string) => {
   const adminId = getAdminId();
   if (!adminId) {
@@ -589,7 +605,9 @@ export const showTicketHistory = async () => {
   }
 };
 
-export const showclientlist = async (siteId: string) => {
+
+
+export const showclientlist = async (siteId: string, page: number = 1) => {
   const adminId = getAdminId();
   if (!adminId) {
     toast.error("Admin ID not found");
@@ -598,7 +616,11 @@ export const showclientlist = async (siteId: string) => {
 
   try {
     const res = await axiosInstance.get(API_PATHS.CLIENTDATA.SHOWCLIENTLIST, {
-      params: { admin_id: adminId, site_id: siteId },
+      params: {
+        admin_id: adminId,
+        site_id: siteId,
+        page,
+      },
     });
     return res.data || null;
   } catch (error) {
@@ -708,8 +730,6 @@ export const getBlockFromBlockid = async (block_id: string) => {
   }
 };
 
-
-
 export const fetchBookingDetails = async (
   // adminId: string,
   client_id: number,
@@ -719,7 +739,7 @@ export const fetchBookingDetails = async (
   try {
     const res = await axiosInstance.get(API_PATHS.CLIENTDATA.GETCLIENTPAYMENT, {
       params: {
-        // ...(adminId ? { admin_id: adminId } : {}), 
+        // ...(adminId ? { admin_id: adminId } : {}),
         client_id,
         site_id,
         block_id, // 👈 match exactly what Postman expects
@@ -738,7 +758,6 @@ export const fetchBookingDetails = async (
     return null;
   }
 };
-
 
 export const fetchClientNameFromBlockId = async (block_id: string) => {
   try {
@@ -763,7 +782,6 @@ export const fetchClientNameFromBlockId = async (block_id: string) => {
   }
 };
 
-
 export const getpropertydetailsByblockId = async (blockDetailId: string) => {
   try {
     const adminId = getAdminId(); // 👈 fetch from local/session storage
@@ -781,9 +799,6 @@ export const getpropertydetailsByblockId = async (blockDetailId: string) => {
     throw err;
   }
 };
-
-
-
 
 export const fetchClientDetails = async (
   adminId: string,
@@ -828,10 +843,7 @@ export const fetchClientDetails = async (
   }
 };
 
-
-
-export const getTicketMessages = async (id
-: string) => {
+export const getTicketMessages = async (id: string) => {
   try {
     const adminId = getAdminId(); // 👈 fetch from local/session storage
     if (!adminId) {
@@ -839,8 +851,7 @@ export const getTicketMessages = async (id
     }
 
     const res = await axiosInstance.get(
-      `${API_PATHS.TICKET.GETTICKETMESSAGES}?admin_id=${adminId}&ticket_id=${id
-}`
+      `${API_PATHS.TICKET.GETTICKETMESSAGES}?admin_id=${adminId}&ticket_id=${id}`
     );
 
     return res;
@@ -849,11 +860,6 @@ export const getTicketMessages = async (id
     throw err;
   }
 };
-
-
-
-
-
 
 export const pendingForApprovals = async () => {
   try {

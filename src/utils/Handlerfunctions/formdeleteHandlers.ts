@@ -313,3 +313,79 @@ export const approve = async (client_milestone_id: number) => {
     throw err;
   }
 };
+
+
+
+export const deleteClientAadharCard = async (id: string): Promise<boolean> => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return false;
+  }
+
+  try {
+    console.log("Deleting Client Aadhar Card, ID:", id);
+
+    const formData = new FormData();
+    formData.append("client_milestone_id", id);
+    formData.append("admin_id", adminId);
+
+    const res = await axiosInstance.post(
+      API_PATHS.CLIENTDATA.DELETECLIENTADHARCARD,{
+      admin_id: adminId,
+      id,
+    });
+ 
+    if (res?.status === 200) {
+      toast.success("Aadhar card deleted successfully!");
+      return true;
+    } else {
+      toast.error(res?.data?.message || "Failed to delete Aadhar card");
+      return false;
+    }
+  } catch (error: any) {
+    console.error("Delete Aadhar card failed:", error);
+    toast.error("Failed to delete Aadhar card");
+    return false;
+  }
+};
+
+// ✅ Delete Client PAN Card
+export const deleteClientPanCard = async (id: string): Promise<boolean> => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return false;
+  }
+
+  try {
+    console.log("Deleting Client PAN Card, ID:", id);
+
+    const formData = new FormData();
+    formData.append("client_milestone_id", id);
+    formData.append("admin_id", adminId);
+
+    const res = await axiosInstance.post(
+      API_PATHS.CLIENTDATA.DELETECLIENTPANCARD,{
+      admin_id: adminId,
+      id,
+    });
+  
+
+    if (res?.status === 200) {
+      toast.success("PAN card deleted successfully!");
+      return true;
+    } else {
+      toast.error(res?.data?.message || "Failed to delete PAN card");
+      return false;
+    }
+  } catch (error: any) {
+    console.error("Delete PAN card failed:", error);
+    toast.error("Failed to delete PAN card");
+    return false;
+  }
+};
+
+
+
+

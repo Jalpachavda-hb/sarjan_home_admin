@@ -105,8 +105,8 @@
 //     // Combine block + number before sending
 //     const fullBlockNumber =
 //       formData.block && formData.block_number
-//         ? `${formData.block}-${formData.block_number}`
-//         : formData.block || formData.block_number;
+//         // ? `${formData.block}-${formData.block_number}`
+//         // : formData.block || formData.block_number;
 
 //     const payload = {
 //       ...formData,
@@ -321,6 +321,7 @@
 
 // export default Addpropertydetails;
 
+
 import { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -335,8 +336,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import FormControl from "@mui/material/FormControl";
 import { getpropertydetailsByblockId } from "../../utils/Handlerfunctions/getdata";
 import { updatePropertyDetails } from "../../utils/Handlerfunctions/formEditHandlers";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 interface Props {
   mode: "add" | "edit";
@@ -349,9 +349,10 @@ const Addpropertydetails = ({ mode }: Props) => {
   const blockDetailId = id ? parseInt(id) : undefined;
   const [siteName, setSiteName] = useState("");
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    block: "", // only letter like "S"
-    block_number: "", // only number part like "001"
+    block: "",
+    block_number: "",
     rera_area: "",
     undivided_landshare: "",
     balcony_area: "",
@@ -362,6 +363,8 @@ const Addpropertydetails = ({ mode }: Props) => {
     east: "",
     west: "",
   });
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   let inputClasses = `h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-200 
   focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30`;
@@ -378,18 +381,15 @@ const Addpropertydetails = ({ mode }: Props) => {
           if (res?.data?.status === 200) {
             const d = res.data.data;
 
-            // Extract block and number separately - FIXED LOGIC
             let block = "";
             let blockNum = "";
             if (d.block_number) {
-              // Check if the format is "letter-number" (e.g., "S-001")
               if (/^[A-Za-z]-\d+$/.test(d.block_number)) {
                 const parts = d.block_number.split("-");
                 block = parts[0] || "";
                 blockNum = parts[1] || "";
               } else {
-                // If it's already just a number or some other format
-                block = d.block || ""; // Use the separate block field from API
+                block = d.block || "";
                 blockNum = d.block_number;
               }
             }
@@ -419,38 +419,70 @@ const Addpropertydetails = ({ mode }: Props) => {
     }
   }, [mode, blockDetailId]);
 
-  // Handle input change
+  // Handle input change with error clearing
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
-  // Submit handler - CORRECTED
+  // Handle site change with error clearing
+  const handleSiteChange = (siteId: string | number) => {
+    setSelectedSite(siteId);
+
+    if (errors.site) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.site;
+        return newErrors;
+      });
+    }
+  };
+
+  // Validation
+  const validate = () => {
+    const newErrors: { [key: string]: string } = {};
+    if (!selectedSite) newErrors.site = "Site is required";
+    if (!formData.block.trim()) newErrors.block = "Unit is required";
+    if (!formData.block_number.trim())
+      newErrors.block_number = "Unit Number is required";
+    return newErrors;
+  };
+
+  // Submit handler
   const handleSubmit = async () => {
-    if (!selectedSite) {
-      toast.error("Please select a site.");
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
+    const fullBlockNumber =
+      formData.block && formData.block_number
+        ? `${formData.block}-${formData.block_number}`
+        : "";
 
-
-    const fullBlockNumber = formData.block && formData.block_number,
-     block = formData.block;
     const payload = {
       ...formData,
-      block :block,
-      block_number: fullBlockNumber, // e.g. "C-201"
+      block: formData.block,
+      block_number: fullBlockNumber,
       site_detail_id: selectedSite,
     };
- 
+
     try {
       if (mode === "add") {
         const data = new FormData();
         Object.entries(payload).forEach(([key, value]) => {
           data.append(key, value as string);
         });
-        for (let [key, value] of data.entries()) {
-          console.log(`${key}: ${value}`);
-        }
+
         const response = await addPropertyDetails(data);
         if (response?.status === 200) {
           toast.success("Property details added successfully!");
@@ -509,12 +541,16 @@ const Addpropertydetails = ({ mode }: Props) => {
               {/* Select Site + Unit */}
               <div className="grid grid-cols-2 gap-6 xl:grid-cols-2">
                 {mode === "add" && (
-                  <SiteSelector
-                    value={selectedSite}
-                    onChange={(siteId: string | number) =>
-                      setSelectedSite(siteId)
-                    }
-                  />
+                  <div>
+                   
+                    <SiteSelector
+                      value={selectedSite}
+                      onChange={handleSiteChange}
+                    />
+                    {errors.site && (
+                      <p className="text-red-500 text-sm">{errors.site}</p>
+                    )}
+                  </div>
                 )}
 
                 {mode === "edit" && (
@@ -528,7 +564,9 @@ const Addpropertydetails = ({ mode }: Props) => {
                   </div>
                 )}
                 <div>
-                  <Label>Unit</Label>
+                  <Label>
+                    Unit <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     name="block"
                     value={formData.block}
@@ -538,13 +576,18 @@ const Addpropertydetails = ({ mode }: Props) => {
                     className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs
               ${mode === "edit" ? "disabledInput" : ""}`}
                   />
+                  {errors.block && (
+                    <p className="text-red-500 text-sm">{errors.block}</p>
+                  )}
                 </div>
               </div>
 
               {/* Unit Number + Balcony Area */}
               <div className="grid grid-cols-2 gap-6 xl:grid-cols-2">
                 <FormControl fullWidth>
-                  <Label>Unit Number</Label>
+                  <Label>
+                    Unit Number <span className="text-red-500">*</span>
+                  </Label>
                   <OutlinedInput
                     name="block_number"
                     value={formData.block_number}
@@ -558,6 +601,9 @@ const Addpropertydetails = ({ mode }: Props) => {
                     }
                     className={inputClasses}
                   />
+                  {errors.block_number && (
+                    <p className="text-red-500 text-sm">{errors.block_number}</p>
+                  )}
                 </FormControl>
                 <div>
                   <Label>Balcony Area</Label>

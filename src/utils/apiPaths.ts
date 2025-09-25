@@ -1,4 +1,5 @@
 export const BASE_URL = "http://192.168.29.2:8000/api/";
+export const IMGURL = "http://192.168.29.2:8000";
 
 export const API_PATHS = {
   // PENDINGFORAPPROVALS
@@ -83,6 +84,8 @@ export const API_PATHS = {
     DELETECLIENTDAT: "deleteClient", // POST
     GETCLIENTPAYMENT: "getClientPayments", // GET {{url}}getClientPayments?client_id=Ev&site_id=3&block_id=196
     ADDPAYMENTFROMCLIENT: "addPaymentFromClient", // CHECK POSTMAN COLLECTION FILE FOR SHOW ID AND GET ID FROM
+    DELETECLIENTPANCARD: "deleteClientPanCard",
+    DELETECLIENTADHARCARD :"deleteClientAdharCard"
   },
 
   //  DOCUMENT API

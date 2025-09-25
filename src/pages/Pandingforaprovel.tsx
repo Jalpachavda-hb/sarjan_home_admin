@@ -283,35 +283,37 @@ export default function Pandingforaprovel() {
                               </Badge>
                             </button>
 
-                            <button
-                              onClick={async () => {
-                                const result = await Swal.fire({
-                                  title: "Are you sure?",
-                                  text: "Do you want to reject this item?",
-                                  icon: "warning",
+                          <button
+  onClick={async () => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to reject this item?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, reject it!",
+      cancelButtonText: "Cancel",
+    });
 
-                                  showCancelButton: true,
-                                  confirmButtonText: "Yes, reject it!",
-                                  cancelButtonText: "Cancel",
-                                });
+    if (result.isConfirmed) {
+      try {
+        // Call the API here
+        await reject(item.id); // <-- make sure to pass the correct ID
+        toast.success("Rejected successfully!");
 
-                                if (result.isConfirmed) {
-                                  try {
-                                    toast.success("Rejected successfully!");
-                                    const updatedData =
-                                      await pendingForApprovals();
-                                    setTableData(updatedData);
-                                  } catch (err) {
-                                    console.error(err);
-                                    toast.error("Failed to reject");
-                                  }
-                                }
-                              }}
-                            >
-                              <Badge variant="light" color="error">
-                                Reject
-                              </Badge>
-                            </button>
+        // Refresh the table data
+        const updatedData = await pendingForApprovals();
+        setTableData(updatedData);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to reject");
+      }
+    }
+  }}
+>
+  <Badge variant="light" color="error">
+    Reject
+  </Badge>
+</button>
                           </div>
                         </TableCell>
                       )}

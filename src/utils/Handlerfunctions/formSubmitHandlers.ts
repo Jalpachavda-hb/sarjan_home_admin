@@ -5,7 +5,7 @@ import axiosInstance from "../axiosinstance";
 import { validateContact, validatePassword } from "../Validation";
 import { API_PATHS } from "../apiPaths";
 import { getAdminId } from "./getdata";
-
+import { fetchRolePermissions } from "../Handlerfunctions/getdata";
 interface HandleLoginSubmitProps {
   e: React.FormEvent;
   contact: string;
@@ -15,15 +15,82 @@ interface HandleLoginSubmitProps {
     React.SetStateAction<{ contact?: string; password?: string }>
   >;
 }
+// export const handleLoginSubmit = async ({
+//   e,
+//   contact,
+//   password,
+//   setErors,
+//   setLoading,
+// }: HandleLoginSubmitProps) => {
+//   e.preventDefault();
+//   setLoading(true); // 🔥 start loader here
+
+//   const newErrors: { contact?: string; password?: string } = {};
+//   const contactError = validateContact(contact);
+//   const passwordError = validatePassword(password);
+
+//   if (contactError) newErrors.contact = contactError;
+//   if (passwordError) newErrors.password = passwordError;
+
+//   if (Object.keys(newErrors).length > 0) {
+//     setErrors(newErrors);
+//     setLoading(false); // stop loader if validation fails
+//     return;
+//   }
+
+//   try {
+//     const res = await axiosInstance.post(API_PATHS.ADMINAUTH.ADMINLOGIN, {
+//       contact,
+//       password,
+//     });
+
+//     if (res.data.status === 200) {
+//       const user = res.data.data;
+//       sessionStorage.setItem("user", JSON.stringify(user));
+
+//       toast.success(res.data.message || "Login successful!");
+
+//       if (user.role === 1 || user.role === 2) {
+//         window.location.href = "/admin/dashboard";
+//       } else {
+//         toast.error("Invalid role. Contact support.");
+//       }
+//     } else {
+//       toast.error(res.data.message || "Login failed!");
+//     }
+//   } catch (err: any) {
+//     if (err.response) {
+//       const { status, data } = err.response;
+//       if (status === 400) {
+//         toast.error(data.message || "Bad request");
+//       } else if (status === 401) {
+//         setErrors({ password: "Invalid password" });
+//       } else if (status === 404) {
+//         setErrors({ contact: "Phone number not found" });
+//       } else {
+//         toast.error("Something went wrong, please try again!");
+//       }
+//     } else {
+//       toast.error("Network error, please check your connection!");
+//     }
+//   } finally {
+//     setLoading(false); // ✅ always stop loader
+//   }
+// };
+
+
+
+
+
 export const handleLoginSubmit = async ({
   e,
   contact,
   password,
-  setErors,
+  setErrors,
   setLoading,
 }: HandleLoginSubmitProps) => {
   e.preventDefault();
-  setLoading(true); // 🔥 start loader here
+  setLoading(true);
 
   const newErrors: { contact?: string; password?: string } = {};
   const contactError = validateContact(contact);
@@ -34,7 +101,7 @@ export const handleLoginSubmit = async ({
 
   if (Object.keys(newErrors).length > 0) {
     setErrors(newErrors);
-    setLoading(false); // stop loader if validation fails
+    setLoading(false);
     return;
   }
 
@@ -45,11 +112,25 @@ export const handleLoginSubmit = async ({
     });
 
     if (res.data.status === 200) {
-      const user = res.data.data;
+    const user = res.data.data;
       sessionStorage.setItem("user", JSON.stringify(user));
 
       toast.success(res.data.message || "Login successful!");
 
+      // 🔥 Step 1: Fetch role permissions after login
+      try {
+        const permRes = await fetchRolePermissions(); // API uses admin_id from session
+        if (permRes) {
+          sessionStorage.setItem("rolePermissions", JSON.stringify(permRes));
+        } else {
+          toast.warn("Could not fetch role permissions");
+        }
+      } catch (permErr) {
+        console.error("Permission fetch failed:", permErr);
+        toast.error("Failed to load permissions");
+      }
+
+      // 🔥 Step 2: Redirect based on role
       if (user.role === 1 || user.role === 2) {
         window.location.href = "/admin/dashboard";
       } else {
@@ -74,9 +155,13 @@ export const handleLoginSubmit = async ({
       toast.error("Network error, please check your connection!");
     }
   } finally {
-    setLoading(false); // ✅ always stop loader
+    setLoading(false);
   }
 };
+
+
+
+
 // utils/Handlerfunctions/formSubmitHandlers.ts
 export const handleLogout = (navigate: (path: string) => void): void => {
   sessionStorage.removeItem("user");
@@ -446,6 +531,33 @@ export const addNewClient = async (
   } catch (error: any) {
     console.error("Error while adding Client:", error);
     toast.error(error.response?.data?.message || "Something went wrong");
+    return null;
+  }
+};
+
+export const replyToTicket = async (formData: FormData) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    // Ensure admin_id is always included
+    if (!formData.has("admin_id")) {
+      formData.append("admin_id", adminId);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.TICKET.REPLAYTOTICKET,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error adding ticket details:", error);
+    toast.error("Failed to add ticket details");
     return null;
   }
 };

@@ -192,6 +192,7 @@ export const updateAdminUser = async (
   contact: string,
   site_detail_id: number,
   role_id: number,
+  password: string,
   permissions: { [feature: string]: string[] },
   clients: string[] = []
 ) => {
@@ -210,6 +211,11 @@ export const updateAdminUser = async (
     formData.append("contact", contact);
     formData.append("site_detail_id", String(site_detail_id));
     formData.append("role_id", String(role_id));
+    if (password && password !== "") {
+      formData.append("password", password);
+    }
+    
+
 
     // ✅ Clients
     clients.forEach((c) => formData.append("clients[]", c));
@@ -288,9 +294,6 @@ export const editPaymentfromAdmin = async (
   }
 };
 
-
-
-
 export const editClient = async (
   clientData: any,
   originalData: any,
@@ -316,13 +319,25 @@ export const editClient = async (
     formData.append("edit_gst_amount", clientData.gst_amount || "");
     formData.append("edit_total_amount", clientData.total_amount || "");
 
-    // ✅ Only attach if a new file is selected
-    if (aadharCard) {
+    // ✅ Handle Aadhar Card: new file, remove, or keep existing
+    if (aadharCard instanceof File) {
+      // New file selected
       formData.append("edit_aadhar_card", aadharCard);
+    } else if (aadharCard === null && clientData.aadhar_card) {
+      // Remove existing file - send null or empty string
+      formData.append("edit_aadhar_card", "");
     }
-    if (panCard) {
+    // If aadharCard is undefined, don't send anything (keep existing)
+
+    // ✅ Handle PAN Card: new file, remove, or keep existing
+    if (panCard instanceof File) {
+      // New file selected
       formData.append("edit_pan_card", panCard);
+    } else if (panCard === null && clientData.pan_card) {
+      // Remove existing file - send null or empty string
+      formData.append("edit_pan_card", "");
     }
+    // If panCard is undefined, don't send anything (keep existing)
 
     const response = await axiosInstance.post(
       API_PATHS.CLIENTDATA.UPDATECLIENTDATA,
@@ -332,9 +347,59 @@ export const editClient = async (
       }
     );
 
-    return response.data; // { status, message, data }
+    return response.data;
   } catch (error) {
     console.error("Error editing client:", error);
     throw error;
   }
 };
+
+// export const editClient = async (
+//   clientData: any,
+//   originalData: any,
+//   aadharCard?: File | null,
+//   panCard?: File | null
+// ) => {
+//   try {
+//     const formData = new FormData();
+
+//     formData.append("admin_id", clientData.admin_id);
+//     formData.append("clientid", clientData.clientid);
+//     formData.append("site_detail_id", clientData.site_detail_id || "");
+//     formData.append("client_name", clientData.name || "");
+//     formData.append("edit_email", clientData.email || "");
+//     formData.append("edit_contact", clientData.contact || "");
+//     formData.append("edit_address", clientData.address || "");
+//     formData.append("update_password", clientData.password || "");
+//     formData.append("client_milestone_id", clientData.client_milestone_id || "");
+//     formData.append("edit_unit_type_option", clientData.unit_type || "");
+//     formData.append("edit_property_amount", clientData.property_amount || "");
+//     formData.append("edit_gst_slab", clientData.gst_slab || "");
+//     formData.append("edit_gst_amount", clientData.gst_amount || "");
+//     formData.append("edit_total_amount", clientData.total_amount || "");
+
+//     // Handle files
+//     if (clientData.remove_aadhar) {
+//       formData.append("edit_aadhar_card", "");
+//     } else if (aadharCard instanceof File) {
+//       formData.append("edit_aadhar_card", aadharCard);
+//     }
+
+//     if (clientData.remove_pan) {
+//       formData.append("edit_pan_card", "");
+//     } else if (panCard instanceof File) {
+//       formData.append("edit_pan_card", panCard);
+//     }
+
+//     const response = await axiosInstance.post(
+//       API_PATHS.CLIENTDATA.UPDATECLIENTDATA,
+//       formData,
+//       { headers: { "Content-Type": "multipart/form-data" } }
+//     );
+
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error editing client:", error);
+//     throw error;
+//   }
+// };

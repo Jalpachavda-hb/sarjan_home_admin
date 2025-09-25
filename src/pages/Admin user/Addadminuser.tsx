@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import PageMeta from "../../components/common/PageMeta";
+
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
@@ -11,19 +11,14 @@ import MultiSelect from "../../components/form/MultiSelect";
 import { toast } from "react-toastify";
 import {
   fetchRolePermissions,
-  fetchProfile,
   getAdminUserById,
-} from "../../utils/Handlerfunctions/getdata";
-// import { addAdminUser } from "../../utils/Handlerfunctions/formSubmitHandlers";
+} from "../../utils/Handlerfunctions/getdata"; // removed fetchProfile import
 import { addAdminUser } from "../../utils/Handlerfunctions/formSubmitHandlers";
 import { updateAdminUser } from "../../utils/Handlerfunctions/formEditHandlers";
 import Stepper from "../OtherPage/Stepper";
 
 const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
   const [showPassword, setShowPassword] = useState(false);
-  // const [selectedPermissions, setSelectedPermissions] = useState<{
-  //   [feature: string]: string[];
-  // }>({});
   const [selectedPermissions, setSelectedPermissions] = useState<{
     [feature: string]: string[];
   }>({
@@ -36,7 +31,7 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
     payments: [],
     app_settings: [],
   });
-  const [profile, setProfile] = useState<any>(null);
+
   const [step, setStep] = useState(1);
 
   // form fields
@@ -53,10 +48,6 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
   const navigate = useNavigate();
   const { id } = useParams(); // <-- route param
   const isEdit = mode === "edit";
-
-  useEffect(() => {
-    fetchProfile().then((data) => setProfile(data));
-  }, []);
 
   useEffect(() => {
     const loadPermissions = async () => {
@@ -88,39 +79,71 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
     }
   }, [isEdit, id]);
 
-  const handleSubmit = async () => {
-    if (!profile) {
-      toast.error("Profile not loaded. Try again.");
-      return;
-    }
+  //   const handleSubmit = async () => {
+  //     let res;
+  //     const fixedRoleId = 2; // ✅ always role_id = 2
+  //  const passwordToSend = password.trim() !== "" ? password : undefined;
+  //     if (isEdit && id) {
+  //       res = await updateAdminUser(
+  //         id,
+  //         name,
+  //         email,
+  //         contact,
+  //         Number(selectedSite),
+  //         fixedRoleId, // ✅ use fixed role id
+  //         selectedPermissions,
+  //           passwordToSend ? [passwordToSend] : []
+  //         []
+  //       );
+  //     } else {
+  //       res = await addAdminUser(
+  //         name,
+  //         email,
+  //         contact,
+  //         password,
+  //         Number(selectedSite),
+  //         fixedRoleId, // ✅ use fixed role id
+  //         selectedPermissions,
+  //         []
+  //       );
+  //       console.log("Selected permissions:", selectedPermissions);
+  //     }
 
+  //     if (res) navigate("/admin/admin_users");
+  //   };
+
+  const handleSubmit = async () => {
     let res;
+    const fixedRoleId = 2; // always role_id = 2
+
     if (isEdit && id) {
+      // ✅ only pass password if user typed a new one
+      const passwordToSend = password.trim() !== "" ? password : "";
+
       res = await updateAdminUser(
         id,
         name,
         email,
         contact,
         Number(selectedSite),
-        profile.role_id,
+        fixedRoleId,
+        passwordToSend,
         selectedPermissions,
         []
       );
-      if (res) toast.success("Admin user updated successfully");
     } else {
       res = await addAdminUser(
         name,
         email,
         contact,
-        password,
+        password, // password must be string
         Number(selectedSite),
-        profile.role_id,
+        fixedRoleId,
         selectedPermissions,
         []
       );
-      console.log("Selected permissions:", selectedPermissions); // Add this line
-      if (res) toast.success("Admin user created successfully");
     }
+
     if (res) navigate("/admin/admin_users");
   };
 
@@ -130,10 +153,9 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
       [feature]: values,
     }));
   };
+
   return (
     <div>
-      <PageMeta title={isEdit ? "Edit Admin User" : "Add Admin User"} />
-
       <Stepper step={step} />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
@@ -195,46 +217,45 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
                 />
               )}
 
-             {isEdit ? (
-  <>
-    <Label>Password</Label>
-    <div className="relative">
-      <Input
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        type={showPassword ? "text" : "password"}
-        placeholder="Update password (leave empty to keep old)"
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-4 top-1/2 -translate-y-1/2"
-      >
-        {showPassword ? <FaRegEye /> : <FaEyeSlash />}
-      </button>
-    </div>
-  </>
-) : (
-  <>
-    <Label>Password</Label>
-    <div className="relative">
-      <Input
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        type={showPassword ? "text" : "password"}
-        placeholder="Enter your password"
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-4 top-1/2 -translate-y-1/2"
-      >
-        {showPassword ? <FaRegEye /> : <FaEyeSlash />}
-      </button>
-    </div>
-  </>
-)}
-
+              {isEdit ? (
+                <>
+                  <Label>Password</Label>
+                  <div className="relative">
+                    <Input
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Update password (leave empty to keep old)"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2"
+                    >
+                      {showPassword ? <FaRegEye /> : <FaEyeSlash />}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Label>Password</Label>
+                  <div className="relative">
+                    <Input
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2"
+                    >
+                      {showPassword ? <FaRegEye /> : <FaEyeSlash />}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </ComponentCard>
         )}
