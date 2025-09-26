@@ -10,12 +10,13 @@ import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
-import { fetchAdminUsers } from "../../utils/Handlerfunctions/getdata";
+import { fetchAdminUsers ,fetchProfile } from "../../utils/Handlerfunctions/getdata";
 import { TextField, Button } from "@mui/material";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import { deleteAdminUser } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { useNavigate } from "react-router-dom";
+
 interface AdminUser {
   id: string;
   title: string;
@@ -33,12 +34,21 @@ export default function Adminuser() {
   const [selectedColumns] = useState<string[]>([]);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const navigate = useNavigate();
-
+const [currentAdminId, setCurrentAdminId] = useState<string | null>(null);
   // use for search
   const [search, setSearch] = useState("");
   const [siteFilter] = useState("");
   const [loading, setLoading] = useState(false);
   // const [newCategory, setNewCategory] = useState("");
+
+useEffect(() => {
+  fetchProfile()
+    .then((data) => {
+      setCurrentAdminId(data.admin_id); // store current admin ID
+    })
+    .catch((err) => console.error("Error fetching profile:", err));
+}, []);
+
 
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
@@ -86,7 +96,11 @@ export default function Adminuser() {
     loadData();
   }, []);
 
-  const filteredData = adminUsers.filter((item) => {
+
+const filteredData = adminUsers
+ .filter((item) => String(item.id) !== String(currentAdminId)) // exclude current login user
+  .filter((item) => item.role_id !== 1) // exclude admin users with role_id 1
+  .filter((item) => {
     const searchTerm = search.trim().toLowerCase();
     const matchesSearch = Object.values(item)
       .map((val) => String(val).trim().toLowerCase())
@@ -95,7 +109,6 @@ export default function Adminuser() {
     const matchesSite = siteFilter ? item.title === siteFilter : true;
     return matchesSearch && matchesSite;
   });
-
   const paginatedData = useMemo(
     () =>
       filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
