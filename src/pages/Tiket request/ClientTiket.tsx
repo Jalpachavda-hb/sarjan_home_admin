@@ -5,13 +5,22 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import Badge from "../../components/ui/badge/Badge";
-import TablePagination from "@mui/material/TablePagination";
-import { useState, useMemo } from "react";
-import { FaPlus } from "react-icons/fa6";
-
 import { FaRegEye } from "react-icons/fa";
 import SiteFilter from "../../components/form/input/FilterbySite";
+import Badge from "../../components/ui/badge/Badge";
+import TablePagination from "@mui/material/TablePagination";
+import { useState, useMemo, useEffect } from "react";
+import { FaPlus } from "react-icons/fa6";
+import { showclientTicket } from "../../utils/Handlerfunctions/getdata";
+import { closeTicket } from "../../utils/Handlerfunctions/formdeleteHandlers";
+import { getTicketMessages } from "../../utils/Handlerfunctions/getdata";
+import { replyToTicket } from "../../utils/Handlerfunctions/formSubmitHandlers";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import {
   TextField,
   Button,
@@ -23,50 +32,69 @@ import {
   ListItemText,
 } from "@mui/material";
 
-interface MyTiket {
+interface MyTicket {
   id: number;
   clientName: string;
   unitNo: string;
   siteName: string;
   title: string;
   date: string;
-  message: string;
   status: string;
+  reply?: string;
 }
 
-const tableData: MyTiket[] = [
-  {
-    id: 1,
-    clientName: "John Doe",
-    unitNo: "A-101",
-    siteName: "Downtown Complex",
-    title: "Complaint",
-    date: "2025-08-11",
-    message: "hello",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    clientName: "Jane Smith",
-    unitNo: "B-202",
-    siteName: "Riverside Towers",
-    title: "Maintenance Request",
-    date: "2025-08-10",
-    message: "hello",
-    status: "Completed",
-  },
-];
-
-export default function ClientTiket() {
+export default function MyTiket() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof MyTiket;
-    direction: "asc" | "desc";
-  } | null>(null);
+  const [tickets, setTickets] = useState<MyTicket[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [replies, setReplies] = useState<any[]>([]);
+  const [message, setMessage] = useState("");
+  const loadTickets = async () => {
+    setLoading(true);
+    try {
+      const res = await showclientTicket(siteFilter); // pass selected site
+
+      if (res?.status === 200 && Array.isArray(res.data)) {
+        const mapped = res.data.map((t: any) => ({
+          id: t.id,
+          clientName: t.client_name,
+          unitNo: t.unit_number,
+          siteName: t.site_name,
+          title: t.title,
+          date: t.created_at,
+          status: t.status,
+          reply: t.is_read === "1" ? "Read" : "Unread",
+        }));
+        setTickets(mapped);
+      } else {
+        setTickets([]);
+      }
+    } catch (err) {
+      console.error("Error loading tickets:", err);
+      setTickets([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch API data
+  useEffect(() => {
+    loadTickets();
+  }, [siteFilter]);
+
+  const handleClose = async (id: string) => {
+    const res = await closeTicket(id);
+    if (res.success) {
+      // refresh ticket list
+      loadTickets();
+    }
+  };
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -82,39 +110,10 @@ export default function ClientTiket() {
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
 
-  // const filteredData = useMemo(() => {
-  //   let data = [...tableData];
-
-  //   if (search) {
-  //     const searchTerm = search.toLowerCase();
-  //     data = data.filter((item) =>
-  //       Object.values(item).some((val) =>
-  //         String(val).toLowerCase().includes(searchTerm)
-  //       )
-  //     );
-  //   }
-
-  //   if (siteFilter) {
-  //     data = data.filter((item) => item.siteName === siteFilter);
-  //   }
-
-  //   if (sortConfig) {
-  //     data.sort((a, b) => {
-  //       const aValue = a[sortConfig.key];
-  //       const bValue = b[sortConfig.key];
-  //       if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-  //       if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-  //       return 0;
-  //     });
-  //   }
-
-  //   return data;
-  // }, [search, siteFilter, sortConfig]);
-
+  // Filtering
   const filteredData = useMemo(() => {
-    let data = [...tableData];
-
-    const searchTerm = search.trim().toLowerCase(); // 🔹 Trim spaces
+    let data = [...tickets];
+    const searchTerm = search.trim().toLowerCase();
 
     if (searchTerm) {
       data = data.filter((item) =>
@@ -124,24 +123,10 @@ export default function ClientTiket() {
       );
     }
 
-    if (sortConfig) {
-      data.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-
-        if (aValue < bValue) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-
     return data;
-  }, [search, sortConfig]);
+  }, [tickets, search]);
 
+  // Pagination
   const paginatedData = useMemo(() => {
     return filteredData.slice(
       page * rowsPerPage,
@@ -149,19 +134,48 @@ export default function ClientTiket() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
+  const handleOpenModal = async (ticket: any) => {
+    setSelectedTicket(ticket);
+    setOpenModal(true);
 
-  const handleSort = (key: keyof MyTiket) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
+    try {
+      const res = await getTicketMessages(ticket.id); // <-- API call
+      if (res?.status === 200) {
+        setReplies(res.data.data); // ✅ only the array
+      }
+    } catch (err) {
+      console.error("Error fetching replies", err);
+      setReplies([]); // fallback
     }
-    setSortConfig({ key, direction });
-    setPage(0);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedTicket(null);
+    setReplies([]);
+  };
+  const handleSend = async () => {
+    if (!message.trim() || !selectedTicket) return;
+
+    const formData = new FormData();
+    formData.append("ticket_id", selectedTicket.id.toString());
+    formData.append("message", message);
+
+    const res = await replyToTicket(formData);
+
+    if (res) {
+      // Update replies list instantly
+      setReplies((prev) => [
+        ...prev,
+        {
+          request_by: "Admin",
+          user_type: "admin",
+          message: message,
+          created_at: new Date().toLocaleString(),
+        },
+      ]);
+      setMessage(""); // clear input
+    }
   };
 
   return (
@@ -169,31 +183,11 @@ export default function ClientTiket() {
       <h3 className="text-lg font-semibold mb-5">Client Ticket</h3>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] px-4 pb-3 pt-4 sm:px-6">
+        {/* Filters + Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-wrap gap-2 items-center">
-            {/* <Button
-              size="small"
-              variant="contained"
-              className="!bg-green-600 hover:!bg-green-700 text-white"
-            >
-              Copy
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              className="!bg-blue-600 hover:!bg-blue-700 text-white"
-            >
-              CSV
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              className="!bg-amber-500 hover:!bg-amber-600 text-white"
-            >
-              Print
-            </Button> */}
-
-            <FormControl size="small" sx={{ minWidth: 200 }}>
+            {/* Column Selector */}
+            {/* <FormControl size="small" sx={{ minWidth: 200 }}>
               <InputLabel
                 className="text-gray-700 dark:text-white"
                 sx={{ fontFamily: "Poppins" }}
@@ -230,8 +224,7 @@ export default function ClientTiket() {
                   "title",
                   "date",
                   "status",
-                  "message",
-
+                  "reply",
                   "blocknumberType",
                 ].map((col) => (
                   <MenuItem
@@ -249,8 +242,7 @@ export default function ClientTiket() {
                           title: "Title",
                           date: "Date",
                           status: "Status",
-                          message: "message",
-
+                          reply: "Reply",
                           blocknumberType: "Manage",
                         }[col]
                       }
@@ -258,14 +250,16 @@ export default function ClientTiket() {
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
-              
-            <SiteFilter
+            </FormControl> */}
+
+            {/* Site Filter */}
+            {/* <SiteFilter
               value={siteFilter}
               onChange={(e) => setSiteFilter(e.target.value)}
-            />
+            /> */}
           </div>
 
+          {/* Search + Add New */}
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
             <TextField
               size="small"
@@ -290,6 +284,7 @@ export default function ClientTiket() {
           </div>
         </div>
 
+        {/* Table */}
         <div className="max-w-full overflow-x-auto mt-8">
           <Table>
             <TableHeader>
@@ -298,20 +293,11 @@ export default function ClientTiket() {
                 {isColumnVisible("clientName") && (
                   <TableCell className="columtext">Client Name</TableCell>
                 )}
-                {isColumnVisible("unitNo") && (
-                  <TableCell className="columtext">Unit No</TableCell>
-                )}
+
                 {isColumnVisible("siteName") && (
                   <TableCell className="columtext">Site Name</TableCell>
                 )}
-                {isColumnVisible("title") && (
-                  <TableCell className="columtext">Title</TableCell>
-                )}
-                {isColumnVisible("date") && (
-                  <TableCell className="columtext">Date</TableCell>
-                )}
-
-                {isColumnVisible("message") && (
+                {isColumnVisible("Message") && (
                   <TableCell className="columtext">Message</TableCell>
                 )}
 
@@ -320,16 +306,25 @@ export default function ClientTiket() {
                 )}
 
                 {isColumnVisible("blocknumberType") && (
-                  <TableCell className="columtext">Action</TableCell>
+                  <TableCell className="columtext">Manage</TableCell>
                 )}
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              {paginatedData.length === 0 ? (
+              {loading ? (
                 <TableRow>
                   <TableCell
-                    // colSpan={8}
+                    colSpan={9}
+                    className="text-center py-12 text-gray-500"
+                  >
+                    Loading tickets...
+                  </TableCell>
+                </TableRow>
+              ) : paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={9}
                     className="text-center py-12 text-gray-500"
                   >
                     No data available
@@ -346,36 +341,39 @@ export default function ClientTiket() {
                         {item.clientName}
                       </TableCell>
                     )}
-                    {isColumnVisible("unitNo") && (
-                      <TableCell className="rowtext">{item.unitNo}</TableCell>
-                    )}
+
                     {isColumnVisible("siteName") && (
                       <TableCell className="rowtext">{item.siteName}</TableCell>
                     )}
-                    {isColumnVisible("title") && (
-                      <TableCell className="rowtext">{item.title}</TableCell>
+
+                    {isColumnVisible("Message") && (
+                      <TableCell className="rowtext">
+                        {/* {item.reply} */}
+                        <button onClick={() => handleOpenModal(item)}>
+                          <Badge variant="light" color="success">
+                            View <FaRegEye />
+                          </Badge>
+                        </button>
+                      </TableCell>
                     )}
-                    {isColumnVisible("date") && (
-                      <TableCell className="rowtext">{item.date}</TableCell>
-                    )}
-                    {isColumnVisible("message") && (
-                      <TableCell className="rowtext">{item.message}</TableCell>
-                    )}
+
                     {isColumnVisible("status") && (
-                      <TableCell className="rowtext">{item.status}</TableCell>
+                      <TableCell className="rowtext">
+                        <Badge
+                          variant="light"
+                          color={item.status === "Active" ? "success" : "error"}
+                        >
+                          {item.status}
+                        </Badge>
+                      </TableCell>
                     )}
 
                     {isColumnVisible("blocknumberType") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
-                          <button>
-                            <Badge variant="light" color="success">
-                              Approve
-                            </Badge>
-                          </button>
-                          <button>
+                          <button onClick={() => handleClose(item.id)}>
                             <Badge variant="light" color="error">
-                              Reject
+                              Close Ticket
                             </Badge>
                           </button>
                         </div>
@@ -386,8 +384,68 @@ export default function ClientTiket() {
               )}
             </TableBody>
           </Table>
+          <Dialog
+            className="swal2-container"
+            open={openModal}
+            onClose={handleCloseModal}
+            maxWidth="md"
+            fullWidth
+          >
+            <DialogTitle className="flex justify-between items-center">
+              <span>Client Reply ({selectedTicket?.unitNo})</span>
+              <Button onClick={handleCloseModal}>✕</Button>
+            </DialogTitle>
+
+            <DialogContent
+              dividers
+              style={{ maxHeight: "400px", overflowY: "auto" }}
+            >
+              {replies.length === 0 ? (
+                <p className="text-gray-500">No replies found</p>
+              ) : (
+                replies.map((reply, idx) => (
+                  <div key={idx} className="mb-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">
+                        {reply.user_type}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {reply.created_at}
+                      </span>
+                    </div>
+
+                    <div className="bg-gray-200 rounded-lg p-2 mt-1">
+                      {reply.message}
+                    </div>
+                  </div>
+                ))
+              )}
+            </DialogContent>
+
+            {/* Input to send new message */}
+            <div className="flex p-2 gap-2 border-t">
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Type your message..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              />
+              <Button variant="contained" color="primary" onClick={handleSend}>
+                Send
+              </Button>
+            </div>
+
+            <DialogActions>
+              <Button onClick={handleCloseModal} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
 
+        {/* Pagination */}
         <div className="mt-4 flex justify-between items-center w-full">
           <p className="text-sm">
             Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–

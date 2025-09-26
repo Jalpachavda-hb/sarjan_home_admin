@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -8,7 +9,6 @@ import Select from "../../components/form/Select";
 import DatePicker from "../../components/form/date-picker";
 import Button from "../../components/ui/button/Button";
 import SiteSelector from "../../components/form/input/SelectSiteinput";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { addPaymentDetail } from "../../utils/Handlerfunctions/formSubmitHandlers";
 import {
@@ -21,13 +21,9 @@ const AddPaymentDetails = () => {
   const navigate = useNavigate();
 
   const [selectedSite, setSelectedSite] = useState<string>("");
-  const [unitOptions, setUnitOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [unitOptions, setUnitOptions] = useState<{ value: string; label: string }[]>([]);
   const [selectedUnit, setSelectedUnit] = useState<string>("");
-  const [clientOptions, setClientOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [clientOptions, setClientOptions] = useState<{ value: string; label: string }[]>([]);
   const [selectedClient, setSelectedClient] = useState<string>("");
 
   const [receivedAmount, setReceivedAmount] = useState<number | "">("");
@@ -36,6 +32,9 @@ const AddPaymentDetails = () => {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // error state
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const amountTypeOptions = [
     { value: "Principal Amount", label: "Principal Amount" },
@@ -78,20 +77,28 @@ const AddPaymentDetails = () => {
     setReceiptPreview(file ? URL.createObjectURL(file) : null);
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!selectedSite) newErrors.site = "Site is required";
+    if (!selectedUnit) newErrors.unit = "Unit number is required";
+    if (!selectedClient) newErrors.client = "Client is required";
+    if (!receivedAmount) newErrors.amount = "Amount is required";
+    if (!amountType) newErrors.amountType = "Amount type is required";
+    if (!paymentDate) newErrors.date = "Payment date is required";
+    return newErrors;
+  };
+
   const handleSubmit = async () => {
     const adminId = getAdminId();
+    const newErrors = validateForm();
+    setErrors(newErrors);
 
-    if (!selectedSite) return toast.error("Please select a site");
-    if (!selectedUnit) return toast.error("Please select a Unit Number");
-    if (!selectedClient) return toast.error("Please select a Client");
-    if (!receivedAmount) return toast.error("Please enter the amount");
-    if (!amountType) return toast.error("Please select amount type");
-    if (!paymentDate) return toast.error("Please select payment date");
+    if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
       await addPaymentDetail({
-        adminId, // replace with dynamic admin id
+        adminId,
         clientId: selectedClient,
         siteDetailId: selectedSite,
         blockDetailsId: selectedUnit,
@@ -101,7 +108,6 @@ const AddPaymentDetails = () => {
         receiptFile,
       });
 
-      toast.success("Payment added successfully!");
       // reset form
       setSelectedSite("");
       setSelectedUnit("");
@@ -111,13 +117,24 @@ const AddPaymentDetails = () => {
       setPaymentDate("");
       setReceiptFile(null);
       setReceiptPreview(null);
+      setErrors({});
 
       navigate("/admin/payments", { replace: true });
     } catch (err) {
       console.error(err);
-      toast.error("Submission failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // helper to clear errors on change
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
     }
   };
 
@@ -129,69 +146,109 @@ const AddPaymentDetails = () => {
           <ComponentCard title="Add Payment Details">
             <div className="space-y-6">
               {/* Select Site */}
-              <SiteSelector value={selectedSite} onChange={setSelectedSite} />
+              <div>
+             
+                <SiteSelector
+                  value={selectedSite}
+                  onChange={(val) => {
+                    setSelectedSite(val);
+                    clearError("site");
+                  }}
+                />
+                {errors.site && <p className="text-red-500 text-sm">{errors.site}</p>}
+              </div>
 
               {/* Unit Number */}
               {selectedSite && (
                 <div>
-                  <Label>Unit Number</Label>
+                  <Label>
+                    Unit Number <span className="text-red-500">*</span>
+                  </Label>
                   <Select
                     options={unitOptions}
                     value={selectedUnit}
-                    onChange={setSelectedUnit}
+                    onChange={(val) => {
+                      setSelectedUnit(val);
+                      clearError("unit");
+                    }}
                     placeholder="Select Unit Number"
                   />
+                  {errors.unit && <p className="text-red-500 text-sm">{errors.unit}</p>}
                 </div>
               )}
 
               {/* Client */}
               {selectedUnit && (
                 <div>
-                  <Label>Select Client</Label>
+                  <Label>
+                    Select Client <span className="text-red-500">*</span>
+                  </Label>
                   <Select
                     options={clientOptions}
                     value={selectedClient}
-                    onChange={setSelectedClient}
+                    onChange={(val) => {
+                      setSelectedClient(val);
+                      clearError("client");
+                    }}
                     placeholder="Select Client"
                   />
+                  {errors.client && <p className="text-red-500 text-sm">{errors.client}</p>}
                 </div>
               )}
 
               {/* Amount */}
               <div>
-                <Label>Received Amount</Label>
+                <Label>
+                  Received Amount <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   type="number"
                   value={receivedAmount}
-                  onChange={(e) => setReceivedAmount(Number(e.target.value))}
+                  onChange={(e) => {
+                    setReceivedAmount(Number(e.target.value));
+                    clearError("amount");
+                  }}
                   placeholder="Enter amount"
                 />
+                {errors.amount && <p className="text-red-500 text-sm">{errors.amount}</p>}
               </div>
 
               {/* Amount Type */}
               <div>
-                <Label>Amount Type</Label>
+                <Label>
+                  Amount Type <span className="text-red-500">*</span>
+                </Label>
                 <Select
                   options={amountTypeOptions}
                   value={amountType}
-                  onChange={setAmountType}
+                  onChange={(val) => {
+                    setAmountType(val);
+                    clearError("amountType");
+                  }}
                   placeholder="Select Amount Type"
                 />
+                {errors.amountType && (
+                  <p className="text-red-500 text-sm">{errors.amountType}</p>
+                )}
               </div>
 
               {/* Payment Date */}
               <div>
-                <Label>Received Payment Date</Label>
+                <Label>
+                  Received Payment Date <span className="text-red-500">*</span>
+                </Label>
                 <DatePicker
                   id="payment-date"
                   placeholder="Select payment date"
-                  onChange={(dates, currentDateString) =>
-                    setPaymentDate(currentDateString)
-                  }
+                  onChange={(dates, currentDateString) => {
+                    setPaymentDate(currentDateString);
+                    clearError("date");
+                  }}
                 />
+                {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
               </div>
 
-              {/* Upload Receipt */}
+              {/* Upload Receipt (optional) */}
               <div>
                 <Label>Upload Receipt</Label>
                 <FileInput id="fileUpload" onChange={handleReceiptChange} />

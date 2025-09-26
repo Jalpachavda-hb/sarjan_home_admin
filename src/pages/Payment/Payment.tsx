@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -71,7 +72,7 @@ export default function Payment() {
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [oldReceiptUrl, setOldReceiptUrl] = useState<string>("");
   const [maxAllowedAmount, setMaxAllowedAmount] = useState<number>(0);
-
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   useEffect(() => {
     const loadPayments = async () => {
       const adminId = getAdminId();
@@ -118,6 +119,42 @@ export default function Payment() {
       } catch (err) {
         console.error("Delete failed:", err);
         toast.error("Failed to delete document. Please try again.");
+      }
+    }
+  };
+
+  const handleAmountChange = (val: number) => {
+    setReceivedAmount(val);
+    const errorMsg = validateAmount(val);
+    setErrors((prev) => ({ ...prev, receivedAmount: errorMsg }));
+  };
+
+  const handleReceiptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setReceiptFile(file);
+      setReceiptPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAmountTypeChange = (val: string) => {
+    setAmountType(val);
+    setErrors((prev) => ({ ...prev, amountType: "" }));
+
+    if (selectedPayment) {
+      const newMax =
+        val === "GST Amount"
+          ? Number(selectedPayment.gstAmount.replace(/[^0-9.-]+/g, ""))
+          : Number(selectedPayment.propertyAmount.replace(/[^0-9.-]+/g, ""));
+      setMaxAllowedAmount(newMax);
+
+      if (receivedAmount > newMax) {
+        setErrors((prev) => ({
+          ...prev,
+          receivedAmount: "Received amount exceeds balance",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, receivedAmount: "" }));
       }
     }
   };
@@ -174,33 +211,14 @@ export default function Payment() {
 
     setIsModalOpen(true);
   };
+  const validateDate = (date: string): string => {
+    if (!date) return "Please select a payment date";
 
-  const handleAmountTypeChange = (val: string) => {
-    setAmountType(val);
-    setFormError(""); // Clear error when changing amount type
+    // Regex for dd/mm/yyyy
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    if (!regex.test(date)) return "Date must be in dd/mm/yyyy format";
 
-    // Update max allowed amount when amount type changes
-    if (selectedPayment) {
-      if (val === "GST Amount") {
-        const gstAmount = Number(
-          selectedPayment.gstAmount.replace(/[^0-9.-]+/g, "")
-        );
-        setMaxAllowedAmount(gstAmount);
-      } else {
-        const propertyAmount = Number(
-          selectedPayment.propertyAmount.replace(/[^0-9.-]+/g, "")
-        );
-        setMaxAllowedAmount(propertyAmount);
-      }
-    }
-  };
-
-  const handleReceiptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setReceiptFile(file); // keep file for DB update
-      setReceiptPreview(URL.createObjectURL(file)); // show preview
-    }
+    return "";
   };
 
   const validateAmount = (amount: number): string => {
@@ -510,51 +528,82 @@ export default function Payment() {
         </div>
 
         {/* Edit Modal */}
+        {/* Edit Modal */}
         <Dialog
           className="swal2-container"
           open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setFormError("");
+            setErrors({});
+            setReceiptFile(null);
+            setReceiptPreview(null);
+          }}
           maxWidth="sm"
           fullWidth
         >
           <DialogTitle className="flex justify-between items-center">
             <span>Edit Payment</span>
-            <Button onClick={() => setIsModalOpen(false)}>✕</Button>
+            <Button
+              onClick={() => {
+                setIsModalOpen(false);
+                setFormError("");
+                setErrors({});
+                setReceiptFile(null);
+                setReceiptPreview(null);
+              }}
+            >
+              ✕
+            </Button>
           </DialogTitle>
+
           <DialogContent dividers>
             <div className="space-y-4">
+              {/* Amount Type */}
               <div>
-                <Label>Amount Type</Label>
-                <div>
-                  <Select
-                    options={amountTypeOptions}
-                    defaultValue={amountType}
-                    onChange={handleAmountTypeChange}
-                  />
-                </div>
+                <Label>
+                  Amount Type <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  options={amountTypeOptions}
+                  defaultValue={amountType}
+                  onChange={(val) => {
+                    handleAmountTypeChange(val);
+                    // Validate amount if it exceeds new max
+                    if (receivedAmount > maxAllowedAmount) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        receivedAmount: "Received amount exceeds balance",
+                      }));
+                    } else {
+                      setErrors((prev) => ({ ...prev, receivedAmount: "" }));
+                    }
+                  }}
+                />
+                {errors.amountType && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.amountType}
+                  </p>
+                )}
               </div>
 
+              {/* Received Amount */}
               <div>
-                <Label className="text-gray-700 dark:text-gray-300">
-                  Received Amount
+                <Label>
+                  Received Amount <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   type="number"
                   value={receivedAmount}
-                  onChange={(e) => {
-                    const value = Number(e.target.value);
-                    setReceivedAmount(value);
-
-                    // Validate the amount in real-time
-                    const error = validateAmount(value);
-                    setFormError(error);
-                  }}
+                  onChange={(e) => handleAmountChange(Number(e.target.value))}
                   placeholder="Enter amount"
                   className="mt-1"
-                  error={!!formError} // Add error styling
+                  error={!!errors.receivedAmount}
                 />
-                {formError && (
-                  <p className="text-red-500 text-sm mt-1">{formError}</p>
+                {errors.receivedAmount && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.receivedAmount}
+                  </p>
                 )}
                 <p className="text-xs text-gray-500 mt-1">
                   Maximum allowed:{" "}
@@ -565,60 +614,80 @@ export default function Payment() {
                 </p>
               </div>
 
+              {/* Payment Date */}
               <div>
-                <Label>Received Payment Date</Label>
+                <Label>
+                  Received Payment Date <span className="text-red-500">*</span>
+                </Label>
                 <Input
+                  type="text"
+                  placeholder="dd/mm/yyyy"
                   value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
+                  onChange={(e) => {
+                    setPaymentDate(e.target.value);
+                    // live validation (optional)
+                    setErrors((prev) => ({
+                      ...prev,
+                      paymentDate: validateDate(e.target.value),
+                    }));
+                  }}
+                  error={!!errors.paymentDate}
                 />
+                {errors.paymentDate && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.paymentDate}
+                  </p>
+                )}
               </div>
 
+              {/* Receipt Upload */}
               <div>
                 <Label>Upload Receipt</Label>
                 <FileInput onChange={handleReceiptChange} />
 
-                {/* Show NEW preview if user selects a file */}
-                {receiptPreview ? (
+                {(receiptPreview || oldReceiptUrl) && (
                   <div className="mt-2 w-40 h-40 border rounded overflow-hidden">
                     <img
-                      src={receiptPreview}
+                      src={receiptPreview || oldReceiptUrl}
                       alt="Receipt Preview"
                       className="w-full h-full object-contain"
                     />
                   </div>
-                ) : (
-                  // Otherwise fallback to OLD image from DB
-                  oldReceiptUrl && (
-                    <div className="mt-2 w-40 h-40 border rounded overflow-hidden">
-                      <img
-                        src={oldReceiptUrl}
-                        alt="Old Receipt"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  )
                 )}
               </div>
             </div>
           </DialogContent>
+
           <DialogActions>
-            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                setIsModalOpen(false);
+                setFormError("");
+                setErrors({});
+                setReceiptFile(null);
+                setReceiptPreview(null);
+              }}
+            >
+              Cancel
+            </Button>
+
             <Button
               variant="contained"
               onClick={async () => {
                 if (!selectedPayment) return;
 
-                // Validate inputs
+                // Validate all fields
                 const amountError = validateAmount(Number(receivedAmount));
-                if (amountError) {
-                  setFormError(amountError);
-                  return;
-                }
+                const dateError = paymentDate
+                  ? ""
+                  : "Please select a payment date";
 
-                if (!paymentDate) {
-                  setFormError("Please select a payment date");
-                  return;
-                }
+                setErrors({
+                  receivedAmount: amountError,
+                  paymentDate: dateError,
+                });
+
+                if (amountError || dateError) return;
 
                 try {
                   const res = await editPaymentfromAdmin(
@@ -638,20 +707,23 @@ export default function Payment() {
                     const updatedData = await fetchPaymentDetails(adminId);
                     setTableData(updatedData);
 
+                    // Reset modal
                     setIsModalOpen(false);
+                    setFormError("");
+                    setErrors({});
+                    setReceiptFile(null);
+                    setReceiptPreview(null);
                   }
                 } catch (error: any) {
-                  if (error.response && error.response.data?.message) {
-                    // Set the specific error message from the server
-                    setFormError(error.response.data.message);
-                    toast.error(error.response.data.message);
-                  } else {
-                    setFormError("Failed to update payment");
-                    toast.error("Failed to update payment");
-                  }
+                  const msg =
+                    error.response?.data?.message || "Failed to update payment";
+                  setFormError(msg);
+                  toast.error(msg);
                 }
               }}
-              disabled={!!formError} // Disable button if there's an error
+              disabled={
+                !!errors.receivedAmount || !!errors.paymentDate || !amountType
+              }
             >
               Save
             </Button>

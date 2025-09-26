@@ -8,7 +8,10 @@ import {
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import { editProjectCategory } from "../../utils/Handlerfunctions/formEditHandlers";
-import { fetchProjectcategory } from "../../utils/Handlerfunctions/getdata";
+import {
+  fetchProjectcategory,
+  getAdminId,
+} from "../../utils/Handlerfunctions/getdata";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo, useEffect } from "react";
@@ -42,7 +45,7 @@ export default function ProjectCategory() {
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [tableData, setTableData] = useState<ProjectCategoryType[]>([]);
-
+  const [editError, setEditError] = useState<string>("");
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -98,67 +101,93 @@ export default function ProjectCategory() {
 
   const handleEditClick = (category: ProjectCategoryType) => {
     setEditData(category);
+    setEditError("");
     setEditOpen(true);
+    if (editError) setEditError("");
   };
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!editData) return;
-    setEditData({ ...editData, [e.target.name]: e.target.value });
-  };
+ const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!editData) return;
+  const { name, value } = e.target;
+
+  setEditData({ ...editData, [name]: value });
+
+  // 🔹 remove validation error once user types something
+  if (editError && value.trim()) {
+    setEditError("");
+  }
+};
+
   const handleCancelForm = () => {
     setShowForm(false);
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const confirm = await Swal.fire({
-        title: "Are you sure?",
-        text: "This action cannot be undone.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, delete it!",
-      });
+ const handleDelete = async (id: string) => {
+  try {
+    const confirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
 
-      if (!confirm.isConfirmed) return;
+    if (!confirm.isConfirmed) return;
 
-      const res = await deleteProjectCategory(id, "1"); // admin_id from auth if possible
-
-      if (res?.status === 200 || res?.success) {
-        toast.success("Category deleted successfully");
-        fetchData(); // 🔹 refetch fresh list after delete
-      } else {
-        toast.error(res?.message || "Failed to delete category");
-      }
-    } catch (error) {
-      toast.error("Something went wrong while deleting");
-      console.error("Delete error:", error);
+    const adminId = getAdminId(); 
+    if (!adminId) {
+      toast.error("Admin ID not found");
+      return;
     }
-  };
-  const handleEditSave = async () => {
-    if (!editData) return;
 
-    try {
-      const formData = new FormData();
-      formData.append("admin_id", "1"); // or dynamic admin id
-      formData.append("id", editData.id.toString());
-      formData.append("project_category_name", editData.name); // 🔹 FIXED KEY
+    const res = await deleteProjectCategory(id, adminId.toString());
 
-      const res = await editProjectCategory(formData);
-
-      if (res?.status === 200) {
-        setTableData((prev) =>
-          prev.map((item) =>
-            item.id === editData.id ? { ...item, name: editData.name } : item
-          )
-        );
-        setEditOpen(false);
-           toast.success("Project category updated successfully!");
-      }
-    } catch (error) {
-      console.error("Update failed:", error);
+    if (res?.status === 200 || res?.success) {
+      toast.success("Category deleted successfully");
+      fetchData();
+    } else {
+      toast.error(res?.message || "Failed to delete category");
     }
-  };
+  } catch (error) {
+    toast.error("Something went wrong while deleting");
+    console.error("Delete error:", error);
+  }
+};
+
+const handleEditSave = async () => {
+  if (!editData?.name.trim()) {
+    setEditError("Project Category is required");
+    return;
+  }
+
+  try {
+    const adminId = getAdminId(); // 🔹 get admin_id dynamically
+    if (!adminId) {
+      toast.error("Admin ID not found");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("admin_id", adminId.toString());
+    formData.append("id", editData.id.toString());
+    formData.append("project_category_name", editData.name);
+
+    const res = await editProjectCategory(formData);
+
+    if (res?.status === 200) {
+      setTableData((prev) =>
+        prev.map((item) =>
+          item.id === editData.id ? { ...item, name: editData.name } : item
+        )
+      );
+      setEditOpen(false);
+      toast.success("Project category updated successfully!");
+    }
+  } catch (error) {
+    console.error("Update failed:", error);
+  }
+};
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -213,40 +242,6 @@ export default function ProjectCategory() {
               </TableRow>
             </TableHeader>
 
-            {/* <TableBody>
-              {paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell className="justify-between py-12 text-gray-500">
-                    No data available
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedData.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="rowtext">
-                      {page * rowsPerPage + index + 1}
-                    </TableCell>
-                    {isColumnVisible("count") && (
-                      <TableCell className="rowtext">
-                        {item.ProjectType}
-                      </TableCell>
-                    )}
-                    {isColumnVisible("blocknumberType") && (
-                      <TableCell className="rowtext">
-                        <div className="flex gap-2 mt-1">
-                          <Badge variant="light" color="error">
-                            <MdDelete className="text-2xl cursor-pointer" />
-                          </Badge>
-                          <Badge variant="light">
-                            <FaEdit className="text-2xl cursor-pointer" />
-                          </Badge>
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))
-              )}
-            </TableBody> */}
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
@@ -341,6 +336,8 @@ export default function ProjectCategory() {
             name="name"
             value={editData?.name || ""}
             onChange={handleEditChange}
+             error={!!editError} // ✅ red border
+            helperText={editError}
           />
         </DialogContent>
         <DialogActions>

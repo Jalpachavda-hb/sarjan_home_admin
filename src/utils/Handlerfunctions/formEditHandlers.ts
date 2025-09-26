@@ -3,6 +3,60 @@ import { toast } from "react-toastify";
 import { API_PATHS } from "../apiPaths";
 import { getAdminId } from "./getdata";
 
+// export const handleUpdateProfile = async (
+//   formData: {
+//     admin_id: string;
+//     name: string;
+//     email: string;
+//     contact_no: string;
+//     password?: string;
+//   },
+//   onSuccess: () => void
+// ) => {
+//   try {
+//     // Validation
+//     if (!formData.name.trim()) {
+//       toast.error("Name is required");
+//       return;
+//     }
+//     if (!formData.email.trim()) {
+//       toast.error("Email is required");
+//       return;
+//     }
+//     if (!/^\d{10}$/.test(formData.contact_no)) {
+//       toast.error("Contact number must be exactly 10 digits");
+//       return;
+//     }
+
+//     // Build payload (note: backend expects "contact", not "contact_no")
+//     const payload = {
+//       admin_id: formData.admin_id,
+//       name: formData.name,
+//       email: formData.email,
+//       contact: formData.contact_no,
+//       ...(formData.password ? { password: formData.password } : {}),
+//     };
+
+//     const { data } = await axiosInstance.post(
+//       API_PATHS.ADMINAUTH.UPDATE_PROFIL,
+//       payload
+//     );
+
+//     if (data.status === 200) {
+//       toast.success(data.message);
+//       onSuccess(); // refresh UI
+//     } else {
+//       toast.error(data.message || "Something went wrong");
+//     }
+//   } catch (error: any) {
+//     toast.error(error.response?.data?.message || "Error updating profile");
+//   }
+// };
+
+// ======================
+
+// WEB SETTING UPDATE
+
 export const handleUpdateProfile = async (
   formData: {
     admin_id: string;
@@ -14,21 +68,7 @@ export const handleUpdateProfile = async (
   onSuccess: () => void
 ) => {
   try {
-    // Validation
-    if (!formData.name.trim()) {
-      toast.error("Name is required");
-      return;
-    }
-    if (!formData.email.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-    if (!/^\d{10}$/.test(formData.contact_no)) {
-      toast.error("Contact number must be exactly 10 digits");
-      return;
-    }
-
-    // Build payload (note: backend expects "contact", not "contact_no")
+    // Using the admin_id from formData directly
     const payload = {
       admin_id: formData.admin_id,
       name: formData.name,
@@ -52,10 +92,6 @@ export const handleUpdateProfile = async (
     toast.error(error.response?.data?.message || "Error updating profile");
   }
 };
-
-// ======================
-
-// WEB SETTING UPDATE
 
 export const updateWebSetting = async (
   adminId: string | null,
@@ -214,8 +250,6 @@ export const updateAdminUser = async (
     if (password && password !== "") {
       formData.append("password", password);
     }
-    
-
 
     // ✅ Clients
     clients.forEach((c) => formData.append("clients[]", c));
@@ -312,7 +346,10 @@ export const editClient = async (
     formData.append("edit_contact", clientData.contact || "");
     formData.append("edit_address", clientData.address || "");
     formData.append("update_password", clientData.password || "");
-    formData.append("client_milestone_id", clientData.client_milestone_id || "");
+    formData.append(
+      "client_milestone_id",
+      clientData.client_milestone_id || ""
+    );
     formData.append("edit_unit_type_option", clientData.unit_type || "");
     formData.append("edit_property_amount", clientData.property_amount || "");
     formData.append("edit_gst_slab", clientData.gst_slab || "");

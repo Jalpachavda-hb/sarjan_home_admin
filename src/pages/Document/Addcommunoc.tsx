@@ -15,78 +15,109 @@ const Addcommunoc = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedSite, setSelectedSite] = useState<string>("");
-const navigate = useNavigate();
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const navigate = useNavigate();
   const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     if (selectedFile) {
       setFile(selectedFile);
       setReceiptPreview(URL.createObjectURL(selectedFile));
+       setErrors({ ...errors, file: "" });
     }
   };
 
+  const validateForm = () => {
+    let newErrors: { [key: string]: string } = {};
+
+    if (!selectedSite) newErrors.selectedSite = "Please select a site";
+    if (!documentName.trim())
+      newErrors.documentName = "Please enter a document name";
+    if (!file) newErrors.file = "Please upload a document file";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async () => {
-  if (!selectedSite) {
-    toast.error("Please select a site");
-    return;
-  }
+    if (!validateForm()) return;
 
-  if (!documentName) {
-    toast.error("Please enter a document name");
-    return;
-  }
+    setLoading(true);
+    try {
+      const res = await submitCommonDocument(
+        file!,
+        documentName,
+        Number(selectedSite)
+      );
+      if (res) {
+        toast.success("Document submitted successfully!");
 
-  if (!file) {
-    toast.error("Please upload a document file");
-    return;
-  }
+        // reset form
+        setDocumentName("");
+        setFile(null);
+        setReceiptPreview(null);
+        setSelectedSite("");
+        setErrors({});
 
-  setLoading(true);
-  try {
-    // Convert selectedSite to number because API expects site_detail_id as number
-    const res = await submitCommonDocument(file, documentName, Number(selectedSite));
-    if (res) {
-      toast.success("Document submitted successfully!");
-
-      // reset form
-      setDocumentName("");
-      setFile(null);
-      setReceiptPreview(null);
-      setSelectedSite("");
-
-      // redirect to common documents page
-      navigate("/admin/common_documents", { replace: true });
+        // redirect to common documents page
+        navigate("/admin/common_documents", { replace: true });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Submission failed");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error(error);
-    toast.error("Submission failed");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   return (
     <div>
-      <PageMeta title="Add Commun Document Details" />
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         <div className="space-y-6">
           <ComponentCard title="Add Commun Document Details">
             <div className="space-y-6">
               {/* Select Site */}
-              <SiteSelector value={selectedSite} onChange={setSelectedSite} />
+              <SiteSelector value={selectedSite}
+              //  onChange={setSelectedSite}
+               
+               onChange={(val) => {
+                      setSelectedSite(val);
+                      setErrors((prev) => ({ ...prev, selectedSite: "" }));
+                    }}
+
+
+
+
+               />
+              {errors.selectedSite && (
+                <p className="text-red-500 text-sm ">{errors.selectedSite}</p>
+              )}
 
               {/* Document Name */}
               <div>
-                <Label>Enter Document Name</Label>
+                <Label>Enter Document Name  <span className="text-red-500">*</span></Label>
                 <Input
                   placeholder="Enter document name"
                   value={documentName}
-                  onChange={(e) => setDocumentName(e.target.value)}
+                  onChange={(e) => {
+                    setDocumentName(e.target.value);
+                    setErrors({ ...errors, documentName: "" }); // <-- remove this line
+                  }}
                 />
+                {errors.documentName && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.documentName}
+                  </p>
+                )}
               </div>
 
               {/* File Upload */}
               <div>
-                <Label>Upload Document</Label>
+                <Label>Upload Document  <span className="text-red-500">*</span></Label>
                 <FileInput id="fileUpload" onChange={handleReceiptChange} />
+                {errors.file && (
+                  <p className="text-red-500 text-sm mt-1">{errors.file}</p>
+                )}
                 {receiptPreview && (
                   <div className="mt-2 w-40 h-40 border rounded overflow-hidden">
                     <img

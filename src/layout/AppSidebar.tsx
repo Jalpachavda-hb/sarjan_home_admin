@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { IoEllipsisHorizontalSharp } from "react-icons/io5";
 import { IoMdDocument } from "react-icons/io";
+import { fetchWebSetting } from "../utils/Handlerfunctions/getdata";
 import {
   MdOutlinePendingActions,
   MdOutlineReport,
@@ -202,7 +203,7 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
   const { canView, loading } = usePermissions();
-
+  const [logo, setLogo] = useState<string | null>(null);
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
@@ -292,6 +293,14 @@ const AppSidebar: React.FC = () => {
       }
     }
   }, [openSubmenu]);
+
+  useEffect(() => {
+    fetchWebSetting()
+      .then((data) => {
+        setLogo(data.logo || null);
+      })
+      .catch((err) => console.error("Error fetching web setting:", err));
+  }, []);
 
   const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
     setOpenSubmenu((prev) =>
@@ -439,7 +448,7 @@ const AppSidebar: React.FC = () => {
         <Link to="/admin/dashboard">
           {isExpanded || isHovered || isMobileOpen ? (
             <img
-              src="/images/logo/logo-icon.png"
+             src={logo || "/images/logo/logo-icon.png"}
               alt="Logo"
               width={150}
               height={40}
@@ -447,7 +456,7 @@ const AppSidebar: React.FC = () => {
           ) : (
             // <img src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
             <img
-              src="/images/logo/logo-icon.png"
+            src={logo || "/images/logo/logo-icon.png"}
               alt="Logo"
               width={50}
               height={50}

@@ -54,7 +54,7 @@ export default function MyTiket() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replies, setReplies] = useState<any[]>([]);
-const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("");
   const loadTickets = async () => {
     setLoading(true);
     try {
@@ -154,36 +154,29 @@ const [message, setMessage] = useState("");
     setSelectedTicket(null);
     setReplies([]);
   };
-const handleSend = async () => {
-  if (!message.trim() || !selectedTicket) return;
+  const handleSend = async () => {
+    if (!message.trim() || !selectedTicket) return;
 
-  const formData = new FormData();
-  formData.append("ticket_id", selectedTicket.id.toString());
-  formData.append("message", message);
+    const formData = new FormData();
+    formData.append("ticket_id", selectedTicket.id.toString());
+    formData.append("message", message);
 
-  const res = await replyToTicket(formData);
+    const res = await replyToTicket(formData);
 
-  if (res) {
-    // Update replies list instantly
-    setReplies((prev) => [
-      ...prev,
-      {
-        request_by: "Admin",
-        user_type: "admin",
-        message: message,
-        created_at: new Date().toLocaleString(),
-      },
-    ]);
-    setMessage(""); // clear input
-  }
-};
-
-
-
-
-
-
-
+    if (res) {
+      // Update replies list instantly
+      setReplies((prev) => [
+        ...prev,
+        {
+          request_by: "Admin",
+          user_type: "admin",
+          message: message,
+          created_at: new Date().toLocaleString(),
+        },
+      ]);
+      setMessage(""); // clear input
+    }
+  };
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -402,61 +395,65 @@ const handleSend = async () => {
               )}
             </TableBody>
           </Table>
-         <Dialog
-  className="swal2-container"
-  open={openModal}
-  onClose={handleCloseModal}
-  maxWidth="md"
-  fullWidth
->
-  <DialogTitle className="flex justify-between items-center">
-    <span>Client Reply ({selectedTicket?.unitNo})</span>
-    <Button onClick={handleCloseModal}>✕</Button>
-  </DialogTitle>
+          <Dialog
+            className="swal2-container"
+            open={openModal}
+            onClose={handleCloseModal}
+            maxWidth="md"
+            fullWidth
+          >
+            <DialogTitle className="flex justify-between items-center">
+              <span>Client Reply ({selectedTicket?.unitNo})</span>
+              <Button onClick={handleCloseModal}>✕</Button>
+            </DialogTitle>
 
-  <DialogContent
-    dividers
-    style={{ maxHeight: "400px", overflowY: "auto" }}
-  >
-    {replies.length === 0 ? (
-      <p className="text-gray-500">No replies found</p>
-    ) : (
-      replies.map((reply, idx) => (
-        <div key={idx} className="mb-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-500">{reply.user_type}</span>
-            <span className="text-sm text-gray-500">
-               (reply.created_at)
-            </span>
-          </div>
-         
-          <div className="bg-gray-200 rounded-lg p-2 mt-1">{reply.message}</div>
-        </div>
-      ))
-    )}
-  </DialogContent>
+            <DialogContent
+              dividers
+              style={{ maxHeight: "400px", overflowY: "auto" }}
+            >
+              {replies.length === 0 ? (
+                <p className="text-gray-500">No replies found</p>
+              ) : (
+                replies.map((reply, idx) => (
+                  <div key={idx} className="mb-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">
+                        {reply.user_type}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {reply.created_at}
+                      </span>
+                    </div>
 
-  {/* Input to send new message */}
-  <div className="flex p-2 gap-2 border-t">
-    <TextField
-      fullWidth
-      size="small"
-      placeholder="Type your message..."
-      value={message}
-      onChange={(e) => setMessage(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && handleSend()}
-    />
-    <Button variant="contained" color="primary" onClick={handleSend}>
-      Send
-    </Button>
-  </div>
+                    <div className="bg-gray-200 rounded-lg p-2 mt-1">
+                      {reply.message}
+                    </div>
+                  </div>
+                ))
+              )}
+            </DialogContent>
 
-  <DialogActions>
-    <Button onClick={handleCloseModal} color="primary">
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
+            {/* Input to send new message */}
+            <div className="flex p-2 gap-2 border-t">
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Type your message..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              />
+              <Button variant="contained" color="primary" onClick={handleSend}>
+                Send
+              </Button>
+            </div>
+
+            <DialogActions>
+              <Button onClick={handleCloseModal} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
 
         {/* Pagination */}

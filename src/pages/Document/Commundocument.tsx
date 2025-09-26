@@ -89,31 +89,36 @@ export default function Commundocument() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won’t be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    });
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "You won’t be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!",
+  });
 
-    if (result.isConfirmed) {
-      try {
-        await deleteCommonDocument(id);
+  if (result.isConfirmed) {
+    try {
+      const res = await deleteCommonDocument(id);
 
+      if (res?.status === 200) {
         // ✅ Update state
         setDocuments((prev) => prev.filter((doc) => doc.id !== id));
 
-        // ✅ Show success
-        // toast.success("Document deleted successfully!");
-      } catch (err) {
-        console.error("Delete failed:", err);
+        // ✅ Show success message
+        toast.success("Document deleted successfully!");
+      } else {
         toast.error("Failed to delete document. Please try again.");
       }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to delete document. Please try again.");
     }
-  };
+  }
+};
+
 
   // ✅ View handler
   const handleView = (fileUrl: string) => {

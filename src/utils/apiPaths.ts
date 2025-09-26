@@ -19,7 +19,7 @@ export const API_PATHS = {
   ADMINAUTH: {
     ADMINLOGIN: "adminLogin", // POST
 
-    GET_PROFILE: "adminProfile", //GET
+    GET_PROFILE: "adminProfile", //GETF
 
     UPDATE_PROFIL: "updateProfile", //PUT
 

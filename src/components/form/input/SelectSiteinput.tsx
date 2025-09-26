@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import Select from "../Select";
 import Label from "../Label";
@@ -37,11 +35,14 @@ const SiteSelector: React.FC<SiteSelectorProps> = ({
 
   return (
     <div>
-      <Label>{label}</Label>
+      <Label>
+        {label}
+        <span className="text-red-500">*</span>
+      </Label>
       <Select
         options={siteOptions}
-        value={value}         
-        onChange={onChange}    
+        value={value}
+        onChange={onChange}
         placeholder={label}
       />
     </div>

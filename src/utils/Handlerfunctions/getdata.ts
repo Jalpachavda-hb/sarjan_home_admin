@@ -37,7 +37,7 @@ export const fetchProfile = async () => {
     const data = res.data.data;
 
     return {
-      admin_id: data.admin_id, // 👈 include admin_id
+      admin_id: data.id, // 👈 map 'id' to 'admin_id'
       name: data.name,
       email: data.email,
       role_id: data.role_id,
@@ -605,6 +605,27 @@ export const showTicketHistory = async () => {
   }
 };
 
+
+export const showclientTicket = async (requestSiteFilter?: string) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return null;
+  }
+
+  try {
+    const res = await axiosInstance.get(API_PATHS.TICKET.SHOWCLIENTTICKET, {
+      params: { 
+        admin_id: adminId,
+        requestSiteFilter: requestSiteFilter || "" // 👈 match your backend param
+      },
+    });
+    return res.data || null;
+  } catch (error) {
+    toast.error("Failed to fetch Ticket history data");
+    return null;
+  }
+};
 
 
 export const showclientlist = async (siteId: string, page: number = 1) => {
