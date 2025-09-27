@@ -28,6 +28,19 @@ export const getRoleId = (): string | null => {
   return null;
 };
 
+export const getUserRole = (): number | null => {
+  const user = sessionStorage.getItem("user");
+  if (user) {
+    try {
+      const parsed = JSON.parse(user);
+      return parsed.role_id || parsed.role || null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
 export const fetchProfile = async () => {
   try {
     const res = await axiosInstance.get(
@@ -605,7 +618,6 @@ export const showTicketHistory = async () => {
   }
 };
 
-
 export const showclientTicket = async (requestSiteFilter?: string) => {
   const adminId = getAdminId();
   if (!adminId) {
@@ -615,9 +627,9 @@ export const showclientTicket = async (requestSiteFilter?: string) => {
 
   try {
     const res = await axiosInstance.get(API_PATHS.TICKET.SHOWCLIENTTICKET, {
-      params: { 
+      params: {
         admin_id: adminId,
-        requestSiteFilter: requestSiteFilter || "" // 👈 match your backend param
+        requestSiteFilter: requestSiteFilter || "", // 👈 match your backend param
       },
     });
     return res.data || null;
@@ -626,7 +638,6 @@ export const showclientTicket = async (requestSiteFilter?: string) => {
     return null;
   }
 };
-
 
 export const showclientlist = async (siteId: string, page: number = 1) => {
   const adminId = getAdminId();
@@ -690,7 +701,7 @@ export const getClientName = async () => {
   }
 };
 
-export const getClientCountOfSite = async () => {
+export const getClientCountOfSite = async (siteId?: string) => {
   const adminId = getAdminId();
   if (!adminId) throw new Error("Admin ID not found");
 
@@ -698,7 +709,7 @@ export const getClientCountOfSite = async () => {
   const res = await axiosInstance.get(
     API_PATHS.CLIENTDATA.GETCLIENTECOUNTOFSITE,
     {
-      params: { admin_id: adminId },
+      params: { admin_id: adminId, site_id: siteId },
     }
   );
 
@@ -906,6 +917,18 @@ export const pendingForApprovals = async () => {
     }
   } catch (err) {
     console.error("Error fetching pending approvals:", err);
+    return [];
+  }
+};
+
+export const getSiteData = async (adminId: string) => {
+  try {
+    const res = await axiosInstance.get(API_PATHS.MULTITIMEUSEAPI.GETSITEDATA, {
+      params: { admin_id: adminId },
+    });
+    return res.data.status === 200 ? res.data.data : [];
+  } catch (err) {
+    console.error("Error fetching site data", err);
     return [];
   }
 };

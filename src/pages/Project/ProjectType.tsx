@@ -1,5 +1,3 @@
-
-
 import {
   Table,
   TableBody,
@@ -16,7 +14,7 @@ import { TextField, Button } from "@mui/material";
 import { fetchProjectTypes } from "../../utils/Handlerfunctions/getdata";
 import { editProjectType } from "../../utils/Handlerfunctions/formEditHandlers";
 import { deleteProjectType } from "../../utils/Handlerfunctions/formdeleteHandlers";
-
+import { usePermissions } from "../../hooks/usePermissions";
 import {
   Dialog,
   DialogTitle,
@@ -25,8 +23,8 @@ import {
 } from "@mui/material";
 
 interface Projecttype {
-  id: number;
-  name: string; // 👈 updated field (your API returns "name")
+  id: string; // ✅ keep ID as string
+  name: string;
 }
 
 export default function ProjectType() {
@@ -36,63 +34,72 @@ export default function ProjectType() {
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState<Projecttype | null>(null);
   const [search, setSearch] = useState("");
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 
   // 🔹 Fetch data from API on mount
-useEffect(() => {
-  const loadData = async () => {
-    const data = await fetchProjectTypes(); // directly returns []
-    setTableData(data);
-  };
-  loadData();
-}, []);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchProjectTypes();
+        setTableData(data || []);
+      } catch (err) {
+        console.error("Failed to fetch project types", err);
+      }
+    };
+    loadData();
+  }, []);
 
-const handleDelete = async (id: string) => {
-  try {
-    const res = await deleteProjectType(id);
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await deleteProjectType(id);
 
-    if (res.status === 200) {
-      // remove deleted row from UI
-      setTableData((prev) => prev.filter((row) => row.id !== id));
+      if (res.status === 200) {
+        setTableData((prev) => prev.filter((row) => row.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to delete project type", err);
     }
-  } catch (err) {
-    console.error("Failed to delete project type", err);
-  }
-};
+  };
 
   const handleEditClick = (row: Projecttype) => {
     setEditData({ ...row });
     setEditOpen(true);
   };
 
+  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const canViewProperties = canView("Properties");
+  const canCreateProperties = canCreate("Properties");
+  const canEditProperties = canEdit("Properties");
+  const canDeleteProperties = canDelete("Properties");
+  const hasAnyActionPermission = canEditProperties || canDeleteProperties;
 
-
-
-
-  
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (editData) {
       setEditData({ ...editData, [e.target.name]: e.target.value });
     }
   };
-const handleEditSave = async () => {
-  if (!editData) return;
 
-  try {
-    const res = await editProjectType("1", editData.id.toString(), editData.name);
+  const handleEditSave = async () => {
+    if (!editData) return;
 
-    if (res.status === 200) {
-      // update UI immediately
-      setTableData((prev) =>
-        prev.map((row) =>
-          row.id === editData.id ? { ...row, name: editData.name } : row
-        )
-      );
-      setEditOpen(false);
+    try {
+      const res = await editProjectType("1", editData.id, editData.name);
+
+      if (res.status === 200) {
+        setTableData((prev) =>
+          prev.map((row) =>
+            row.id === editData.id ? { ...row, name: editData.name } : row
+          )
+        );
+        setEditOpen(false);
+      }
+    } catch (err) {
+      console.error("Failed to update project type", err);
     }
-  } catch (err) {
-    console.error("Failed to update project type", err);
-  }
-};
+  };
+
+  const isColumnVisible = (column: string) =>
+    selectedColumns.length === 0 || selectedColumns.includes(column);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -149,40 +156,58 @@ const handleEditSave = async () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableCell className="columtext">Sr. No</TableCell>
-                <TableCell className="columtext">Project Name</TableCell>
-                <TableCell className="columtext">Action</TableCell>
+                {isColumnVisible("no") && (
+                  <TableCell className="columtext">Sr. No</TableCell>
+                )}
+                {isColumnVisible("ProjectName") && (
+                  <TableCell className="columtext">Project Name</TableCell>
+                )}
+                {hasAnyActionPermission && isColumnVisible("Action") && (
+                  <TableCell className="columtext">Action</TableCell>
+                )}
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell className="py-12 text-gray-500">
+                  <TableCell className="py-12 text-gray-500" colSpan={3}>
                     No data available
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedData.map((item, index) => (
                   <TableRow key={item.id}>
-                    <TableCell className="rowtext">
-                      {page * rowsPerPage + index + 1}
-                    </TableCell>
-                    <TableCell className="rowtext">{item.name}</TableCell>
-                    <TableCell className="rowtext">
-                      <div className="flex gap-2 mt-1">
-                        <Badge variant="light" color="error">
-                          <MdDelete className="text-2xl cursor-pointer"
-                          onClick={() => handleDelete(item.id)} />
-                        </Badge>
-                        <Badge variant="light">
-                          <FaEdit
-                            className="text-2xl cursor-pointer"
-                            onClick={() => handleEditClick(item)}
-                          />
-                        </Badge>
-                      </div>
-                    </TableCell>
+                    {isColumnVisible("no") && (
+                      <TableCell className="rowtext">
+                        {page * rowsPerPage + index + 1}
+                      </TableCell>
+                    )}
+                    {isColumnVisible("ProjectName") && (
+                      <TableCell className="rowtext">{item.name}</TableCell>
+                    )}
+                    {hasAnyActionPermission && isColumnVisible("Action") && (
+                      <TableCell className="rowtext">
+                        <div className="flex gap-2 mt-1">
+                          {canDeleteProperties && (
+                            <Badge variant="light" color="error">
+                              <MdDelete
+                                className="text-2xl cursor-pointer"
+                                onClick={() => handleDelete(item.id)}
+                              />
+                            </Badge>
+                          )}
+                          {canEditProperties && (
+                            <Badge variant="light">
+                              <FaEdit
+                                className="text-2xl cursor-pointer"
+                                onClick={() => handleEditClick(item)}
+                              />
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}
@@ -210,7 +235,13 @@ const handleEditSave = async () => {
       </div>
 
       {/* 🔹 Edit Dialog */}
-      <Dialog className="swal2-container" open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        className="swal2-container"
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Edit Project Type</DialogTitle>
         <DialogContent>
           <TextField

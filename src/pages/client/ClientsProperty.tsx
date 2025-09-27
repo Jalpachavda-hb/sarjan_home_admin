@@ -11,7 +11,10 @@ import { useState, useMemo, useEffect } from "react";
 import { FaRegEye } from "react-icons/fa";
 import { TextField } from "@mui/material";
 import { Link } from "react-router-dom";
-import { getClientCountOfSite } from "../../utils/Handlerfunctions/getdata";
+import {
+  getClientCountOfSite,
+  getSiteData,
+} from "../../utils/Handlerfunctions/getdata";
 
 interface Aprovel {
   id: string;
@@ -33,15 +36,61 @@ export default function ClientProperty() {
 
   const [tableData, setTableData] = useState<Aprovel[]>([]);
 
-  // 🔹 Fetch API data on mount
+  const getUserRole = (): number | null => {
+    const user = sessionStorage.getItem("user");
+    if (user) {
+      try {
+        const parsed = JSON.parse(user);
+        return parsed.role_id || parsed.role || null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+  const role = getUserRole();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getClientCountOfSite();
+        let data;
+
+        if (role === 1) {
+          // 🔹 Admin
+          data = await getClientCountOfSite();
+        } else {
+          // 🔹 Non-admin → must pass adminId
+          const user = sessionStorage.getItem("user");
+          let adminId: string | null = null;
+
+          if (user) {
+            try {
+              const parsed = JSON.parse(user);
+              adminId = parsed.admin_id || parsed.id || null;
+            } catch {
+              console.error("Invalid user object in sessionStorage");
+            }
+          }
+
+          if (!adminId) {
+            console.error("Admin ID not found for non-admin user");
+            return;
+          }
+
+          const siteRes = await getSiteData(adminId);
+
+          if (siteRes?.site_id) {
+            data = await getClientCountOfSite(siteRes.id);
+          } else {
+            console.error("Site ID not found in response:", siteRes);
+            return;
+          }
+        }
+
         setTableData(
           data.map((item: any) => ({
             id: item.id,
-            siteName: item.title,
+            siteName: item.title || item.site_name,
             count: item.clients_count,
           }))
         );
@@ -51,7 +100,27 @@ export default function ClientProperty() {
     };
 
     fetchData();
-  }, []);
+  }, [role]);
+
+  // 🔹 Fetch API data on mount
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const data = await getClientCountOfSite();
+  //       setTableData(
+  //         data.map((item: any) => ({
+  //           id: item.id,
+  //           siteName: item.title,
+  //           count: item.clients_count,
+  //         }))
+  //       );
+  //     } catch (err) {
+  //       console.error("Failed to fetch site client counts:", err);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);

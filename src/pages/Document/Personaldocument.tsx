@@ -15,6 +15,7 @@ import { TextField, Button } from "@mui/material";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { deletePersonalDocument } from "../../utils/Handlerfunctions/formdeleteHandlers";
+import { usePermissions } from "../../hooks/usePermissions";
 
 interface Adminuser {
   id: number;
@@ -35,6 +36,12 @@ export default function Personaldocument() {
   } | null>(null);
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
+    const { canDelete, canEdit, canCreate, canView } = usePermissions();
+
+ const canViewDocuments = canView("Documents");
+  const canCreateDocuments = canCreate("Documents");
+  const canEditDocuments = canEdit("Documents");
+  const canDeleteDocuments = canDelete("Documents");
 
   // ✅ Load data
   useEffect(() => {
@@ -156,6 +163,7 @@ export default function Personaldocument() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div />
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
+             {canCreateDocuments && (
             <a href="/admin/personal_documents/add">
               <Button
                 size="small"
@@ -164,7 +172,7 @@ export default function Personaldocument() {
               >
                 + Add Document Types
               </Button>
-            </a>
+            </a>)}
             <TextField
               size="small"
               variant="outlined"
@@ -240,12 +248,13 @@ export default function Personaldocument() {
                     {isColumnVisible("action") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
+                           {canDeleteDocuments && (
                           <Badge variant="light" color="error">
                             <MdDelete
                               className="text-2xl cursor-pointer"
                               onClick={() => handleDelete(item.id)}
                             />
-                          </Badge>
+                          </Badge>)}
                           <Badge variant="light" >
                             <FaRegEye
                               className="text-2xl cursor-pointer"

@@ -164,5 +164,6 @@ export const API_PATHS = {
     GETCLIENTNAMEFROMBLOCKID: "getClientNameFromBlockId",
     UNITTYPE: "unitType",
     GETCLIENTNAMEFROMSITEID: "getClientNameFromSiteId",
+    GETSITEDATA: "getSiteData"
   },
 };

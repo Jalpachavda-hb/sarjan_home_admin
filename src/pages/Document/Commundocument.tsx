@@ -15,6 +15,8 @@ import {
   fetchCommonDocuments,
   getAdminId,
 } from "../../utils/Handlerfunctions/getdata";
+import { usePermissions } from "../../hooks/usePermissions";
+
 import { deleteCommonDocument } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { FaRegEye } from "react-icons/fa";
 import { TextField, Button } from "@mui/material";
@@ -38,8 +40,18 @@ export default function Commundocument() {
   // use for search
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
-
   const [newCategory, setNewCategory] = useState("");
+
+  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+
+  // Check permissions for Clients feature
+  const canViewDocuments = canView("Documents");
+  const canCreateDocuments = canCreate("Documents");
+  const canEditDocuments = canEdit("Documents");
+  const canDeleteDocuments = canDelete("Documents");
+
+  // Check if user has any action permissions to show Manage column
+
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -89,36 +101,35 @@ export default function Commundocument() {
   }, []);
 
   const handleDelete = async (id: string) => {
-  const result = await Swal.fire({
-    title: "Are you sure?",
-    text: "You won’t be able to revert this!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, delete it!",
-  });
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won’t be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
 
-  if (result.isConfirmed) {
-    try {
-      const res = await deleteCommonDocument(id);
+    if (result.isConfirmed) {
+      try {
+        const res = await deleteCommonDocument(id);
 
-      if (res?.status === 200) {
-        // ✅ Update state
-        setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+        if (res?.status === 200) {
+          // ✅ Update state
+          setDocuments((prev) => prev.filter((doc) => doc.id !== id));
 
-        // ✅ Show success message
-        toast.success("Document deleted successfully!");
-      } else {
+          // ✅ Show success message
+          toast.success("Document deleted successfully!");
+        } else {
+          toast.error("Failed to delete document. Please try again.");
+        }
+      } catch (err) {
+        console.error("Delete failed:", err);
         toast.error("Failed to delete document. Please try again.");
       }
-    } catch (err) {
-      console.error("Delete failed:", err);
-      toast.error("Failed to delete document. Please try again.");
     }
-  }
-};
-
+  };
 
   // ✅ View handler
   const handleView = (fileUrl: string) => {
@@ -257,15 +268,17 @@ export default function Commundocument() {
             </FormControl> */}
 
             {/* Search Input */}
-            <a href="/admin/common_documents/add">
-              <Button
-                size="small"
-                variant="contained"
-                className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
-              >
-                + Add Common Doc Types
-              </Button>
-            </a>
+            {canCreateDocuments && (
+              <a href="/admin/common_documents/add">
+                <Button
+                  size="small"
+                  variant="contained"
+                  className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
+                >
+                  + Add Common Doc Types
+                </Button>
+              </a>
+            )}
             <TextField
               size="small"
               variant="outlined"
@@ -317,12 +330,13 @@ export default function Commundocument() {
                     </TableCell>
                     <TableCell className="rowtext">
                       <div className="flex gap-2 mt-1">
+                        {canDeleteDocuments && (
                         <Badge variant="light" color="error">
                           <MdDelete
                             className="text-2xl cursor-pointer"
                             onClick={() => handleDelete(item.id)}
                           />
-                        </Badge>
+                        </Badge>)}
                         <Badge variant="light">
                           <FaRegEye
                             className="text-2xl cursor-pointer"

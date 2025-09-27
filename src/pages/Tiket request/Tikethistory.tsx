@@ -29,7 +29,9 @@ import SiteFilter from "../../components/form/input/FilterbySite";
 import {
   showTicketHistory,
   getTicketMessages,
+  getUserRole,
 } from "../../utils/Handlerfunctions/getdata";
+import AccessDenied from "../../components/ui/AccessDenied";
 
 interface MyTiket {
   id: number;
@@ -41,6 +43,13 @@ interface MyTiket {
 }
 
 export default function Tikethistory() {
+  const role = getUserRole();
+  
+  // Show Access Denied if user role is not 1
+  if (role !== 1) {
+    return <AccessDenied message="You don't have permission to view ticket history." />;
+  }
+  
   const [tickets, setTickets] = useState<MyTiket[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);

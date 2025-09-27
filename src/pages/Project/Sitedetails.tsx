@@ -5,6 +5,8 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { fetchSiteDetails } from "../../utils/Handlerfunctions/getdata";
@@ -13,8 +15,9 @@ import { FaEdit } from "react-icons/fa";
 import { useEffect, useState, useMemo } from "react";
 import { TextField, Button } from "@mui/material";
 import {} from "@mui/material";
-
-interface project_category_name {
+import { usePermissions } from "../../hooks/usePermissions";
+import { deleteSite } from "../../utils/Handlerfunctions/formdeleteHandlers";
+interface sitedetails {
   id: string;
   project_type: string;
   project_category_name: string;
@@ -22,36 +25,73 @@ interface project_category_name {
 }
 
 export default function sitedetails() {
+  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const canViewProperties = canView("Properties");
+
+  const canCreateProperties = canCreate("Properties");
+  const canEditProperties = canEdit("Properties");
+  const canDeleteProperties = canDelete("Properties");
+  const hasAnyActionPermission = canEditProperties || canDeleteProperties;
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState<project_category_name | null>(null);
-
+  const [editData, setEditData] = useState<sitedetails | null>(null);
+  const [tableData, setTableData] = useState<sitedetails[]>([]);
   // use for search
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
   const [addOpen, setAddOpen] = useState(false);
-  const [siteDetails, setSiteDetails] = useState<project_category_name[]>([]);
+  const [siteDetails, setSiteDetails] = useState<sitedetails[]>([]);
   const [newCategory, setNewCategory] = useState("");
 
-  const handleEditClick = (row: project_category_name) => {
+  const handleEditClick = (row: sitedetails) => {
     setEditData({ ...row });
     setEditOpen(true);
   };
+  const loadSiteDetails = async () => {
+    try {
+      const data = await fetchSiteDetails();
+      setSiteDetails(data);
+    } catch (error) {
+      console.error("Error loading site details:", error);
+    }
+  };
 
   useEffect(() => {
-    const loadSiteDetails = async () => {
-      try {
-        const data = await fetchSiteDetails();
-        setSiteDetails(data);
-      } catch (error) {
-        console.error("Error loading site details:", error);
-      }
-    };
-
     loadSiteDetails();
   }, []);
+
+
+  const handleDelete = async (id: string) => {
+  try {
+    const confirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!confirm.isConfirmed) return; 
+
+    const res = await deleteSite(id); // 🔹 API call
+
+    if (res?.status === 200 || res?.success) {
+      toast.success("Site deleted successfully ✅");
+      // refresh UI (re-fetch list)
+      loadSiteDetails();
+    } else {
+      toast.error(res?.message || "Failed to delete site ");
+    }
+  } catch (error) {
+    toast.error("Something went wrong while deleting ");
+    console.error("Delete error:", error);
+  }
+};
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (editData) {
@@ -105,6 +145,8 @@ export default function sitedetails() {
   }, [filteredData, page, rowsPerPage]);
 
   //   const uniqueSites = [...new Set(siteDetails.map((item) => item.name))];
+
+  // Show Access Denied if user doesn't have view permission
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -236,16 +278,18 @@ export default function sitedetails() {
             </FormControl> */}
 
             {/* Search Input */}
-            <a href="/admin/projects/site_details/Addsite">
-              <Button
-                size="small"
-                variant="contained"
-                className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
-                onClick={() => setAddOpen(true)}
-              >
-                Add Site Details
-              </Button>
-            </a>
+            {canCreateProperties && (
+              <a href="/admin/projects/site_details/Addsite">
+                <Button
+                  size="small"
+                  variant="contained"
+                  className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
+                  onClick={() => setAddOpen(true)}
+                >
+                  Add Site Details
+                </Button>
+              </a>
+            )}
             <TextField
               size="small"
               variant="outlined"
@@ -274,7 +318,7 @@ export default function sitedetails() {
                 {isColumnVisible("siteName") && (
                   <TableCell className="columtext">Site Title</TableCell>
                 )}
-                {isColumnVisible("siteName") && (
+                {hasAnyActionPermission && isColumnVisible("Action") && (
                   <TableCell className="columtext">Action</TableCell>
                 )}
               </TableRow>
@@ -313,7 +357,7 @@ export default function sitedetails() {
                       <TableCell className="rowtext">{item.title}</TableCell>
                     )}
 
-                    {isColumnVisible("Action") && (
+                    {/* {isColumnVisible("Action") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
                           <Badge variant="light" color="error">
@@ -325,6 +369,30 @@ export default function sitedetails() {
                               onClick={() => handleEditClick(item)}
                             />
                           </Badge>
+                        </div>
+                      </TableCell>
+                    )}  */}
+                    {hasAnyActionPermission && isColumnVisible("Action") && (
+                      <TableCell className="rowtext">
+                        <div className="flex gap-2 mt-1">
+                          {canDeleteProperties && (
+                            <Badge variant="light" color="error">
+                              <MdDelete
+                                className="text-2xl cursor-pointer"
+                                onClick={() => handleDelete(item.id)}
+                                title="Delete Property"
+                              />
+                            </Badge>
+                          )}
+                          {canEditProperties && (
+                            <Badge variant="light">
+                              <FaEdit
+                                className="text-2xl cursor-pointer"
+                                // onClick={() => handleEdit(item)}
+                                title="Edit Property"
+                              />
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
                     )}

@@ -33,6 +33,7 @@ import { useState, useEffect } from "react";
 import {
   getAdminId,
   fetchPaymentDetails,
+  getUserRole
 } from "../../utils/Handlerfunctions/getdata";
 import { destroyPaymentDetails } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { editPaymentfromAdmin } from "../../utils/Handlerfunctions/formEditHandlers";
@@ -40,6 +41,8 @@ import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import FileInput from "../../components/form/input/FileInput";
 import SiteFilter from "../../components/form/input/FilterbySite";
+import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 
 interface Payment {
   id: number;
@@ -55,6 +58,20 @@ interface Payment {
 }
 
 export default function Payment() {
+  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  
+  // Check permissions for Payments feature
+  const canViewPayments = canView('Payments');
+  const canCreatePayments = canCreate('Payments');
+  const canEditPayments = canEdit('Payments');
+  const canDeletePayments = canDelete('Payments');
+  
+  // Check if user has any action permissions to show Manage column
+  const hasAnyActionPermission = canEditPayments || canDeletePayments;
+  
+  // Get user role to conditionally show site filter
+  const role = getUserRole();
+  
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
@@ -237,6 +254,11 @@ export default function Payment() {
     return "";
   };
 
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewPayments) {
+    return <AccessDenied message="You don't have permission to view payments." />;
+  }
+
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">Payment Details</h3>
@@ -341,11 +363,13 @@ export default function Payment() {
           </div>
 
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-            {/* Site Filter */}
-            <SiteFilter
-              value={siteFilter}
-              onChange={(e) => setSiteFilter(e.target.value)}
-            />
+            {/* Site Filter - Only show for role ID 1 */}
+            {role === 1 && (
+              <SiteFilter
+                value={siteFilter}
+                onChange={(e) => setSiteFilter(e.target.value)}
+              />
+            )}
 
             {/* Search */}
             <TextField
@@ -355,15 +379,17 @@ export default function Payment() {
               onChange={(e) => setSearch(e.target.value.trimStart())}
             />
 
-            <a href="/admin/payments/add">
-              <Button
-                size="small"
-                variant="contained"
-                className="!bg-indigo-700 hover:!bg-indigo-900 text-white p-3 h-10"
-              >
-                + Add
-              </Button>
-            </a>
+            {canCreatePayments && (
+              <a href="/admin/payments/add">
+                <Button
+                  size="small"
+                  variant="contained"
+                  className="!bg-indigo-700 hover:!bg-indigo-900 text-white p-3 h-10"
+                >
+                  + Add
+                </Button>
+              </a>
+            )}
           </div>
         </div>
 
@@ -402,7 +428,7 @@ export default function Payment() {
                 {isColumnVisible("receiptUrl") && (
                   <TableCell className="columtext">Receipt</TableCell>
                 )}
-                {isColumnVisible("Delete") && (
+                {hasAnyActionPermission && isColumnVisible("Delete") && (
                   <TableCell className="columtext">Action</TableCell>
                 )}
               </TableRow>
@@ -477,20 +503,26 @@ export default function Payment() {
                         )}
                       </TableCell>
                     )}
-                    {isColumnVisible("Delete") && (
+                    {hasAnyActionPermission && isColumnVisible("Delete") && (
                       <TableCell className="rowtext">
-                        <Badge variant="light">
-                          <MdEdit
-                            className="text-2xl cursor-pointer"
-                            onClick={() => handleEdit(item)}
-                          />
-                        </Badge>
-                        <Badge variant="light" color="error">
-                          <MdDelete
-                            className="text-2xl cursor-pointer"
-                            onClick={() => handleDelete(item.id)}
-                          />
-                        </Badge>
+                        <div className="flex gap-2">
+                          {canEditPayments && (
+                            <Badge variant="light">
+                              <MdEdit
+                                className="text-2xl cursor-pointer"
+                                onClick={() => handleEdit(item)}
+                              />
+                            </Badge>
+                          )}
+                          {canDeletePayments && (
+                            <Badge variant="light" color="error">
+                              <MdDelete
+                                className="text-2xl cursor-pointer"
+                                onClick={() => handleDelete(item.id)}
+                              />
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>

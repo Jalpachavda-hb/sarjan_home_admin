@@ -2,13 +2,14 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { IoEllipsisHorizontalSharp } from "react-icons/io5";
 import { IoMdDocument } from "react-icons/io";
-import { fetchWebSetting } from "../utils/Handlerfunctions/getdata";
+import { fetchWebSetting ,getUserRole } from "../utils/Handlerfunctions/getdata";
 import {
   MdOutlinePendingActions,
   MdOutlineReport,
   MdMergeType,
 } from "react-icons/md";
 import { FaPeopleRoof, FaBuildingUser } from "react-icons/fa6";
+
 import { BsBuildingFillCheck } from "react-icons/bs";
 import { RiAdminFill } from "react-icons/ri";
 import { IoTicketSharp } from "react-icons/io5";
@@ -231,6 +232,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const userRole = getUserRole();
+  console.log("user role" ,userRole)
   // Filter menu items based on permissions
   const filterMenuItems = useCallback(
     (items: NavItem[]) => {
@@ -244,9 +246,13 @@ const AppSidebar: React.FC = () => {
 
         // If has subitems, filter them too
         if (item.subItems) {
-          item.subItems = item.subItems.filter((subItem) =>
-            canView(subItem.permission || "")
-          );
+          item.subItems = item.subItems.filter((subItem) => {
+            // Role-based filtering for specific submenu items
+            if (subItem.name === "Ticket History") {
+              return userRole === 1;
+            }
+            return canView(subItem.permission || "");
+          });
           // Show parent if at least one subitem is accessible
           return item.subItems.length > 0;
         }
@@ -254,7 +260,7 @@ const AppSidebar: React.FC = () => {
         return true;
       });
     },
-    [canView]
+    [canView, userRole]
   );
 
   useEffect(() => {

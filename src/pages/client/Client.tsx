@@ -15,7 +15,12 @@ import { MdDelete } from "react-icons/md";
 import { MdAddCard } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { useState, useMemo, useEffect } from "react";
-import { showclientlist } from "../../utils/Handlerfunctions/getdata";
+
+import {
+  showclientlist,
+  getUserRole,
+  fetchRolePermissions,
+} from "../../utils/Handlerfunctions/getdata";
 import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { TextField, Button } from "@mui/material";
@@ -24,6 +29,8 @@ import {
   IconButton,
   // Select,
 } from "@mui/material";
+import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 interface Client {
   id: string;
   clientName: string;
@@ -39,7 +46,17 @@ interface Client {
 
 export default function ClientList() {
   const { id } = useParams(); // ✅ get site id from URL (/admin/clients/:id)
-
+  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  
+  // Check permissions for Clients feature
+  const canViewClient = canView('Clients');
+  const canCreateClient = canCreate('Clients');
+  const canEditClient = canEdit('Clients');
+  const canDeleteClient = canDelete('Clients');
+  
+  // Check if user has any action permissions to show Manage column
+  const hasAnyActionPermission = canEditClient || canDeleteClient;
+  
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortConfig, setSortConfig] = useState<{
@@ -78,7 +95,25 @@ export default function ClientList() {
       setLoading(false);
     }
   };
+  // useEffect(() => {
+  //   const loadPermissions = async () => {
+  //     try {
+  //       const res = await fetchRolePermissions();
+  //       const clientFeature = res?.data?.find(
+  //         (f: any) => f.feature === "Clients"
+  //       );
+  //       setClientPermissions(clientFeature?.permission || []);
+  //     } catch (err) {
+  //       console.error("Error fetching permissions:", err);
+  //       setClientPermissions([]);
+  //     }
+  //   };
 
+  //   loadPermissions();
+  // }, []);
+
+  // const hasPermission = (perm: string) => clientPermissions.includes(perm);
+  // console.log(hasPermission);
   useEffect(() => {
     if (!id) return;
 
@@ -146,7 +181,13 @@ export default function ClientList() {
       filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
     [filteredData, page, rowsPerPage]
   );
-
+  const role = getUserRole();
+  
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewClient) {
+    return <AccessDenied message="You don't have permission to view clients." />;
+  }
+  
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">Clients List</h3>
@@ -176,16 +217,18 @@ export default function ClientList() {
               InputProps={{ sx: { fontFamily: "Poppins", fontSize: "14px" } }}
             />
 
-            <Link to={`/admin/clients/${id}/addnewclient`}>
-              <Button
-                size="small"
-                variant="contained"
-                className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
-              >
-                <FaPlus />
-                Add New Client
-              </Button>
-            </Link>
+            {canCreateClient && (
+              <Link to={`/admin/clients/${id}/addnewclient`}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
+                >
+                  <FaPlus />
+                  Add New Client
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -201,19 +244,23 @@ export default function ClientList() {
                 <TableCell className="columtext">Unit No</TableCell>
                 <TableCell className="columtext">Pan</TableCell>
                 <TableCell className="columtext">Aadhar</TableCell>
-                <TableCell className="columtext">Manage</TableCell>
-                <TableCell className="columtext">Payment</TableCell>
+                {hasAnyActionPermission && (
+                  <TableCell className="columtext">Manage</TableCell>
+                )}
+                {role === 1 && (
+                  <TableCell className="columtext">Payment</TableCell>
+                )}
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8}>Loading...</TableCell>
+                  <TableCell colSpan={hasAnyActionPermission ? (role === 1 ? 9 : 8) : (role === 1 ? 8 : 7)}>Loading...</TableCell>
                 </TableRow>
               ) : paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-gray-500">
+                  <TableCell colSpan={hasAnyActionPermission ? (role === 1 ? 9 : 8) : (role === 1 ? 8 : 7)} className="text-gray-500">
                     No clients found
                   </TableCell>
                 </TableRow>
@@ -233,8 +280,9 @@ export default function ClientList() {
                     <TableCell className="rowtext">
                       {item.panCard ? (
                         <a
-                          href={item.panCard} target="_blank"
-                          download={`PAN_${item.clientName}.pdf`} 
+                          href={item.panCard}
+                          target="_blank"
+                          download={`PAN_${item.clientName}.pdf`}
                           className="text-blue-600 underline"
                         >
                           <IconButton color="primary">
@@ -248,7 +296,8 @@ export default function ClientList() {
                     <TableCell className="rowtext">
                       {item.adharCard ? (
                         <a
-                          href={item.adharCard} target="_blank"
+                          href={item.adharCard}
+                          target="_blank"
                           download={`Aadhar_${item.clientName}.pdf`}
                           className="text-blue-600 underline"
                         >
@@ -260,45 +309,53 @@ export default function ClientList() {
                         "-"
                       )}
                     </TableCell>
-                    <TableCell className="rowtext">
-                      <div className="flex gap-2">
-                        <Link
-                          to={`${item.id}/edit`}
-                          state={{
-                            client_milestone_id: item.client_milestone_id,
-                          }}
-                        >
-                          <Badge variant="light">
-                            <FaEdit className="text-xl cursor-pointer" />
-                          </Badge>
-                        </Link>
+                    {hasAnyActionPermission && (
+                      <TableCell className="rowtext">
+                        <div className="flex gap-2">
+                          {canEditClient && (
+                            <Link
+                              to={`${item.id}/edit`}
+                              state={{
+                                client_milestone_id: item.client_milestone_id,
+                              }}
+                            >
+                              <Badge variant="light">
+                                <FaEdit className="text-xl cursor-pointer" />
+                              </Badge>
+                            </Link>
+                          )}
 
-                        <Badge variant="light" color="error">
-                          <MdDelete
-                            onClick={() =>
-                              handleDelete(item.client_milestone_id)
-                            }
-                            className="text-xl cursor-pointer"
-                          />
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="rowtext">
-                      <div className="flex gap-2">
-                        <Link
-                          to={`${item.id}/payment_details/add`}
-                          state={{
-                            clientId: item.id,
-                            siteId: item.site_detail_id,
-                            blockId: item.block_detail_id,
-                          }}
-                        >
-                          <Badge variant="light" color="success">
-                            <MdAddCard className="text-xl cursor-pointer" />
-                          </Badge>
-                        </Link>
-                      </div>
-                    </TableCell>
+                          {canDeleteClient && (
+                            <Badge variant="light" color="error">
+                              <MdDelete
+                                onClick={() =>
+                                  handleDelete(item.client_milestone_id)
+                                }
+                                className="text-xl cursor-pointer"
+                              />
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
+                    {role === 1 && (
+                      <TableCell className="rowtext">
+                        <div className="flex gap-2">
+                          <Link
+                            to={`${item.id}/payment_details/add`}
+                            state={{
+                              clientId: item.id,
+                              siteId: item.site_detail_id,
+                              blockId: item.block_detail_id,
+                            }}
+                          >
+                            <Badge variant="light" color="success">
+                              <MdAddCard className="text-xl cursor-pointer" />
+                            </Badge>
+                          </Link>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}

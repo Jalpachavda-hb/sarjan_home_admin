@@ -389,3 +389,35 @@ export const deleteClientPanCard = async (id: string): Promise<boolean> => {
 
 
 
+export const deleteSite = async (id: string) => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found");
+    return false;
+  }
+
+  try {
+    console.log(id);
+
+    const formData = new FormData();
+    formData.append("site_id", id);
+    formData.append("admin_id", adminId);
+
+    const res = await axiosInstance.post(
+      API_PATHS.SITEDETAILS.DELETESITE,
+      formData
+    );
+
+    if (res?.status === 200) {
+      toast.success("Client deleted successfully!");
+      return true;
+    } else {
+      toast.error(res?.data?.message || "Failed to delete Client");
+      return false;
+    }
+  } catch (error: any) {
+    console.error("Delete Client failed:", error);
+    toast.error("Failed to delete Client");
+    return false;
+  }
+};

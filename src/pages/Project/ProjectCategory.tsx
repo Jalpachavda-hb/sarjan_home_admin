@@ -27,6 +27,8 @@ import {
   DialogActions,
 } from "@mui/material";
 import { Navigate } from "react-router";
+import { usePermissions } from "../../hooks/usePermissions";
+
 // ✅ Match API response
 interface ProjectCategoryType {
   id: number;
@@ -49,6 +51,12 @@ export default function ProjectCategory() {
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
+  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const canViewProperties = canView("Properties");
+  const canCreateProperties = canCreate("Properties");
+  const canEditProperties = canEdit("Properties");
+  const canDeleteProperties = canDelete("Properties");
+  const hasAnyActionPermission = canEditProperties || canDeleteProperties;
 
   // ✅ Fetch data from API
   const fetchData = async () => {
@@ -105,89 +113,89 @@ export default function ProjectCategory() {
     setEditOpen(true);
     if (editError) setEditError("");
   };
- const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (!editData) return;
-  const { name, value } = e.target;
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editData) return;
+    const { name, value } = e.target;
 
-  setEditData({ ...editData, [name]: value });
+    setEditData({ ...editData, [name]: value });
 
-  // 🔹 remove validation error once user types something
-  if (editError && value.trim()) {
-    setEditError("");
-  }
-};
+    // 🔹 remove validation error once user types something
+    if (editError && value.trim()) {
+      setEditError("");
+    }
+  };
 
   const handleCancelForm = () => {
     setShowForm(false);
   };
 
- const handleDelete = async (id: string) => {
-  try {
-    const confirm = await Swal.fire({
-      title: "Are you sure?",
-      text: "This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      const confirm = await Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+      });
 
-    if (!confirm.isConfirmed) return;
+      if (!confirm.isConfirmed) return;
 
-    const adminId = getAdminId(); 
-    if (!adminId) {
-      toast.error("Admin ID not found");
+      const adminId = getAdminId();
+      if (!adminId) {
+        toast.error("Admin ID not found");
+        return;
+      }
+
+      const res = await deleteProjectCategory(id, adminId.toString());
+
+      if (res?.status === 200 || res?.success) {
+        toast.success("Category deleted successfully");
+        fetchData();
+      } else {
+        toast.error(res?.message || "Failed to delete category");
+      }
+    } catch (error) {
+      toast.error("Something went wrong while deleting");
+      console.error("Delete error:", error);
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editData?.name.trim()) {
+      setEditError("Project Category is required");
       return;
     }
 
-    const res = await deleteProjectCategory(id, adminId.toString());
+    try {
+      const adminId = getAdminId(); // 🔹 get admin_id dynamically
+      if (!adminId) {
+        toast.error("Admin ID not found");
+        return;
+      }
 
-    if (res?.status === 200 || res?.success) {
-      toast.success("Category deleted successfully");
-      fetchData();
-    } else {
-      toast.error(res?.message || "Failed to delete category");
+      const formData = new FormData();
+      formData.append("admin_id", adminId.toString());
+      formData.append("id", editData.id.toString());
+      formData.append("project_category_name", editData.name);
+
+      const res = await editProjectCategory(formData);
+
+      if (res?.status === 200) {
+        setTableData((prev) =>
+          prev.map((item) =>
+            item.id === editData.id ? { ...item, name: editData.name } : item
+          )
+        );
+        setEditOpen(false);
+        toast.success("Project category updated successfully!");
+      }
+    } catch (error) {
+      console.error("Update failed:", error);
     }
-  } catch (error) {
-    toast.error("Something went wrong while deleting");
-    console.error("Delete error:", error);
-  }
-};
-
-const handleEditSave = async () => {
-  if (!editData?.name.trim()) {
-    setEditError("Project Category is required");
-    return;
-  }
-
-  try {
-    const adminId = getAdminId(); // 🔹 get admin_id dynamically
-    if (!adminId) {
-      toast.error("Admin ID not found");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("admin_id", adminId.toString());
-    formData.append("id", editData.id.toString());
-    formData.append("project_category_name", editData.name);
-
-    const res = await editProjectCategory(formData);
-
-    if (res?.status === 200) {
-      setTableData((prev) =>
-        prev.map((item) =>
-          item.id === editData.id ? { ...item, name: editData.name } : item
-        )
-      );
-      setEditOpen(false);
-      toast.success("Project category updated successfully!");
-    }
-  } catch (error) {
-    console.error("Update failed:", error);
-  }
-};
+  };
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -207,6 +215,7 @@ const handleEditSave = async () => {
             >
               Add Category
             </Button> */}
+            {canCreateProperties && (
             <a href="projects_category/addcategory">
               <Button
                 size="small"
@@ -216,6 +225,7 @@ const handleEditSave = async () => {
                 + Add Category
               </Button>
             </a>
+                     )}
             <TextField
               size="small"
               variant="outlined"
@@ -236,7 +246,7 @@ const handleEditSave = async () => {
                 {isColumnVisible("name") && (
                   <TableCell className="columtext">Project Category</TableCell>
                 )}
-                {isColumnVisible("action") && (
+                {hasAnyActionPermission && isColumnVisible("action") && (
                   <TableCell className="columtext">Action</TableCell>
                 )}
               </TableRow>
@@ -258,7 +268,7 @@ const handleEditSave = async () => {
                     {isColumnVisible("name") && (
                       <TableCell className="rowtext">{item.name}</TableCell>
                     )}
-                    {isColumnVisible("action") && (
+                    {hasAnyActionPermission && isColumnVisible("action") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
                           <Badge variant="light">
@@ -336,7 +346,7 @@ const handleEditSave = async () => {
             name="name"
             value={editData?.name || ""}
             onChange={handleEditChange}
-             error={!!editError} // ✅ red border
+            error={!!editError} // ✅ red border
             helperText={editError}
           />
         </DialogContent>
