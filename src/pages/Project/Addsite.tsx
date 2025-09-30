@@ -554,11 +554,9 @@ const Addsite = () => {
       }
       if (result && result.status === 200) {
         toast.success(`Site ${isEditMode ? "updated" : "added"} successfully!`);
-       
-          navigate("/admin/projects/site_details");
-   
-      }
 
+        navigate("/admin/projects/site_details");
+      }
     } catch (error) {
       console.error("Error submitting site:", error);
       toast.error(`Failed to ${isEditMode ? "update" : "add"} site`);

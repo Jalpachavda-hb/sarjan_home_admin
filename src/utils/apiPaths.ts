@@ -85,7 +85,7 @@ export const API_PATHS = {
     GETCLIENTPAYMENT: "getClientPayments", // GET {{url}}getClientPayments?client_id=Ev&site_id=3&block_id=196
     ADDPAYMENTFROMCLIENT: "addPaymentFromClient", // CHECK POSTMAN COLLECTION FILE FOR SHOW ID AND GET ID FROM
     DELETECLIENTPANCARD: "deleteClientPanCard",
-    DELETECLIENTADHARCARD :"deleteClientAdharCard"
+    DELETECLIENTADHARCARD: "deleteClientAdharCard",
   },
 
   //  DOCUMENT API
@@ -130,7 +130,7 @@ export const API_PATHS = {
     SHOWTICKETGISTORY: "showTicketHistory",
     GETTICKETMESSAGES: "getTicketMessages", //    "raw": "{{url}}getTicketMessages?admin_id=1&ticket_id=14",
     REPLAYTOTICKET: "replyToTicket", //POST
-    CLOSETICKET:"closeTicket", //POST
+    CLOSETICKET: "closeTicket", //POST
   },
 
   // USERLOG API
@@ -164,6 +164,6 @@ export const API_PATHS = {
     GETCLIENTNAMEFROMBLOCKID: "getClientNameFromBlockId",
     UNITTYPE: "unitType",
     GETCLIENTNAMEFROMSITEID: "getClientNameFromSiteId",
-    GETSITEDATA: "getSiteData"
+    GETSITEDATA: "getSiteData",
   },
 };

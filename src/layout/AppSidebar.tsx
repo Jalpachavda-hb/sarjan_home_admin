@@ -2,7 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { IoEllipsisHorizontalSharp } from "react-icons/io5";
 import { IoMdDocument } from "react-icons/io";
-import { fetchWebSetting ,getUserRole } from "../utils/Handlerfunctions/getdata";
+import {
+  fetchWebSetting,
+  getUserRole,
+} from "../utils/Handlerfunctions/getdata";
 import {
   MdOutlinePendingActions,
   MdOutlineReport,
@@ -232,7 +235,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const userRole = getUserRole();
-  console.log("user role" ,userRole)
+
   // Filter menu items based on permissions
   const filterMenuItems = useCallback(
     (items: NavItem[]) => {
@@ -450,11 +453,12 @@ const AppSidebar: React.FC = () => {
         className={`py-8 flex justify-center${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
-      > */}<div className="py-8 flex justify-center">
+      > */}
+      <div className="py-8 flex justify-center">
         <Link to="/admin/dashboard">
           {isExpanded || isHovered || isMobileOpen ? (
             <img
-             src={logo || "/images/logo/logo-icon.png"}
+              src={logo || "/images/logo/logo-icon.png"}
               alt="Logo"
               width={200}
               height={40}
@@ -462,7 +466,7 @@ const AppSidebar: React.FC = () => {
           ) : (
             // <img src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
             <img
-            src={logo || "/images/logo/logo-icon.png"}
+              src={logo || "/images/logo/logo-icon.png"}
               alt="Logo"
               width={50}
               height={50}
