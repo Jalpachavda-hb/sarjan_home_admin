@@ -15,72 +15,6 @@ interface HandleLoginSubmitProps {
     React.SetStateAction<{ contact?: string; password?: string }>
   >;
 }
-// export const handleLoginSubmit = async ({
-//   e,
-//   contact,
-//   password,
-//   setErors,
-//   setLoading,
-// }: HandleLoginSubmitProps) => {
-//   e.preventDefault();
-//   setLoading(true); // 🔥 start loader here
-
-//   const newErrors: { contact?: string; password?: string } = {};
-//   const contactError = validateContact(contact);
-//   const passwordError = validatePassword(password);
-
-//   if (contactError) newErrors.contact = contactError;
-//   if (passwordError) newErrors.password = passwordError;
-
-//   if (Object.keys(newErrors).length > 0) {
-//     setErrors(newErrors);
-//     setLoading(false); // stop loader if validation fails
-//     return;
-//   }
-
-//   try {
-//     const res = await axiosInstance.post(API_PATHS.ADMINAUTH.ADMINLOGIN, {
-//       contact,
-//       password,
-//     });
-
-//     if (res.data.status === 200) {
-//       const user = res.data.data;
-//       sessionStorage.setItem("user", JSON.stringify(user));
-
-//       toast.success(res.data.message || "Login successful!");
-
-//       if (user.role === 1 || user.role === 2) {
-//         window.location.href = "/admin/dashboard";
-//       } else {
-//         toast.error("Invalid role. Contact support.");
-//       }
-//     } else {
-//       toast.error(res.data.message || "Login failed!");
-//     }
-//   } catch (err: any) {
-//     if (err.response) {
-//       const { status, data } = err.response;
-//       if (status === 400) {
-//         toast.error(data.message || "Bad request");
-//       } else if (status === 401) {
-//         setErrors({ password: "Invalid password" });
-//       } else if (status === 404) {
-//         setErrors({ contact: "Phone number not found" });
-//       } else {
-//         toast.error("Something went wrong, please try again!");
-//       }
-//     } else {
-//       toast.error("Network error, please check your connection!");
-//     }
-//   } finally {
-//     setLoading(false); // ✅ always stop loader
-//   }
-// };
-
-
-
-
 
 export const handleLoginSubmit = async ({
   e,
@@ -112,7 +46,7 @@ export const handleLoginSubmit = async ({
     });
 
     if (res.data.status === 200) {
-    const user = res.data.data;
+      const user = res.data.data;
       sessionStorage.setItem("user", JSON.stringify(user));
 
       toast.success(res.data.message || "Login successful!");
@@ -158,9 +92,6 @@ export const handleLoginSubmit = async ({
     setLoading(false);
   }
 };
-
-
-
 
 // utils/Handlerfunctions/formSubmitHandlers.ts
 export const handleLogout = (navigate: (path: string) => void): void => {
@@ -559,5 +490,57 @@ export const replyToTicket = async (formData: FormData) => {
     console.error("Error adding ticket details:", error);
     toast.error("Failed to add ticket details");
     return null;
+  }
+};
+
+export interface SpecialityField {
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+export interface SiteFormValues {
+  project_category: string;
+  project_type: string;
+  title: string;
+  descr: string;
+  bhk_details: string;
+  amenities: string[];
+  specification: SpecialityField[];
+  map_link?: string;
+  video_link?: string;
+  rera_number: string;
+  banner_image?: File;
+  brochure?: File;
+  rera_certificate?: File[];
+  gallery_image?: File[];
+  unit_plan?: File[];
+  floor_plan?: File[];
+  bird_view?: File[];
+}
+
+
+
+export const addNewSite = async (formData: FormData) => {
+    const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+     if (!formData.has("admin_id")) {
+      formData.append("admin_id", adminId);
+    }
+    const response = await axiosInstance.post(
+      API_PATHS.SITEDETAILS.ADDSITE,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error adding site:", error);
+    throw error;
   }
 };

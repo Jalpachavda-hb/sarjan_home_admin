@@ -76,6 +76,7 @@ export default function Allfile() {
         <Route path="category/edit/:id" element={<Addcategory />} />
         <Route path="projects/site_details" element={<Sitedetails />} />
         <Route path="projects/site_details/addsite" element={<Addsite />} />
+        <Route path="projects/site_details/addsite/:id" element={<Addsite />} />
         <Route path="projects/property_details" element={<PropertyDetails />} />
 
         <Route

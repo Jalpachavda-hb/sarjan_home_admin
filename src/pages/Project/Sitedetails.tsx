@@ -12,8 +12,9 @@ import TablePagination from "@mui/material/TablePagination";
 import { fetchSiteDetails } from "../../utils/Handlerfunctions/getdata";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo , } from "react";
 import { TextField, Button } from "@mui/material";
+
 import {} from "@mui/material";
 import { usePermissions } from "../../hooks/usePermissions";
 import { deleteSite } from "../../utils/Handlerfunctions/formdeleteHandlers";
@@ -46,10 +47,13 @@ export default function sitedetails() {
   const [siteDetails, setSiteDetails] = useState<sitedetails[]>([]);
   const [newCategory, setNewCategory] = useState("");
 
-  const handleEditClick = (row: sitedetails) => {
-    setEditData({ ...row });
-    setEditOpen(true);
+  // const handleEdit = (id: sitedetails) => {
+  //   window.location.href = `site_details/Addsite/${id}`;
+  // };
+   const handleEdit = (id: sitedetails) => {
+    window.location.href = `/admin/projects/site_details/Addsite/${id}`;
   };
+
   const loadSiteDetails = async () => {
     try {
       const data = await fetchSiteDetails();
@@ -63,48 +67,31 @@ export default function sitedetails() {
     loadSiteDetails();
   }, []);
 
-
   const handleDelete = async (id: string) => {
-  try {
-    const confirm = await Swal.fire({
-      title: "Are you sure?",
-      text: "This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    });
+    try {
+      const confirm = await Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+      });
 
-    if (!confirm.isConfirmed) return; 
+      if (!confirm.isConfirmed) return;
 
-    const res = await deleteSite(id); // 🔹 API call
-
-    if (res?.status === 200 || res?.success) {
-      toast.success("Site deleted successfully ✅");
-      // refresh UI (re-fetch list)
-      loadSiteDetails();
-    } else {
-      toast.error(res?.message || "Failed to delete site ");
+      const res = await deleteSite(id); // returns true/false or axios res
+      if (res) {
+        toast.success("Site deleted successfully!");
+        loadSiteDetails(); // 🔄 refresh UI
+      } else {
+        toast.error("Failed to delete site");
+      }
+    } catch (error) {
+      toast.error("Something went wrong while deleting");
+      console.error("Delete error:", error);
     }
-  } catch (error) {
-    toast.error("Something went wrong while deleting ");
-    console.error("Delete error:", error);
-  }
-};
-
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (editData) {
-      setEditData({ ...editData, [e.target.name]: e.target.value });
-    }
-  };
-
-  const handleEditSave = () => {
-    if (editData) {
-      // Here you would normally update in DB or state
-      console.log("Updated data:", editData);
-    }
-    setEditOpen(false);
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -388,7 +375,7 @@ export default function sitedetails() {
                             <Badge variant="light">
                               <FaEdit
                                 className="text-2xl cursor-pointer"
-                                // onClick={() => handleEdit(item)}
+                                onClick={() => handleEdit(item.id)}
                                 title="Edit Property"
                               />
                             </Badge>

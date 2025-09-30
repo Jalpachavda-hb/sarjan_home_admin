@@ -33,13 +33,15 @@ export default function UserDropdown() {
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
-        <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
+        <span className="mr-3 overflow-hidden rounded-full h-15 w-15">
           <img src="/images/user/owner.jpg" alt="User" />
         </span>
 
         <span className="block mr-1 font-medium text-theme-sm">
           {" "}
-          {formData.name?.split(" ")[0]}
+          {formData.name
+          // ?.split(" ")[0]
+          }
         </span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${

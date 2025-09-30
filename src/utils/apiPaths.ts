@@ -50,10 +50,10 @@ export const API_PATHS = {
 
   SITEDETAILS: {
     GETSITEDETAILS: "showSiteList", //GET
+    SITEDETAILSBYID: "showSiteDetails", // change url when use
     ADDSITE: "addSite", //POST
     EDITSITEDETAILS: "editSite", //POST
     DELETESITE: "deleteSite", //POST
-    SITEDETAILSBYID: "showSiteDetails", // change url when use
     ADDPROPERTDETAILS: "addPropertyDetails", // POST
     UPLOADBLOCKDETAILCVC: "uploadBlockDetailCsv", //POST
     PROPERTYDETAILSLIST: "propertyDetailsList", // change url when use GET

@@ -932,3 +932,16 @@ export const getSiteData = async (adminId: string) => {
     return [];
   }
 };
+export const fetchSitedetails = async (id: string) => {
+  try {
+    const response = await axiosInstance.get(API_PATHS.SITEDETAILS.SITEDETAILSBYID, {
+      params: { site_id: id },
+    });
+
+    // ✅ return full response, not just `data.data`
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching site details:", error);
+    return null;
+  }
+};

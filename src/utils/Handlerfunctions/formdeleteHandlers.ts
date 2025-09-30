@@ -388,17 +388,11 @@ export const deleteClientPanCard = async (id: string): Promise<boolean> => {
 
 
 
-
 export const deleteSite = async (id: string) => {
   const adminId = getAdminId();
-  if (!adminId) {
-    toast.error("Admin ID not found");
-    return false;
-  }
+  if (!adminId) return { success: false, message: "Admin ID not found" };
 
   try {
-    console.log(id);
-
     const formData = new FormData();
     formData.append("site_id", id);
     formData.append("admin_id", adminId);
@@ -408,16 +402,9 @@ export const deleteSite = async (id: string) => {
       formData
     );
 
-    if (res?.status === 200) {
-      toast.success("Client deleted successfully!");
-      return true;
-    } else {
-      toast.error(res?.data?.message || "Failed to delete Client");
-      return false;
-    }
+    if (res?.status === 200) return { success: true, message: "Site deleted!" };
+    return { success: false, message: res?.data?.message || "Failed to delete site" };
   } catch (error: any) {
-    console.error("Delete Client failed:", error);
-    toast.error("Failed to delete Client");
-    return false;
+    return { success: false, message: "Failed to delete site" };
   }
 };

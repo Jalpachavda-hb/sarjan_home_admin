@@ -3,60 +3,6 @@ import { toast } from "react-toastify";
 import { API_PATHS } from "../apiPaths";
 import { getAdminId } from "./getdata";
 
-// export const handleUpdateProfile = async (
-//   formData: {
-//     admin_id: string;
-//     name: string;
-//     email: string;
-//     contact_no: string;
-//     password?: string;
-//   },
-//   onSuccess: () => void
-// ) => {
-//   try {
-//     // Validation
-//     if (!formData.name.trim()) {
-//       toast.error("Name is required");
-//       return;
-//     }
-//     if (!formData.email.trim()) {
-//       toast.error("Email is required");
-//       return;
-//     }
-//     if (!/^\d{10}$/.test(formData.contact_no)) {
-//       toast.error("Contact number must be exactly 10 digits");
-//       return;
-//     }
-
-//     // Build payload (note: backend expects "contact", not "contact_no")
-//     const payload = {
-//       admin_id: formData.admin_id,
-//       name: formData.name,
-//       email: formData.email,
-//       contact: formData.contact_no,
-//       ...(formData.password ? { password: formData.password } : {}),
-//     };
-
-//     const { data } = await axiosInstance.post(
-//       API_PATHS.ADMINAUTH.UPDATE_PROFIL,
-//       payload
-//     );
-
-//     if (data.status === 200) {
-//       toast.success(data.message);
-//       onSuccess(); // refresh UI
-//     } else {
-//       toast.error(data.message || "Something went wrong");
-//     }
-//   } catch (error: any) {
-//     toast.error(error.response?.data?.message || "Error updating profile");
-//   }
-// };
-
-// ======================
-
-// WEB SETTING UPDATE
-
 export const handleUpdateProfile = async (
   formData: {
     admin_id: string;
@@ -391,52 +337,33 @@ export const editClient = async (
   }
 };
 
-// export const editClient = async (
-//   clientData: any,
-//   originalData: any,
-//   aadharCard?: File | null,
-//   panCard?: File | null
-// ) => {
-//   try {
-//     const formData = new FormData();
+export const editSiteData = async (
+ 
+  id: string,
+  formData: FormData
+) => {
+  try {
+     const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
 
-//     formData.append("admin_id", clientData.admin_id);
-//     formData.append("clientid", clientData.clientid);
-//     formData.append("site_detail_id", clientData.site_detail_id || "");
-//     formData.append("client_name", clientData.name || "");
-//     formData.append("edit_email", clientData.email || "");
-//     formData.append("edit_contact", clientData.contact || "");
-//     formData.append("edit_address", clientData.address || "");
-//     formData.append("update_password", clientData.password || "");
-//     formData.append("client_milestone_id", clientData.client_milestone_id || "");
-//     formData.append("edit_unit_type_option", clientData.unit_type || "");
-//     formData.append("edit_property_amount", clientData.property_amount || "");
-//     formData.append("edit_gst_slab", clientData.gst_slab || "");
-//     formData.append("edit_gst_amount", clientData.gst_amount || "");
-//     formData.append("edit_total_amount", clientData.total_amount || "");
+    // ✅ append ids to formData
+    formData.append("admin_id", adminId);
+    formData.append("site_id", id);
 
-//     // Handle files
-//     if (clientData.remove_aadhar) {
-//       formData.append("edit_aadhar_card", "");
-//     } else if (aadharCard instanceof File) {
-//       formData.append("edit_aadhar_card", aadharCard);
-//     }
+    const response = await axiosInstance.post(
+      API_PATHS.SITEDETAILS.EDITSITEDETAILS,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
 
-//     if (clientData.remove_pan) {
-//       formData.append("edit_pan_card", "");
-//     } else if (panCard instanceof File) {
-//       formData.append("edit_pan_card", panCard);
-//     }
-
-//     const response = await axiosInstance.post(
-//       API_PATHS.CLIENTDATA.UPDATECLIENTDATA,
-//       formData,
-//       { headers: { "Content-Type": "multipart/form-data" } }
-//     );
-
-//     return response.data;
-//   } catch (error) {
-//     console.error("Error editing client:", error);
-//     throw error;
-//   }
-// };
+    return response;
+  } catch (error) {
+    console.error("Error editing site:", error);
+    throw error;
+  }
+};
