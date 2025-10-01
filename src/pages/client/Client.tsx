@@ -46,7 +46,7 @@ interface Client {
 
 export default function ClientList() {
   const { id } = useParams(); // ✅ get site id from URL (/admin/clients/:id)
-  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+ const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
 
   // Check permissions for Clients feature
   const canViewClient = canView("Clients");
@@ -166,6 +166,16 @@ export default function ClientList() {
   const role = getUserRole();
 
   // Show Access Denied if user doesn't have view permission
+
+    if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+
   if (!canViewClient) {
     return (
       <AccessDenied message="You don't have permission to view clients." />
@@ -177,7 +187,6 @@ export default function ClientList() {
     { key: "email", label: "Email" },
     { key: "contactNumber", label: "Contact" },
     { key: "unitNo", label: "Unit No" },
- 
   ];
 
   return (
@@ -192,9 +201,7 @@ export default function ClientList() {
               size="small"
               variant="contained"
               className="!bg-amber-500 hover:!bg-amber-600 text-white"
-              onClick={() =>
-                printTableData(filteredData, columns)
-              }
+              onClick={() => printTableData(filteredData, columns)}
             >
               Print
             </Button>
