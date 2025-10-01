@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { deletePersonalDocument } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 
 interface Adminuser {
   id: number;
@@ -36,7 +37,7 @@ export default function Personaldocument() {
   } | null>(null);
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
-    const { canDelete, canEdit, canCreate, canView } = usePermissions();
+    const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
 
  const canViewDocuments = canView("Documents");
   const canCreateDocuments = canCreate("Documents");
@@ -154,6 +155,22 @@ export default function Personaldocument() {
 
   // ✅ Edit in new tab
   
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewDocuments) {
+    return (
+      <AccessDenied message="You don't have permission to view personal documents." />
+    );
+  }
+
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">Personal Document Types</h3>

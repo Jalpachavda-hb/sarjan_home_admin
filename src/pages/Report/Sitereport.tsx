@@ -8,6 +8,8 @@ import {
 import { copyTableData, downloadCSV } from "../../utils/copy";
 import { printTableData } from "../../utils/printTableData";
 import { fetchSiteReports } from "../../utils/Handlerfunctions/getdata";
+import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useEffect, useMemo } from "react";
 
@@ -29,7 +31,8 @@ interface SiteReport {
   admin_name: string;
 }
 
-export default function Pandingforaprovel() {
+export default function Sitereport() {
+  const { canView, loading: permissionLoading } = usePermissions();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -37,6 +40,9 @@ export default function Pandingforaprovel() {
   // use for search
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
+
+  // Check permissions
+  const canViewReports = canView("Reports");
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -69,7 +75,7 @@ export default function Pandingforaprovel() {
       .includes(searchTerm);
 
     const matchesSite = siteFilter
-      ? item.siteName.trim() === siteFilter.trim()
+      ? item.site_name.trim() === siteFilter.trim()
       : true;
 
     return matchesSearch && matchesSite;
@@ -89,7 +95,23 @@ export default function Pandingforaprovel() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
+  const uniqueSites = [...new Set(tableData.map((item) => item.site_name))];
+
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewReports) {
+    return (
+      <AccessDenied message="You don't have permission to view site reports." />
+    );
+  }
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">

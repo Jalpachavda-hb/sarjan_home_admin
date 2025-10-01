@@ -15,6 +15,7 @@ import { fetchProjectTypes } from "../../utils/Handlerfunctions/getdata";
 import { editProjectType } from "../../utils/Handlerfunctions/formEditHandlers";
 import { deleteProjectType } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 import {
   Dialog,
   DialogTitle,
@@ -66,7 +67,7 @@ export default function ProjectType() {
     setEditOpen(true);
   };
 
-  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
   const canViewProperties = canView("Properties");
   const canCreateProperties = canCreate("Properties");
   const canEditProperties = canEdit("Properties");
@@ -131,6 +132,22 @@ export default function ProjectType() {
       page * rowsPerPage + rowsPerPage
     );
   }, [filteredData, page, rowsPerPage]);
+
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewProperties) {
+    return (
+      <AccessDenied message="You don't have permission to view project types." />
+    );
+  }
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">

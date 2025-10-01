@@ -28,6 +28,7 @@ import {
 } from "@mui/material";
 import { Navigate } from "react-router";
 import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 
 // ✅ Match API response
 interface ProjectCategoryType {
@@ -51,7 +52,7 @@ export default function ProjectCategory() {
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
-  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
   const canViewProperties = canView("Properties");
   const canCreateProperties = canCreate("Properties");
   const canEditProperties = canEdit("Properties");
@@ -196,6 +197,22 @@ export default function ProjectCategory() {
       console.error("Update failed:", error);
     }
   };
+
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewProperties) {
+    return (
+      <AccessDenied message="You don't have permission to view project categories." />
+    );
+  }
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">

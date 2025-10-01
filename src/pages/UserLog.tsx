@@ -6,10 +6,10 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { fetchAdminLogs } from "../utils/Handlerfunctions/getdata";
-
+import { usePermissions } from "../hooks/usePermissions";
+import AccessDenied from "../components/ui/AccessDenied";
 import { useState, useEffect } from "react";
 import { TextField } from "@mui/material";
-
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 
@@ -23,14 +23,20 @@ interface Log {
 }
 
 export default function UserLog() {
+  const { canView, loading: permissionLoading } = usePermissions();
   const [logs, setLogs] = useState<Log[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(12);
   const [totalRecords, setTotalRecords] = useState(0);
   const [search, setSearch] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Check permissions
+  const canViewUserLog = canView("User_log");
   // 🔹 Fetch logs for specific page
   const getLogs = async (pageNumber: number) => {
+    setLoading(true);
     try {
       const res = await fetchAdminLogs(pageNumber + 1);
       const updatedLogs = res.data.map((log: any) => ({
@@ -43,6 +49,8 @@ export default function UserLog() {
       setTotalRecords(res.pagination.total);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,6 +69,22 @@ export default function UserLog() {
   };
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
+
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewUserLog) {
+    return (
+      <AccessDenied message="You don't have permission to view user logs." />
+    );
+  }
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -100,10 +124,16 @@ export default function UserLog() {
             </TableHeader>
 
             <TableBody>
-              {filteredData.length === 0 ? (
+              {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-12 text-center">
+                  <TableCell colSpan={4} className="py-12 text-center">
                     Loading...
+                  </TableCell>
+                </TableRow>
+              ) : filteredData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="py-12 text-center text-gray-500">
+                    No logs available
                   </TableCell>
                 </TableRow>
               ) : (

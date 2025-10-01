@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import { deleteAdminUser } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { useNavigate } from "react-router-dom";
 import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 
 interface AdminUser {
   id: string;
@@ -33,12 +34,12 @@ interface AdminUser {
 }
 
 export default function Adminuser() {
-  const { canDelete, canEdit, canCreate, canView } = usePermissions();
-  // const canViewAdminUsers = canView("Admin_users");
+  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
+  const canViewAdminUsers = canView("Admin_users");
   const canCreateAdminUsers = canCreate("Admin_users");
   const canEditAdminUsers = canEdit("Admin_users");
   const canDeleteAdminUsers = canDelete("Admin_users");
-const hasAnyActionPermission = canEditAdminUsers || canDeleteAdminUsers;
+  const hasAnyActionPermission = canEditAdminUsers || canDeleteAdminUsers;
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns] = useState<string[]>([]);
@@ -126,7 +127,21 @@ const hasAnyActionPermission = canEditAdminUsers || canDeleteAdminUsers;
 
   //   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
 
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   // Show Access Denied if user doesn't have view permission
+  if (!canViewAdminUsers) {
+    return (
+      <AccessDenied message="You don't have permission to view admin users." />
+    );
+  }
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">

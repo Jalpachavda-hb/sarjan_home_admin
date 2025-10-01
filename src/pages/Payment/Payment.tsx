@@ -57,7 +57,7 @@ interface Payment {
 }
 
 export default function Payment() {
-  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
 
   // Check permissions for Payments feature
   const canViewPayments = canView("Payments");
@@ -266,6 +266,15 @@ const columns = [
 ];
 
 
+
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   // Show Access Denied if user doesn't have view permission
   if (!canViewPayments) {

@@ -18,6 +18,7 @@ import { TextField, Button } from "@mui/material";
 import {} from "@mui/material";
 import { usePermissions } from "../../hooks/usePermissions";
 import { deleteSite } from "../../utils/Handlerfunctions/formdeleteHandlers";
+import AccessDenied from "../../components/ui/AccessDenied";
 interface sitedetails {
   id: string;
   project_type: string;
@@ -26,7 +27,7 @@ interface sitedetails {
 }
 
 export default function sitedetails() {
-  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
   const canViewProperties = canView("Properties");
 
   const canCreateProperties = canCreate("Properties");
@@ -133,7 +134,21 @@ export default function sitedetails() {
 
   //   const uniqueSites = [...new Set(siteDetails.map((item) => item.name))];
 
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   // Show Access Denied if user doesn't have view permission
+  if (!canViewProperties) {
+    return (
+      <AccessDenied message="You don't have permission to view site details." />
+    );
+  }
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">

@@ -8,6 +8,8 @@ import {
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo, useEffect } from "react";
 import { printTableData } from "../../utils/printTableData";
+import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 import {
   TextField,
   Button,
@@ -39,6 +41,8 @@ interface ClientReport {
   ledger: string;
 }
 export default function Clientreport() {
+  const { canView, loading: permissionLoading } = usePermissions();
+  const canViewReports = canView("Reports");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -120,6 +124,22 @@ export default function Clientreport() {
       page * rowsPerPage + rowsPerPage
     );
   }, [filteredData, page, rowsPerPage]);
+
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewReports) {
+    return (
+      <AccessDenied message="You don't have permission to view client reports." />
+    );
+  }
 
   return (
     <>

@@ -15,6 +15,8 @@ import {
   getClientCountOfSite,
   getSiteData,
 } from "../../utils/Handlerfunctions/getdata";
+import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 
 interface Aprovel {
   id: string;
@@ -23,6 +25,7 @@ interface Aprovel {
 }
 
 export default function ClientProperty() {
+  const { canView, loading: permissionLoading } = usePermissions();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -35,6 +38,9 @@ export default function ClientProperty() {
   // const [siteFilter, setSiteFilter] = useState("");
 
   const [tableData, setTableData] = useState<Aprovel[]>([]);
+
+  // Check permissions
+  const canViewClients = canView("Clients");
 
   const getUserRole = (): number | null => {
     const user = sessionStorage.getItem("user");
@@ -188,6 +194,22 @@ export default function ClientProperty() {
     setSortConfig({ key, direction });
     setPage(0);
   };
+
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewClients) {
+    return (
+      <AccessDenied message="You don't have permission to view client properties." />
+    );
+  }
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">

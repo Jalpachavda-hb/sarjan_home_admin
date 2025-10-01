@@ -38,7 +38,7 @@ interface PropertyDetailsType {
 
 export default function PropertyDetails() {
   // All hooks must be called unconditionally at the top
-  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
   const [page, setPage] = useState(0);
   const [tableData, setTableData] = useState<PropertyDetailsType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -155,8 +155,16 @@ export default function PropertyDetails() {
     { key: "unitNumber", label: "Unit Number" },
   ];
 
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   // Show Access Denied if user doesn't have view permission
-  // This must be after all hooks are called
   if (!canViewProperties) {
     return (
       <AccessDenied message="You don't have permission to view property details." />

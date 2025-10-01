@@ -5,7 +5,7 @@ import Input from "../input/InputField";
 import TextArea from "../input/TextArea";
 
 export interface SpecialityField {
-  icon: string;
+  
   title: string;
   description: string;
 }
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const DynamicSpeciality = ({ initialValues = [], onChange }: Props) => {
-  const [fields, setFields] = useState<SpecialityField[]>([{ icon: "", title: "", description: "" }]);
+  const [fields, setFields] = useState<SpecialityField[]>([{ title: "", description: "" }]);
 
   // Update state if initialValues change (important for edit mode)
   useEffect(() => {
@@ -32,7 +32,7 @@ const DynamicSpeciality = ({ initialValues = [], onChange }: Props) => {
     onChange?.(updated);
   };
 
-  const handleAddField = () => setFields([...fields, { icon: "", title: "", description: "" }]);
+  const handleAddField = () => setFields([...fields, { title: "", description: "" }]);
   const handleDeleteField = (index: number) => {
     const updated = fields.filter((_, i) => i !== index);
     setFields(updated);
@@ -45,13 +45,13 @@ const DynamicSpeciality = ({ initialValues = [], onChange }: Props) => {
 
       {fields.map((field, index) => (
         <div key={index} className="flex flex-col gap-2 mt-2 w-full border p-3 rounded-md">
-          <Input
+          {/* <Input
             type="text"
             value={field.icon}
             onChange={(e) => handleFieldChange(index, "icon", e.target.value)}
             placeholder="Enter Icon Name"
             className="w-full"
-          />
+          /> */}
           <Input
             type="text"
             value={field.title}

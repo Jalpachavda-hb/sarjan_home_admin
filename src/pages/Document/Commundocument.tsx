@@ -16,6 +16,7 @@ import {
   getAdminId,
 } from "../../utils/Handlerfunctions/getdata";
 import { usePermissions } from "../../hooks/usePermissions";
+import AccessDenied from "../../components/ui/AccessDenied";
 
 import { deleteCommonDocument } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { FaRegEye } from "react-icons/fa";
@@ -42,7 +43,8 @@ export default function Commundocument() {
   const [siteFilter, setSiteFilter] = useState("");
   const [newCategory, setNewCategory] = useState("");
 
-  const { canDelete, canEdit, canCreate, canView } = usePermissions();
+  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
+ 
 
   // Check permissions for Clients feature
   const canViewDocuments = canView("Documents");
@@ -137,6 +139,22 @@ export default function Commundocument() {
   };
 
   //   const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
+
+  // Show loader while checking permissions
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show Access Denied if user doesn't have view permission
+  if (!canViewDocuments) {
+    return (
+      <AccessDenied message="You don't have permission to view common documents." />
+    );
+  }
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
