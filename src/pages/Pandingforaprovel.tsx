@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import Badge from "../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
+import { printTableData } from "../utils/printTableData";
 import {
   TextField,
   Button,
@@ -98,6 +99,15 @@ export default function Pandingforaprovel() {
     );
   }, [filteredData, page, rowsPerPage]);
 
+  const columns = [
+    { key: "siteName", label: "Site Name" },
+    { key: "clientName", label: "Client Name" },
+    { key: "contactNumber", label: "Contact Number" },
+    { key: "Email", label: "Email" },
+    { key: "blocknumber", label: "Block Number" },
+    
+  ];
+
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">Pending for Approvals</h3>
@@ -109,6 +119,9 @@ export default function Pandingforaprovel() {
               size="small"
               variant="contained"
               className="!bg-amber-500 hover:!bg-amber-600 text-white"
+              onClick={() =>
+                printTableData(filteredData, columns, selectedColumns)
+              }
             >
               Print
             </Button>
@@ -283,37 +296,38 @@ export default function Pandingforaprovel() {
                               </Badge>
                             </button>
 
-                          <button
-  onClick={async () => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to reject this item?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, reject it!",
-      cancelButtonText: "Cancel",
-    });
+                            <button
+                              onClick={async () => {
+                                const result = await Swal.fire({
+                                  title: "Are you sure?",
+                                  text: "Do you want to reject this item?",
+                                  icon: "warning",
+                                  showCancelButton: true,
+                                  confirmButtonText: "Yes, reject it!",
+                                  cancelButtonText: "Cancel",
+                                });
 
-    if (result.isConfirmed) {
-      try {
-        // Call the API here
-        await reject(item.id); // <-- make sure to pass the correct ID
-        toast.success("Rejected successfully!");
+                                if (result.isConfirmed) {
+                                  try {
+                                    // Call the API here
+                                    await reject(item.id); // <-- make sure to pass the correct ID
+                                    toast.success("Rejected successfully!");
 
-        // Refresh the table data
-        const updatedData = await pendingForApprovals();
-        setTableData(updatedData);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to reject");
-      }
-    }
-  }}
->
-  <Badge variant="light" color="error">
-    Reject
-  </Badge>
-</button>
+                                    // Refresh the table data
+                                    const updatedData =
+                                      await pendingForApprovals();
+                                    setTableData(updatedData);
+                                  } catch (err) {
+                                    console.error(err);
+                                    toast.error("Failed to reject");
+                                  }
+                                }
+                              }}
+                            >
+                              <Badge variant="light" color="error">
+                                Reject
+                              </Badge>
+                            </button>
                           </div>
                         </TableCell>
                       )}

@@ -28,7 +28,7 @@ import {
 import Swal from "sweetalert2";
 import { usePermissions } from "../../hooks/usePermissions";
 import AccessDenied from "../../components/ui/AccessDenied";
-
+import { downloadCSV } from "../../utils/copy";
 interface PropertyDetailsType {
   id: number;
   siteName: string;
@@ -148,6 +148,13 @@ export default function PropertyDetails() {
     );
   }, [search, tableData]);
 
+  // Define columns for CSV export
+  const columns = [
+    { key: "siteName", label: "Site Name" },
+    { key: "unit", label: "Unit" },
+    { key: "unitNumber", label: "Unit Number" },
+  ];
+
   // Show Access Denied if user doesn't have view permission
   // This must be after all hooks are called
   if (!canViewProperties) {
@@ -168,8 +175,16 @@ export default function PropertyDetails() {
               size="small"
               variant="contained"
               className="!bg-blue-600 hover:!bg-blue-700 text-white"
+              onClick={() =>
+                downloadCSV(
+                  filteredData,
+                  columns,
+                  selectedColumns,
+                  "property_details.csv"
+                )
+              }
             >
-              Upload CSV
+              CSV
             </Button>
 
             {/* Column selector */}

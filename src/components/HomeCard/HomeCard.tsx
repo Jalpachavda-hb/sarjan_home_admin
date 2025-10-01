@@ -11,8 +11,20 @@ import {
   getUserRole,
 } from "../../utils/Handlerfunctions/getdata";
 import { usePermissions } from "../../hooks/usePermissions";
+
+// Define the interface for formData state
+interface DashboardData {
+  clientCount: string;
+  projectTypes: string;
+  adminUsers: string;
+  siteDetailsCount: string;
+  today_payment: string;
+  sitenames: string;
+  admin_id: string;
+}
+
 export default function HomeCard() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<DashboardData>({
     clientCount: "",
     projectTypes: "",
     adminUsers: "",
@@ -21,13 +33,19 @@ export default function HomeCard() {
     sitenames: "",
     admin_id: "",
   });
+  
   const userRole = getUserRole();
   const { canView } = usePermissions();
-  useEffect(() => {
-    fetchDashboardCount()
-      .then((data) => setFormData({ ...data }))
-      .catch((err) => console.error("Error fetching dashboardcount:", err));
-  }, []);
+
+useEffect(() => {
+  fetchDashboardCount()
+    .then((data) => setFormData(prev => ({
+      ...prev, // keep existing values
+      ...data  // overwrite with new data
+    })))
+    .catch((err: Error) => console.error("Error fetching dashboardcount:", err));
+}, []);
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-6">
       {/* Card 1 - Only show if user has Payments permission */}
@@ -43,7 +61,6 @@ export default function HomeCard() {
               </span>
               <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
                 {formData.today_payment}
-                {/* 5 */}
               </h4>
             </div>
             <Link to="/admin/payments" className="cursor-pointer">

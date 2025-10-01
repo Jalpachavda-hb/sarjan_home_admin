@@ -136,7 +136,13 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
 
   return (
     <div>
-      <Stepper step={step} />
+      <Stepper
+        step={step}
+        steps={[
+          { number: 1, label: "User Information" },
+          { number: 2, label: "User Permissions" },
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         {/* STEP 1: User Info */}
@@ -203,7 +209,6 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
 
               <div>
                 {isEdit ? (
-                 
                   <SiteSelector
                     value={selectedSite}
                     onChange={(e) => {

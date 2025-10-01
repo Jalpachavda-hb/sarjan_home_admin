@@ -11,7 +11,7 @@ import DynamicInputFields from "../../components/form/form-elements/DynamicInput
 import Dynamicgroup from "../../components/form/form-elements/Dynamicgroup";
 import { addNewSite } from "../../utils/Handlerfunctions/formSubmitHandlers";
 import { editSiteData } from "../../utils/Handlerfunctions/formEditHandlers";
-
+import Stepper from "../OtherPage/Stepper";
 import { toast } from "react-toastify";
 import {
   fetchProjectTypes,
@@ -64,47 +64,6 @@ interface FilePreview {
   name: string;
   type: "image" | "document" | "video";
 }
-
-const SiteStepper = ({ step }: { step: number }) => {
-  const steps = [
-    { number: 1, label: "Site Information" },
-    { number: 2, label: "Other Details" },
-  ];
-
-  return (
-    <div className="flex mb-8 w-full">
-      {steps.map((s, index) => (
-        <div key={s.number} className="flex items-center w-full">
-          <div className="flex items-center">
-            <div
-              className={`flex items-center justify-center w-8 h-8 rounded-full border-2 
-              ${
-                step === s.number
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : step > s.number
-                  ? "bg-green-500 text-white border-green-500"
-                  : "bg-gray-200 text-gray-600 border-gray-300"
-              }
-              `}
-            >
-              {s.number}
-            </div>
-            <span
-              className={`ml-2 font-medium ${
-                step === s.number ? "text-blue-600" : "text-gray-500"
-              }`}
-            >
-              {s.label}
-            </span>
-          </div>
-          {index !== steps.length - 1 && (
-            <div className="flex-1 h-[2px] bg-gray-300 mx-4" />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-};
 
 const FilePreviewGrid = ({
   files,
@@ -570,7 +529,13 @@ const Addsite = () => {
       <h2 className="text-2xl font-semibold mb-4">
         {isEditMode ? "Edit Site" : "Add Site"}
       </h2>
-      <SiteStepper step={step} />
+      <Stepper
+        step={step}
+        steps={[
+          { number: 1, label: "Site Information" },
+          { number: 2, label: "Upload Images" },
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         {step === 1 && (

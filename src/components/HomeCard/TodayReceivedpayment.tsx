@@ -19,9 +19,14 @@ import {
   ListItemText,
 } from "@mui/material";
 import SiteFilter from "../../components/form/input/FilterbySite";
-import { TodayReceivedpayment } from "../../utils/Handlerfunctions/getdata"; // ✅ import API fn
+import {
+  TodayReceivedpayment,
+  fetchDashboardCount,
+} from "../../utils/Handlerfunctions/getdata"; // ✅ import API fn
 import { getAdminId } from "../../utils/Handlerfunctions/getdata";
-
+import { usePermissions } from "../../hooks/usePermissions";
+import { copyTableData, downloadCSV } from "../../utils/copy";
+import { printTableData } from "../../utils/printTableData";
 interface Payment {
   id: number;
   name: string; // client name
@@ -40,6 +45,9 @@ export default function TodayReceivedpaymentTable() {
   const [siteFilter, setSiteFilter] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [paymentData, setPaymentData] = useState<Payment[]>([]);
+  const { canView } = usePermissions();
+
+  // Don't render if user doesn't have Payments permission
 
   // ✅ Fetch data on load & site change
   useEffect(() => {
@@ -85,6 +93,20 @@ export default function TodayReceivedpaymentTable() {
     page * rowsPerPage + rowsPerPage
   );
 
+  if (!canView("Payments")) {
+    return <div className="font-poppins text-gray-800 dark:text-white"></div>;
+  }
+
+  const columns = [
+    { key: "name", label: "Client Name" },
+    { key: "title", label: "Site Name" },
+    { key: "block", label: "Block" },
+    { key: "block_number", label: "Unit No." },
+    { key: "received_amount", label: "Received Amount" },
+    { key: "received_amount_type", label: "Amount Type" },
+    { key: "received_payment_date", label: "Received Date" },
+  ];
+
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">Today's Received Payment</h3>
@@ -98,20 +120,27 @@ export default function TodayReceivedpaymentTable() {
               size="small"
               variant="contained"
               className="!bg-green-600 hover:!bg-green-700 text-white"
+              onClick={() =>
+                copyTableData(filteredData, columns, selectedColumns)
+              }
             >
               Copy
             </Button>
-            <Button
-              size="small"
-              variant="contained"
-              className="!bg-blue-600 hover:!bg-blue-700 text-white"
-            >
-              CSV
-            </Button>
+          <Button
+  size="small"
+  variant="contained"
+  className="!bg-blue-600 hover:!bg-blue-700 text-white"
+  onClick={() => downloadCSV(filteredData, columns, selectedColumns, "today_received_payments.csv")}
+>
+  CSV
+</Button>
             <Button
               size="small"
               variant="contained"
               className="!bg-amber-500 hover:!bg-amber-600 text-white"
+              onClick={() =>
+                printTableData(filteredData, columns, selectedColumns)
+              }
             >
               Print
             </Button>

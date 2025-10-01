@@ -15,7 +15,7 @@ import { MdDelete } from "react-icons/md";
 import { MdAddCard } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { useState, useMemo, useEffect } from "react";
-
+import { printTableData } from "../../utils/printTableData";
 import {
   showclientlist,
   getUserRole,
@@ -47,16 +47,16 @@ interface Client {
 export default function ClientList() {
   const { id } = useParams(); // ✅ get site id from URL (/admin/clients/:id)
   const { canDelete, canEdit, canCreate, canView } = usePermissions();
-  
+
   // Check permissions for Clients feature
-  const canViewClient = canView('Clients');
-  const canCreateClient = canCreate('Clients');
-  const canEditClient = canEdit('Clients');
-  const canDeleteClient = canDelete('Clients');
-  
+  const canViewClient = canView("Clients");
+  const canCreateClient = canCreate("Clients");
+  const canEditClient = canEdit("Clients");
+  const canDeleteClient = canDelete("Clients");
+
   // Check if user has any action permissions to show Manage column
   const hasAnyActionPermission = canEditClient || canDeleteClient;
-  
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortConfig, setSortConfig] = useState<{
@@ -95,25 +95,7 @@ export default function ClientList() {
       setLoading(false);
     }
   };
-  // useEffect(() => {
-  //   const loadPermissions = async () => {
-  //     try {
-  //       const res = await fetchRolePermissions();
-  //       const clientFeature = res?.data?.find(
-  //         (f: any) => f.feature === "Clients"
-  //       );
-  //       setClientPermissions(clientFeature?.permission || []);
-  //     } catch (err) {
-  //       console.error("Error fetching permissions:", err);
-  //       setClientPermissions([]);
-  //     }
-  //   };
 
-  //   loadPermissions();
-  // }, []);
-
-  // const hasPermission = (perm: string) => clientPermissions.includes(perm);
-  // console.log(hasPermission);
   useEffect(() => {
     if (!id) return;
 
@@ -182,12 +164,22 @@ export default function ClientList() {
     [filteredData, page, rowsPerPage]
   );
   const role = getUserRole();
-  
+
   // Show Access Denied if user doesn't have view permission
   if (!canViewClient) {
-    return <AccessDenied message="You don't have permission to view clients." />;
+    return (
+      <AccessDenied message="You don't have permission to view clients." />
+    );
   }
-  
+
+  const columns = [
+    { key: "clientName", label: "Client Name" },
+    { key: "email", label: "Email" },
+    { key: "contactNumber", label: "Contact" },
+    { key: "unitNo", label: "Unit No" },
+ 
+  ];
+
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
       <h3 className="text-lg font-semibold mb-5">Clients List</h3>
@@ -200,6 +192,9 @@ export default function ClientList() {
               size="small"
               variant="contained"
               className="!bg-amber-500 hover:!bg-amber-600 text-white"
+              onClick={() =>
+                printTableData(filteredData, columns)
+              }
             >
               Print
             </Button>
@@ -256,11 +251,34 @@ export default function ClientList() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={hasAnyActionPermission ? (role === 1 ? 9 : 8) : (role === 1 ? 8 : 7)}>Loading...</TableCell>
+                  <TableCell
+                    colSpan={
+                      hasAnyActionPermission
+                        ? role === 1
+                          ? 9
+                          : 8
+                        : role === 1
+                        ? 8
+                        : 7
+                    }
+                  >
+                    Loading...
+                  </TableCell>
                 </TableRow>
               ) : paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={hasAnyActionPermission ? (role === 1 ? 9 : 8) : (role === 1 ? 8 : 7)} className="text-gray-500">
+                  <TableCell
+                    colSpan={
+                      hasAnyActionPermission
+                        ? role === 1
+                          ? 9
+                          : 8
+                        : role === 1
+                        ? 8
+                        : 7
+                    }
+                    className="text-gray-500"
+                  >
                     No clients found
                   </TableCell>
                 </TableRow>

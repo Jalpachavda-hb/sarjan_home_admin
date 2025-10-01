@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableBody,
@@ -33,7 +32,7 @@ import { useState, useEffect } from "react";
 import {
   getAdminId,
   fetchPaymentDetails,
-  getUserRole
+  getUserRole,
 } from "../../utils/Handlerfunctions/getdata";
 import { destroyPaymentDetails } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import { editPaymentfromAdmin } from "../../utils/Handlerfunctions/formEditHandlers";
@@ -43,7 +42,7 @@ import FileInput from "../../components/form/input/FileInput";
 import SiteFilter from "../../components/form/input/FilterbySite";
 import { usePermissions } from "../../hooks/usePermissions";
 import AccessDenied from "../../components/ui/AccessDenied";
-
+import { printTableData } from "../../utils/printTableData";
 interface Payment {
   id: number;
   clientName: string;
@@ -59,19 +58,19 @@ interface Payment {
 
 export default function Payment() {
   const { canDelete, canEdit, canCreate, canView } = usePermissions();
-  
+
   // Check permissions for Payments feature
-  const canViewPayments = canView('Payments');
-  const canCreatePayments = canCreate('Payments');
-  const canEditPayments = canEdit('Payments');
-  const canDeletePayments = canDelete('Payments');
-  
+  const canViewPayments = canView("Payments");
+  const canCreatePayments = canCreate("Payments");
+  const canEditPayments = canEdit("Payments");
+  const canDeletePayments = canDelete("Payments");
+
   // Check if user has any action permissions to show Manage column
   const hasAnyActionPermission = canEditPayments || canDeletePayments;
-  
+
   // Get user role to conditionally show site filter
   const role = getUserRole();
-  
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
@@ -232,7 +231,7 @@ export default function Payment() {
     if (!date) return "Please select a payment date";
 
     // Regex for dd/mm/yyyy
-    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    const regex = /^(0[1-9]|[12][0-9]|3[01])[-\/](0[1-9]|1[0-2])[-\/]\d{4}$/;
     if (!regex.test(date)) return "Date must be in dd/mm/yyyy format";
 
     return "";
@@ -254,9 +253,25 @@ export default function Payment() {
     return "";
   };
 
+const columns = [
+  { key: "clientName", label: "Client Name" },
+  { key: "siteName", label: "Site Name" },
+  { key: "unitNo", label: "Unit Number" },
+  { key: "propertyAmount", label: "Property Amount" },
+  { key: "gstAmount", label: "GST Amount" },
+  { key: "receivedDate", label: "Received Date" },
+  { key: "receivedAmountType", label: "Received Amount Type" },
+  { key: "receivedAmount", label: "Received Amount" },
+ 
+];
+
+
+
   // Show Access Denied if user doesn't have view permission
   if (!canViewPayments) {
-    return <AccessDenied message="You don't have permission to view payments." />;
+    return (
+      <AccessDenied message="You don't have permission to view payments." />
+    );
   }
 
   return (
@@ -271,6 +286,9 @@ export default function Payment() {
               size="small"
               variant="contained"
               className="!bg-amber-500 hover:!bg-amber-600 text-white"
+              onClick={() =>
+                printTableData(filteredData, columns, selectedColumns)
+              }
             >
               Print
             </Button>
@@ -657,7 +675,6 @@ export default function Payment() {
                   value={paymentDate}
                   onChange={(e) => {
                     setPaymentDate(e.target.value);
-                    // live validation (optional)
                     setErrors((prev) => ({
                       ...prev,
                       paymentDate: validateDate(e.target.value),
@@ -710,9 +727,7 @@ export default function Payment() {
 
                 // Validate all fields
                 const amountError = validateAmount(Number(receivedAmount));
-                const dateError = paymentDate
-                  ? ""
-                  : "Please select a payment date";
+                const dateError = validateDate(paymentDate);
 
                 setErrors({
                   receivedAmount: amountError,

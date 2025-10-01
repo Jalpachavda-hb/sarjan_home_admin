@@ -2,8 +2,21 @@ import { useEffect, useState } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { fetchSiteList } from "../../../utils/Handlerfunctions/getdata";
 
-const SiteFilter = ({ value, onChange, label = "Filter by Site" }) => {
-  const [siteOptions, setSiteOptions] = useState([]);
+import { SelectChangeEvent } from "@mui/material";
+interface SiteFilterProps {
+  value: string;
+  onChange: (event: SelectChangeEvent<string>) => void;
+  label?: string;
+}
+
+const SiteFilter = ({
+  value,
+  onChange,
+  label = "Filter by Site",
+}: SiteFilterProps) => {
+  const [siteOptions, setSiteOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   useEffect(() => {
     const loadSites = async () => {
@@ -38,50 +51,3 @@ const SiteFilter = ({ value, onChange, label = "Filter by Site" }) => {
 };
 
 export default SiteFilter;
-
-// import { useEffect, useState } from "react";
-// import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-// import { fetchSiteList } from "../../../utils/Handlerfunctions/getdata";
-
-// interface Site {
-//   id: number;
-//   title: string;
-// }
-
-// const SiteFilter = ({ value, onChange, label = "Filter by Site" }) => {
-//   const [siteOptions, setSiteOptions] = useState<Site[]>([]);
-
-//   useEffect(() => {
-//     const loadSites = async () => {
-//       const sites = await fetchSiteList();
-//       setSiteOptions(sites || []);
-//     };
-//     loadSites();
-//   }, []);
-
-//   return (
-//          <FormControl size="small" sx={{ minWidth: 180 }}>
-//        <InputLabel>{label}</InputLabel>
-//       <Select
-//   value={value}
-//   onChange={(e) => onChange(e.target.value)}   // ✅ extract only the value
-//   label={label}
-//   MenuProps={{
-//     PaperProps: {
-//       sx: { fontFamily: "Poppins", fontSize: "14px" },
-//     },
-//   }}
-// >
-//   <MenuItem value="">All Sites</MenuItem>
-//   {siteOptions.map((site) => (
-//     <MenuItem key={site.value} value={site.value}>
-//       {site.label}
-//     </MenuItem>
-//   ))}
-// </Select>
-
-//     </FormControl>
-//   );
-// };
-
-// export default SiteFilter;

@@ -7,6 +7,7 @@ import {
 } from "../../components/ui/table";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo, useEffect } from "react";
+import { printTableData } from "../../utils/printTableData";
 import {
   TextField,
   Button,
@@ -20,6 +21,7 @@ import {
   fetchClientReports,
   fetchClientReportSummary,
 } from "../../utils/Handlerfunctions/getdata";
+import { copyTableData, downloadCSV } from "../../utils/copy";
 
 // interface for your API response row
 interface ClientReport {
@@ -132,6 +134,9 @@ export default function Clientreport() {
                 size="small"
                 variant="contained"
                 className="!bg-green-600 hover:!bg-green-700 text-white"
+                onClick={() =>
+                  copyTableData(filteredData, columns, selectedColumns)
+                }
               >
                 Copy
               </Button>
@@ -139,6 +144,14 @@ export default function Clientreport() {
                 size="small"
                 variant="contained"
                 className="!bg-blue-600 hover:!bg-blue-700 text-white"
+                onClick={() =>
+                  downloadCSV(
+                    filteredData,
+                    columns,
+                    selectedColumns,
+                    "Client_report.csv"
+                  )
+                }
               >
                 CSV
               </Button>
@@ -146,6 +159,9 @@ export default function Clientreport() {
                 size="small"
                 variant="contained"
                 className="!bg-amber-500 hover:!bg-amber-600 text-white"
+                onClick={() =>
+                  printTableData(filteredData, columns, selectedColumns)
+                }
               >
                 Print
               </Button>
