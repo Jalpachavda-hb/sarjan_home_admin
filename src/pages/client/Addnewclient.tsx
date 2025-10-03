@@ -493,6 +493,8 @@ import {
   getBlockFromSiteId,
   getBlockFromBlockid,
 } from "../../utils/Handlerfunctions/getdata";
+import AccessDenied from "../../components/ui/AccessDenied";
+import { usePermissions } from "../../hooks/usePermissions";
 import { addNewClient } from "../../utils/Handlerfunctions/formSubmitHandlers";
 
 type ClientErrors = {
@@ -507,7 +509,6 @@ type ClientErrors = {
   property_amount?: string;
   gst_slab?: string;
   submit?: string;
-   
 };
 
 type Option = { label: string; value: string | number };
@@ -568,6 +569,10 @@ const Addnewclient: React.FC = () => {
       val && typeof val === "object" && "value" in val ? val.value : val;
     setClientData((prev: any) => ({ ...prev, [field]: finalVal }));
   };
+  const { canEdit, canCreate, loading: permissionLoading } = usePermissions();
+
+  const canCreateClient = canCreate("Clients");
+  const canEditClient = canEdit("Clients");
 
   // Load unit types + clients
   useEffect(() => {
@@ -642,7 +647,7 @@ const Addnewclient: React.FC = () => {
       case "name":
         if (!finalValue) error = "Name is required";
         break;
-     
+
       case "contact":
         if (!finalValue) error = "Contact is required";
         else if (finalValue.length !== 10) error = "Contact must be 10 digits";
@@ -665,7 +670,7 @@ const Addnewclient: React.FC = () => {
 
     if (clientData.client_type === "1") {
       if (!clientData.name) newErrors.name = "Name is required";
-    
+
       const contactError = validateContact(clientData.contact);
       if (!clientData.contact) newErrors.contact = "Contact is required";
       else if (contactError) newErrors.contact = contactError;
@@ -698,6 +703,20 @@ const Addnewclient: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (permissionLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!canViewClient) {
+    return (
+      <AccessDenied message="You don't have permission to view clients." />
+    );
+  }
 
   return (
     <div>
@@ -749,9 +768,7 @@ const Addnewclient: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    <Label>
-                      Email
-                    </Label>
+                    <Label>Email</Label>
                     <div className="relative">
                       <Input
                         name="email"
@@ -765,8 +782,7 @@ const Addnewclient: React.FC = () => {
                         <CiMail className="size-6" />
                       </span>
                     </div>
-                 
-                  </div> 
+                  </div>
                   <div>
                     <Label>
                       Contact Number <span className="text-red-500">*</span>
@@ -827,7 +843,9 @@ const Addnewclient: React.FC = () => {
               {/* Block/Shop */}
               {clientData.unit_type && (
                 <div>
-                  <Label>Block/Shop  <span className="text-red-500">*</span></Label>
+                  <Label>
+                    Block/Shop <span className="text-red-500">*</span>
+                  </Label>
                   <Select
                     options={blocks}
                     value={clientData.block_id}
@@ -845,7 +863,9 @@ const Addnewclient: React.FC = () => {
               {/* Block Numbers */}
               {blockDetails.length > 0 && (
                 <div>
-                  <Label>Block Numbers  <span className="text-red-500">*</span></Label>
+                  <Label>
+                    Block Numbers <span className="text-red-500">*</span>
+                  </Label>
                   <MultiSelect
                     options={blockDetails.map((o) => ({
                       value: String(o.value),
@@ -868,7 +888,9 @@ const Addnewclient: React.FC = () => {
 
               {/* Property Amount */}
               <div>
-                <Label>Property Amount  <span className="text-red-500">*</span> </Label>
+                <Label>
+                  Property Amount <span className="text-red-500">*</span>{" "}
+                </Label>
                 <Input
                   name="property_amount"
                   value={clientData.property_amount}
@@ -886,7 +908,9 @@ const Addnewclient: React.FC = () => {
               {/* GST Slab */}
               {clientData.property_amount && (
                 <div>
-                  <Label>GST Slab  <span className="text-red-500">*</span></Label>
+                  <Label>
+                    GST Slab <span className="text-red-500">*</span>
+                  </Label>
                   <Select
                     options={[
                       { value: "1", label: "1%" },
