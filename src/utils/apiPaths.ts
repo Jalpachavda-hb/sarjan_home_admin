@@ -55,7 +55,7 @@ export const API_PATHS = {
     EDITSITEDETAILS: "editSite", //POST
     DELETESITE: "deleteSite", //POST
     ADDPROPERTDETAILS: "addPropertyDetails", // POST
-    UPLOADBLOCKDETAILCVC: "uploadBlockDetailCsv", //POST
+    UPLOADBLOCKDETAILCVC: "uploadBlockDetailCsv",
     PROPERTYDETAILSLIST: "propertyDetailsList", // change url when use GET
     GETBLOCKDETAILS: "getBlockDetails", // GET change url when use
     //"description": "propertyDetailsList from this api get block_detail_id"

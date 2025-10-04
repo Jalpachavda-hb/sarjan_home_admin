@@ -246,7 +246,6 @@ export const deleteClient = async (id: string) => {
   }
 };
 
-
 export const closeTicket = async (ticketId: string) => {
   const adminId = getAdminId();
   if (!adminId) {
@@ -259,7 +258,8 @@ export const closeTicket = async (ticketId: string) => {
     formData.append("ticket_id", ticketId);
     formData.append("admin_id", adminId);
 
-    const res = await axiosInstance.post(API_PATHS.TICKET.CLOSETICKET,
+    const res = await axiosInstance.post(
+      API_PATHS.TICKET.CLOSETICKET,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
@@ -279,16 +279,22 @@ export const closeTicket = async (ticketId: string) => {
 };
 
 // pending for Approvals
-export const reject = async (client_milestone_id: number, description?: string) => {
+export const reject = async (
+  client_milestone_id: number,
+  description?: string
+) => {
   try {
     const adminId = getAdminId();
     if (!adminId) throw new Error("Admin ID not found");
 
-    const res = await axiosInstance.post(API_PATHS.PENDINGFORAPPROVALSTABLE.REJECT, {
-      admin_id: adminId,
-      client_milestone_id,
-      description, // optional reject reason
-    });
+    const res = await axiosInstance.post(
+      API_PATHS.PENDINGFORAPPROVALSTABLE.REJECT,
+      {
+        admin_id: adminId,
+        client_milestone_id,
+        description, // optional reject reason
+      }
+    );
 
     return res.data;
   } catch (err) {
@@ -302,10 +308,13 @@ export const approve = async (client_milestone_id: number) => {
     const adminId = getAdminId();
     if (!adminId) throw new Error("Admin ID not found");
 
-    const res = await axiosInstance.post(API_PATHS.PENDINGFORAPPROVALSTABLE.APPROVALS, {
-      admin_id: adminId,
-      client_milestone_id,
-    });
+    const res = await axiosInstance.post(
+      API_PATHS.PENDINGFORAPPROVALSTABLE.APPROVALS,
+      {
+        admin_id: adminId,
+        client_milestone_id,
+      }
+    );
 
     return res.data;
   } catch (err) {
@@ -313,8 +322,6 @@ export const approve = async (client_milestone_id: number) => {
     throw err;
   }
 };
-
-
 
 export const deleteClientAadharCard = async (id: string): Promise<boolean> => {
   const adminId = getAdminId();
@@ -331,11 +338,13 @@ export const deleteClientAadharCard = async (id: string): Promise<boolean> => {
     formData.append("admin_id", adminId);
 
     const res = await axiosInstance.post(
-      API_PATHS.CLIENTDATA.DELETECLIENTADHARCARD,{
-      admin_id: adminId,
-      id,
-    });
- 
+      API_PATHS.CLIENTDATA.DELETECLIENTADHARCARD,
+      {
+        admin_id: adminId,
+        id,
+      }
+    );
+
     if (res?.status === 200) {
       toast.success("Aadhar card deleted successfully!");
       return true;
@@ -366,11 +375,12 @@ export const deleteClientPanCard = async (id: string): Promise<boolean> => {
     formData.append("admin_id", adminId);
 
     const res = await axiosInstance.post(
-      API_PATHS.CLIENTDATA.DELETECLIENTPANCARD,{
-      admin_id: adminId,
-      id,
-    });
-  
+      API_PATHS.CLIENTDATA.DELETECLIENTPANCARD,
+      {
+        admin_id: adminId,
+        id,
+      }
+    );
 
     if (res?.status === 200) {
       toast.success("PAN card deleted successfully!");
@@ -385,8 +395,6 @@ export const deleteClientPanCard = async (id: string): Promise<boolean> => {
     return false;
   }
 };
-
-
 
 export const deleteSite = async (id: string) => {
   const adminId = getAdminId();
@@ -403,7 +411,10 @@ export const deleteSite = async (id: string) => {
     );
 
     if (res?.status === 200) return { success: true, message: "Site deleted!" };
-    return { success: false, message: res?.data?.message || "Failed to delete site" };
+    return {
+      success: false,
+      message: res?.data?.message || "Failed to delete site",
+    };
   } catch (error: any) {
     return { success: false, message: "Failed to delete site" };
   }

@@ -24,11 +24,20 @@ import {
   Checkbox,
   ListItemText,
   FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import Swal from "sweetalert2";
 import { usePermissions } from "../../hooks/usePermissions";
 import AccessDenied from "../../components/ui/AccessDenied";
 import { downloadCSV } from "../../utils/copy";
+import { addPropertyDetails } from "../../utils/Handlerfunctions/formSubmitHandlers";
+import { uploadcsv } from "../../utils/Handlerfunctions/formSubmitHandlers";
+import Papa from "papaparse";
+import SiteSelector from "../../components/form/input/SelectSiteinput";
+import Label from "../../components/form/Label";
 interface PropertyDetailsType {
   id: number;
   siteName: string;
@@ -38,7 +47,13 @@ interface PropertyDetailsType {
 
 export default function PropertyDetails() {
   // All hooks must be called unconditionally at the top
-  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
+  const {
+    canDelete,
+    canEdit,
+    canCreate,
+    canView,
+    loading: permissionLoading,
+  } = usePermissions();
   const [page, setPage] = useState(0);
   const [tableData, setTableData] = useState<PropertyDetailsType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -47,6 +62,9 @@ export default function PropertyDetails() {
   const [search, setSearch] = useState("");
   const [totalRecords, setTotalRecords] = useState(0);
   const [selectedSite, setSelectedSite] = useState<number | string>(1);
+  const [csvModalOpen, setCsvModalOpen] = useState(false);
+  const [csvSite, setCsvSite] = useState<string>("");
+  const [csvFile, setCsvFile] = useState<File | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -118,7 +136,7 @@ export default function PropertyDetails() {
     if (result.isConfirmed) {
       try {
         await deletePropertyDetails(id.toString());
-        toast.success("Property deleted successfully");
+
         fetchPageData(page + 1);
       } catch (error) {
         toast.error("Failed to delete property");
@@ -147,6 +165,76 @@ export default function PropertyDetails() {
         ""
     );
   }, [search, tableData]);
+
+  const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    setCsvFile(selectedFile);
+  };
+
+  const downloadSampleCsv = () => {
+    const headers = [
+      "unit_number",
+      "rera_area",
+      "balcony_area",
+      "wash_area",
+      "terrace_area",
+      "undivided_landshare",
+      "north",
+      "south",
+      "east",
+      "west",
+    ].join(",");
+
+    const rows = [
+      ["K-501", 5, 5, 5, 5, 5, 5, 5, 5, 5],
+      ["K-502", 5, 5, 5, 5, 5, 5, 5, 5, 5],
+      ["K-503", 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    const csvContent = headers + "\n" + rows;
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sample_properties.csv";
+    document.body.appendChild(a); // ensures Firefox compatibility
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+  };
+  const handleCsvUpload = async () => {
+    if (!csvSite) return toast.error("Please select a site");
+    if (!csvFile) return toast.error("Please select a CSV file");
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("site_detail_id", csvSite);
+      formData.append("file", csvFile);
+      const res = await uploadcsv(formData);
+
+      if (res?.status === 200 || res?.success) {
+        toast.success("CSV uploaded successfully!");
+        setCsvModalOpen(false);
+        setCsvFile(null);
+        setCsvSite("");
+        fetchPageData(1);
+      } else {
+        toast.error(res?.message || "Upload failed.");
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Define columns for CSV export
   const columns = [
@@ -183,16 +271,9 @@ export default function PropertyDetails() {
               size="small"
               variant="contained"
               className="!bg-blue-600 hover:!bg-blue-700 text-white"
-              onClick={() =>
-                downloadCSV(
-                  filteredData,
-                  columns,
-                  selectedColumns,
-                  "property_details.csv"
-                )
-              }
+              onClick={() => setCsvModalOpen(true)}
             >
-              CSV
+              Upload CSV
             </Button>
 
             {/* Column selector */}
@@ -421,6 +502,66 @@ export default function PropertyDetails() {
           )}
         </div>
       </div>
+
+      {/* CSV Upload Modal */}
+      <Dialog
+        open={csvModalOpen}
+        onClose={() => setCsvModalOpen(false)}
+        maxWidth="sm"
+        className="swal2-container"
+        fullWidth
+      >
+        <DialogTitle>Upload CSV File</DialogTitle>
+        <DialogContent>
+          <div className="space-y-4 pt-2">
+            {/* Site Selector */}
+            <div>
+              <button
+                type="button"
+                className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
+                onClick={downloadSampleCsv}
+              >
+                Download Sample CSV
+              </button>
+            </div>
+            <div>
+              <SiteSelector value={csvSite} onChange={setCsvSite} />
+            </div>
+
+            {/* Sample CSV Download */}
+
+            {/* File Upload */}
+            <div>
+              <Label>
+                Upload CSV File <span className="text-red-500">*</span>
+              </Label>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleCsvFileChange}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+            </div>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <button
+            type="button"
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            onClick={() => setCsvModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50"
+            onClick={handleCsvUpload}
+            disabled={loading}
+          >
+            {loading ? "Uploading..." : "Upload"}
+          </button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

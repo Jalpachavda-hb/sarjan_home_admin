@@ -519,17 +519,15 @@ export interface SiteFormValues {
   bird_view?: File[];
 }
 
-
-
 export const addNewSite = async (formData: FormData) => {
-    const adminId = getAdminId();
+  const adminId = getAdminId();
   if (!adminId) {
     toast.error("Admin ID not found. Please login again.");
     return null;
   }
 
   try {
-     if (!formData.has("admin_id")) {
+    if (!formData.has("admin_id")) {
       formData.append("admin_id", adminId);
     }
     const response = await axiosInstance.post(
@@ -541,6 +539,33 @@ export const addNewSite = async (formData: FormData) => {
     return response;
   } catch (error) {
     console.error("Error adding site:", error);
+    throw error;
+  }
+};
+
+export const uploadcsv = async (formData) => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  formData.append("admin_id", adminId.toString());
+
+  try {
+    const response = await axiosInstance.post(
+      API_PATHS.SITEDETAILS.UPLOADBLOCKDETAILCVC, // make sure this route matches backend
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("CSV upload error:", error.response?.data || error);
     throw error;
   }
 };
