@@ -35,7 +35,7 @@ export default function ProjectType() {
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState<Projecttype | null>(null);
   const [search, setSearch] = useState("");
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumns] = useState<string[]>([]);
 
   // 🔹 Fetch data from API on mount
   useEffect(() => {
@@ -67,9 +67,9 @@ export default function ProjectType() {
     setEditOpen(true);
   };
 
-  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
+  const { canDelete, canEdit,  canView, loading: permissionLoading } = usePermissions();
   const canViewProperties = canView("Properties");
-  const canCreateProperties = canCreate("Properties");
+  // const canCreateProperties = canCreate("Properties");
   const canEditProperties = canEdit("Properties");
   const canDeleteProperties = canDelete("Properties");
   const hasAnyActionPermission = canEditProperties || canDeleteProperties;
@@ -188,7 +188,7 @@ export default function ProjectType() {
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell className="py-12 text-gray-500" colSpan={3}>
+                  <TableCell className="py-12 text-gray-500">
                     No data available
                   </TableCell>
                 </TableRow>

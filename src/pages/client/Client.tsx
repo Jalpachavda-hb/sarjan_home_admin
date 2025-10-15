@@ -19,7 +19,7 @@ import { printTableData } from "../../utils/printTableData";
 import {
   showclientlist,
   getUserRole,
-  fetchRolePermissions,
+
 } from "../../utils/Handlerfunctions/getdata";
 import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -58,20 +58,22 @@ export default function ClientList() {
   const hasAnyActionPermission = canEditClient || canDeleteClient;
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Client;
-    direction: "asc" | "desc";
-  } | null>(null);
+  const [rowsPerPage] = useState(5);
+ 
   const [search, setSearch] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [siteName] = useState<string>("");
+  const [sortConfig] = useState<{
+    key: keyof Client;
+    direction: "asc" | "desc";
+  } | null>(null);
 
   const fetchClients = async () => {
     setLoading(true);
     try {
-      const res = await showclientlist(id, page + 1, rowsPerPage); // server-side page
+      const res = await showclientlist(id!, page + 1); // server-side page
       const details = res?.details || [];
       setClients(
         details.map((item: any) => ({
@@ -96,7 +98,7 @@ export default function ClientList() {
     }
   };
 
-  useEffect(() => {
+   useEffect(() => {
     if (!id) return;
 
     fetchClients();
@@ -191,7 +193,9 @@ export default function ClientList() {
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
-      <h3 className="text-lg font-semibold mb-5">Clients List</h3>
+      <h3 className="text-lg font-semibold mb-5 dark:text-white">
+        {siteName ? `${siteName} - Clients List` : "Clients List"}
+      </h3>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:bg-white/[0.03] px-4 pb-3 pt-4 sm:px-6">
         {/* Top Bar */}

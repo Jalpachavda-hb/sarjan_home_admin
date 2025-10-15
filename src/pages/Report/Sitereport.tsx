@@ -18,7 +18,7 @@ import {
   Button,
   Select,
   MenuItem,
-  InputLabel,
+  
   FormControl,
   Checkbox,
   ListItemText,
@@ -29,8 +29,12 @@ interface SiteReport {
   project_category_name: string;
   site_name: string;
   admin_name: string;
+   id: string;
 }
-
+interface Column {
+  key: keyof SiteReport; // ensures key is valid for SiteReport
+  label: string;
+}
 export default function Sitereport() {
   const { canView, loading: permissionLoading } = usePermissions();
   const [page, setPage] = useState(0);
@@ -39,7 +43,7 @@ export default function Sitereport() {
   const [tableData, setTableData] = useState<SiteReport[]>([]);
   // use for search
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
+  const [siteFilter] = useState("");
 
   // Check permissions
   const canViewReports = canView("Reports");
@@ -81,7 +85,7 @@ export default function Sitereport() {
     return matchesSearch && matchesSite;
   });
 
-  const columns = [
+  const columns :Column[]  = [
     { key: "project_type", label: "Project Type" },
     { key: "project_category_name", label: "Project Category" },
     { key: "site_name", label: "Site Name" },
@@ -95,7 +99,7 @@ export default function Sitereport() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  const uniqueSites = [...new Set(tableData.map((item) => item.site_name))];
+  // const uniqueSites = [...new Set(tableData.map((item) => item.site_name))];
 
   // Show loader while checking permissions
   if (permissionLoading) {

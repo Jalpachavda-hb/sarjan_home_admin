@@ -25,7 +25,7 @@ import {
   ListItemText,
 } from "@mui/material";
 
-import SiteFilter from "../../components/form/input/FilterbySite";
+// ///
 import {
   showTicketHistory,
   getTicketMessages,
@@ -55,12 +55,12 @@ export default function Tikethistory() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [replies, setReplies] = useState<any[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
+  const [sortConfig] = useState<{
     key: keyof MyTiket;
     direction: "asc" | "desc";
   } | null>(null);
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
+  const [siteFilter] = useState("");
 
   // modal state
   const [openModal, setOpenModal] = useState(false);
@@ -155,20 +155,9 @@ export default function Tikethistory() {
   );
 
   // unique site names
-  const uniqueSites = [...new Set(tickets.map((item) => item.siteName))];
+ 
 
-  const handleSort = (key: keyof MyTiket) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
+
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">

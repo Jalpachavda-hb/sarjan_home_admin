@@ -32,28 +32,28 @@ interface CommonDocument {
 export default function Commundocument() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumns] = useState<string[]>([]);
   const [documents, setDocuments] = useState<CommonDocument[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Adminuser;
-    direction: "asc" | "desc";
-  } | null>(null);
+
   // use for search
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
-  const [newCategory, setNewCategory] = useState("");
+  const [siteFilter] = useState("");
+  // const [newCategory, setNewCategory] = useState("");
 
-  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
- 
+  const {
+    canDelete,
+    canCreate,
+    canView,
+    loading: permissionLoading,
+  } = usePermissions();
 
   // Check permissions for Clients feature
   const canViewDocuments = canView("Documents");
   const canCreateDocuments = canCreate("Documents");
-  const canEditDocuments = canEdit("Documents");
+  // const canEditDocuments = canEdit("Documents");
   const canDeleteDocuments = canDelete("Documents");
 
   // Check if user has any action permissions to show Manage column
-
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -116,18 +116,12 @@ export default function Commundocument() {
     if (result.isConfirmed) {
       try {
         const res = await deleteCommonDocument(id);
-
-        if (res?.status === 200) {
-          // ✅ Update state
+        if (res.status === 200) {
           setDocuments((prev) => prev.filter((doc) => doc.id !== id));
-
-          // ✅ Show success message
           toast.success("Document deleted successfully!");
-        } else {
-          toast.error("Failed to delete document. Please try again.");
         }
       } catch (err) {
-        console.error("Delete failed:", err);
+        console.error(err);
         toast.error("Failed to delete document. Please try again.");
       }
     }
@@ -349,12 +343,13 @@ export default function Commundocument() {
                     <TableCell className="rowtext">
                       <div className="flex gap-2 mt-1">
                         {canDeleteDocuments && (
-                        <Badge variant="light" color="error">
-                          <MdDelete
-                            className="text-2xl cursor-pointer"
-                            onClick={() => handleDelete(item.id)}
-                          />
-                        </Badge>)}
+                          <Badge variant="light" color="error">
+                            <MdDelete
+                              className="text-2xl cursor-pointer"
+                              onClick={() => handleDelete(item.id)}
+                            />
+                          </Badge>
+                        )}
                         <Badge variant="light">
                           <FaRegEye
                             className="text-2xl cursor-pointer"

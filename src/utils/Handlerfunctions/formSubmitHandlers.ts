@@ -178,7 +178,7 @@ export const submitCommonDocument = async (
   try {
     const formData = new FormData();
     formData.append("common_document_name", common_document_name);
-    formData.append("site_detail_id", site_detail_id);
+    formData.append("site_detail_id", String(site_detail_id));
     formData.append("document", document);
     formData.append("admin_id", adminId);
 
@@ -348,6 +348,15 @@ export const addPaymentDetail = async ({
   receivedAmount,
   paymentDate,
   receiptFile = null,
+}: {
+  adminId: any;
+  clientId: any;
+  siteDetailId: any;
+  blockDetailsId: any;
+  receivedAmountType: any;
+  receivedAmount: any;
+  paymentDate: any;
+  receiptFile?: File | null;
 }) => {
   try {
     const formData = new FormData();
@@ -543,7 +552,7 @@ export const addNewSite = async (formData: FormData) => {
   }
 };
 
-export const uploadcsv = async (formData) => {
+export const uploadcsv = async (formData: FormData) => {
   const adminId = getAdminId();
 
   if (!adminId) {
@@ -565,7 +574,7 @@ export const uploadcsv = async (formData) => {
     );
     return response.data;
   } catch (error) {
-    console.error("CSV upload error:", error.response?.data || error);
+    console.error("CSV upload error:", (error as any).response?.data || error);
     throw error;
   }
 };

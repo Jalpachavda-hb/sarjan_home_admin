@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { toast } from "react-toastify";
+
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { MdDelete } from "react-icons/md";
@@ -32,13 +32,13 @@ export default function Homeslider() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
   const [data, setData] = useState<SplashScreen[]>([]);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumns] = useState<string[]>([]);
   // Fetch data on mount
   useEffect(() => {
     fetchData();
   }, []);
 
-  const { canDelete, canCreate, canView } = usePermissions();
+  const { canDelete, canCreate } = usePermissions();
   // const canViewAdminUsers = canView("App_settings");
   const canCreateApp_settings = canCreate("App_settings");
 
@@ -127,7 +127,7 @@ export default function Homeslider() {
                     size="small"
                     variant="contained"
                     className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
-                    onClick={() => setAddOpen(true)}
+                   
                   >
                     + Add Splash Screen
                   </Button>

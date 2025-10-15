@@ -4,7 +4,6 @@ import { IoEllipsisHorizontalSharp } from "react-icons/io5";
 import { IoMdDocument } from "react-icons/io";
 import {
   fetchWebSetting,
-  getUserRole,
 } from "../utils/Handlerfunctions/getdata";
 import {
   MdOutlinePendingActions,

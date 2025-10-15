@@ -1,13 +1,10 @@
 import { Link } from "react-router";
-import PageMeta from "../../components/common/PageMeta";
+
 
 export default function NotFound() {
   return (
     <>
-      <PageMeta
-        title="React.js 404 Dashboard | Sarjan_Admin - React.js Admin Dashboard Template"
-        description="This is React.js 404 Dashboard page for Sarjan_Admin - React.js Tailwind CSS Admin Dashboard Template"
-      />
+     
       <div className="relative flex flex-col items-center justify-center min-h-screen p-6 overflow-hidden z-1">
         <div className="mx-auto w-full max-w-[542px] text-center sm:max-w-[700px]">
           <img src="/images/logo/404.gif" alt="404" className="dark:hidden" />

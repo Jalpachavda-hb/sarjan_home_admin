@@ -1,18 +1,8 @@
 import { useState } from "react";
-import ComponentCard from "../../common/ComponentCard";
-import Label from "../Label";
-import Select from "../Select";
+
 import MultiSelect from "../MultiSelect";
 
 export default function SelectInputs() {
-  const options = [
-    { value: "marketing", label: "Marketing" },
-    { value: "template", label: "Template" },
-    { value: "development", label: "Development" },
-  ];
-  const handleSelectChange = (value: string) => {
-    console.log("Selected value:", value);
-  };
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const multiOptions = [
@@ -25,6 +15,7 @@ export default function SelectInputs() {
     <div className="space-y-6">
       <div>
         <MultiSelect
+          label=""
           options={multiOptions}
           onChange={(values) => setSelectedValues(values)}
         />
@@ -33,4 +24,3 @@ export default function SelectInputs() {
     </div>
   );
 }
-

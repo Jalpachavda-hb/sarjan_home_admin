@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PageMeta from "../../components/common/PageMeta";
+
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
@@ -9,9 +9,11 @@ import Button from "../../components/ui/button/Button";
 import { submitSplashScreen } from "../../utils/Handlerfunctions/formSubmitHandlers";
 
 const Addscreen = () => {
-  const [splashscreen_image, setSplashscreenImage] = useState<File | null>(null);
+  const [splashscreen_image, setSplashscreenImage] = useState<File | null>(
+    null
+  );
   const [title, setTitle] = useState("");
-  const [data, setData] = useState<any[]>([]);
+  const [_data, setData] = useState<any[]>([]);
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({
@@ -67,8 +69,6 @@ const Addscreen = () => {
 
   return (
     <div>
-
-
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         <div className="space-y-6">
           <ComponentCard title="Add New Splash Screen">
@@ -87,8 +87,13 @@ const Addscreen = () => {
                 <Label htmlFor="fileUpload">
                   Upload Image<span className="text-red-500">*</span>
                 </Label>
-                <FileInput id="fileUpload" onChange={handleSplashScreenChange} />
-                {errors.image && <p className="text-red-500 text-sm mt-1">{errors.image}</p>}
+                <FileInput
+                  id="fileUpload"
+                  onChange={handleSplashScreenChange}
+                />
+                {errors.image && (
+                  <p className="text-red-500 text-sm mt-1">{errors.image}</p>
+                )}
               </div>
 
               <div>
@@ -103,14 +108,19 @@ const Addscreen = () => {
                   onChange={handleTitleChange}
                   error={!!errors.title}
                 />
-                {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+                {errors.title && (
+                  <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                )}
               </div>
             </div>
           </ComponentCard>
         </div>
       </div>
 
-      <Button onClick={handleSubmit} className="mt-3 bg-green-600 hover:bg-green-700">
+      <Button
+        onClick={handleSubmit}
+        className="mt-3 bg-green-600 hover:bg-green-700"
+      >
         Add
       </Button>
       <Button className="canclebtn" onClick={() => navigate(-1)}>

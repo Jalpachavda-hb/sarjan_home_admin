@@ -1,5 +1,5 @@
 import UserMetaCard from "../components/UserProfile/UserMetaCard";
-import PageMeta from "../components/common/PageMeta";
+
 
 export default function UserProfiles() {
   return (

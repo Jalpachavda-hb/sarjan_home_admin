@@ -28,8 +28,8 @@ export default function ClientProperty() {
   const { canView, loading: permissionLoading } = usePermissions();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
+  const [selectedColumns] = useState<string[]>([]);
+  const [sortConfig] = useState<{
     key: keyof Aprovel;
     direction: "asc" | "desc";
   } | null>(null);
@@ -180,20 +180,9 @@ export default function ClientProperty() {
     );
   }, [filteredData, page, rowsPerPage]);
 
-  const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
+  // const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
 
-  const handleSort = (key: keyof Aprovel) => {
-    let direction: "asc" | "desc" = "asc";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "asc"
-    ) {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
+  
 
   // Show loader while checking permissions
   if (permissionLoading) {
@@ -245,7 +234,7 @@ export default function ClientProperty() {
                 {isColumnVisible("siteName") && (
                   <TableCell
                     className="columtext"
-                    onClick={() => handleSort("siteName")}
+
                   >
                     Site Name
                   </TableCell>
@@ -254,7 +243,7 @@ export default function ClientProperty() {
                 {isColumnVisible("count") && (
                   <TableCell
                     className="columtext"
-                    onClick={() => handleSort("count")}
+                    
                   >
                     Count
                   </TableCell>

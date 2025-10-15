@@ -37,12 +37,12 @@ export default function Pandingforaprovel() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
+  const [sortConfig] = useState<{
     key: keyof Aprovel;
     direction: "asc" | "desc";
   } | null>(null);
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
+  // const [siteFilter, setSiteFilter] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

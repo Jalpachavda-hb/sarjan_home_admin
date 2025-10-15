@@ -50,7 +50,7 @@ export default function Adminuser() {
   
   const [search, setSearch] = useState("");
   const [siteFilter] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   // const [newCategory, setNewCategory] = useState("");
 
   useEffect(() => {

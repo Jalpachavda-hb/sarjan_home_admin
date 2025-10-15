@@ -211,26 +211,26 @@ const Addadminuser = ({ mode }: { mode: "add" | "edit" }) => {
                 {isEdit ? (
                   <SiteSelector
                     value={selectedSite}
-                    onChange={(e) => {
-                      setSelectedSite(e.target.value);
+                    onChange={(val) => {
+                      setSelectedSite(val);
                       setErrors((prev) => ({ ...prev, site: "" }));
                     }}
-                    className={`h-11 w-full rounded-lg border px-4 py-2.5 text-sm ${
-                      errors.site ? "border-red-500" : ""
-                    }`}
-                  >
-                    <option value="">Select Site</option>
-                    {mappedSite && (
-                      <option value={mappedSite.site_detail_id}>
-                        {mappedSite.title}
-                      </option>
-                    )}
-                    {remainingSites.map((site) => (
-                      <option key={site.id} value={site.id}>
-                        {site.title}
-                      </option>
-                    ))}
-                  </SiteSelector>
+                    customOptions={[
+                      { value: "", label: "Select Site" },
+                      ...(mappedSite
+                        ? [
+                            {
+                              value: mappedSite.site_detail_id,
+                              label: mappedSite.title,
+                            },
+                          ]
+                        : []),
+                      ...remainingSites.map((site) => ({
+                        value: site.id.toString(),
+                        label: site.title,
+                      })),
+                    ]}
+                  />
                 ) : (
                   <SiteSelector
                     value={selectedSite}

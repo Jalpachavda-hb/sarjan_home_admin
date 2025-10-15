@@ -321,7 +321,6 @@ export default function MyTiket() {
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
                     className="text-center py-12 text-gray-500"
                   >
                     Loading tickets...
@@ -330,7 +329,6 @@ export default function MyTiket() {
               ) : paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
                     className="text-center py-12 text-gray-500"
                   >
                     No data available
@@ -382,7 +380,7 @@ export default function MyTiket() {
                     {isColumnVisible("blocknumberType") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
-                          <button onClick={() => handleClose(item.id)}>
+                          <button onClick={() => handleClose(String(item.id))}>
                             <Badge variant="light" color="error">
                               Close Ticket
                             </Badge>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import PageMeta from "../../components/common/PageMeta";
+
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
@@ -220,7 +220,7 @@ const EditClient: React.FC = () => {
         submitData,
         originalData,
         aadharCard,
-        panCard
+        // panCard
       );
 
       if (res.status === 200) {
@@ -320,7 +320,7 @@ const EditClient: React.FC = () => {
                     <>
                       <Button
                         type="button"
-                        variant="secondary"
+                        variant="outline"
                         onClick={() => {
                           window.open(
                             IMGURL +
@@ -335,7 +335,7 @@ const EditClient: React.FC = () => {
                       </Button>
                       <Button
                         type="button"
-                        variant="destructive"
+                        variant="outline"
                         onClick={() => {
                           handleDeleteAadhar();
                         }}
@@ -367,7 +367,7 @@ const EditClient: React.FC = () => {
                     <>
                       <Button
                         type="button"
-                        variant="secondary"
+                        variant="outline"
                         onClick={() => {
                           window.open(
                             IMGURL +
@@ -382,7 +382,7 @@ const EditClient: React.FC = () => {
                       </Button>
                       <Button
                         type="button"
-                        variant="destructive"
+                        variant="outline"
                         onClick={() => {
                           handleDeletePan();
                         }}
@@ -501,7 +501,7 @@ const EditClient: React.FC = () => {
         <Button onClick={handleSubmit} disabled={loading}>
           {loading ? "Updating..." : "Update Client"}
         </Button>
-        <Button variant="secondary" onClick={() => navigate(-1)}>
+        <Button variant="outline" onClick={() => navigate(-1)}>
           Cancel
         </Button>
       </div>

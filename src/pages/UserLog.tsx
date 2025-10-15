@@ -29,7 +29,7 @@ export default function UserLog() {
   const [rowsPerPage, setRowsPerPage] = useState(12);
   const [totalRecords, setTotalRecords] = useState(0);
   const [search, setSearch] = useState("");
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumns] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Check permissions
@@ -64,9 +64,7 @@ export default function UserLog() {
     getLogs(page);
   }, [page]);
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+  
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
 
@@ -126,13 +124,13 @@ export default function UserLog() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-12 text-center">
+                  <TableCell className="py-12 text-center">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-12 text-center text-gray-500">
+                  <TableCell className="py-12 text-center text-gray-500">
                     No logs available
                   </TableCell>
                 </TableRow>

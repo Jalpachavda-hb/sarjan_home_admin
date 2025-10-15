@@ -23,11 +23,9 @@ import {
   InputLabel,
   FormControl,
   IconButton,
-  Checkbox,
-  ListItemText,
 } from "@mui/material";
 import { copyTableData } from "../../utils/copy";
-import {printTableData} from "../../utils/printTableData"
+
 interface Inquiry {
   id: number;
   siteName: string; // lowercase `siteName`
@@ -43,13 +41,17 @@ interface InquiryThroughCard {
   inquiry_through: string;
   count: number;
 }
+type ColumnConfig = {
+  key: keyof Inquiry;
+  label: string;
+};
 
 export default function Inquiry() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [siteFilter, setSiteFilter] = useState<number | "">("");
+  const [selectedColumns] = useState<string[]>([]);
   const [inquiryThroughFilter, setInquiryThroughFilter] = useState("");
   const [dateFilter, setDateFilter] = useState<number>(0);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -183,7 +185,7 @@ export default function Inquiry() {
     const matchesDate = dateFilter
       ? (() => {
           const today = new Date();
-          const filterDays = parseInt(dateFilter, 10);
+          const filterDays = parseInt(String(dateFilter), 10);
           const cutoffDate = new Date(today);
           cutoffDate.setDate(today.getDate() - filterDays);
 
@@ -207,12 +209,12 @@ export default function Inquiry() {
     page * rowsPerPage + rowsPerPage
   );
 
-  const uniqueSites = [...new Set(inquiries.map((i) => i.siteName))].sort();
+  // const uniqueSites = [...new Set(inquiries.map((i) => i.siteName))].sort();
 
   const isColumnVisible = (column: string) =>
     selectedColumns.length === 0 || selectedColumns.includes(column);
 
-  const columns = [
+  const columns: ColumnConfig[] = [
     { key: "siteName", label: "Site Name" },
     { key: "name", label: "Name" },
     { key: "contactNumber", label: "Contact Number" },
@@ -309,8 +311,8 @@ export default function Inquiry() {
             <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
               {/* Filter by Site */}
               <SiteFilter
-                value={siteFilter}
-                onChange={(e) => setSiteFilter(e.target.value)} // 🔹 pick value not whole event
+                value={siteFilter === "" ? "" : String(siteFilter)}
+                onChange={(e) => setSiteFilter(e.target.value === "" ? "" : Number(e.target.value))}
               />
 
               {/* <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -476,7 +478,7 @@ export default function Inquiry() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={9}
+                      // colSpan={9}
                       className="text-center py-4 rowtext "
                     >
                       No data available

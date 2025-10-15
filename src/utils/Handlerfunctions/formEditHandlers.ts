@@ -276,7 +276,7 @@ export const editPaymentfromAdmin = async (
 
 export const editClient = async (
   clientData: any,
-  originalData: any,
+
   aadharCard: File | null,
   panCard: File | null
 ) => {
@@ -337,17 +337,13 @@ export const editClient = async (
   }
 };
 
-export const editSiteData = async (
- 
-  id: string,
-  formData: FormData
-) => {
+export const editSiteData = async (id: string, formData: FormData) => {
   try {
-     const adminId = getAdminId();
-  if (!adminId) {
-    toast.error("Admin ID not found. Please login again.");
-    return null;
-  }
+    const adminId = getAdminId();
+    if (!adminId) {
+      toast.error("Admin ID not found. Please login again.");
+      return null;
+    }
 
     // ✅ append ids to formData
     formData.append("admin_id", adminId);

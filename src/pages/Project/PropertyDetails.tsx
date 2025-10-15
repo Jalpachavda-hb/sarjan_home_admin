@@ -8,7 +8,7 @@ import {
 import Badge from "../../components/ui/badge/Badge";
 import { FaPlus } from "react-icons/fa6";
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -32,10 +32,10 @@ import {
 import Swal from "sweetalert2";
 import { usePermissions } from "../../hooks/usePermissions";
 import AccessDenied from "../../components/ui/AccessDenied";
-import { downloadCSV } from "../../utils/copy";
-import { addPropertyDetails } from "../../utils/Handlerfunctions/formSubmitHandlers";
+// import { downloadCSV } from "../../utils/copy";
+// import { addPropertyDetails } from "../../utils/Handlerfunctions/formSubmitHandlers";
 import { uploadcsv } from "../../utils/Handlerfunctions/formSubmitHandlers";
-import Papa from "papaparse";
+// import Papa from "papaparse";
 import SiteSelector from "../../components/form/input/SelectSiteinput";
 import Label from "../../components/form/Label";
 interface PropertyDetailsType {
@@ -61,11 +61,11 @@ export default function PropertyDetails() {
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [totalRecords, setTotalRecords] = useState(0);
-  const [selectedSite, setSelectedSite] = useState<number | string>(1);
+  // const [selectedSite, setSelectedSite] = useState<number | string>(1);
   const [csvModalOpen, setCsvModalOpen] = useState(false);
   const [csvSite, setCsvSite] = useState<string>("");
   const [csvFile, setCsvFile] = useState<File | null>(null);
-  const { id } = useParams();
+  // const { id } = useParams();
   const navigate = useNavigate();
 
   // Check permissions for Properties feature (after hooks)
@@ -81,17 +81,17 @@ export default function PropertyDetails() {
     selectedColumns.length === 0 || selectedColumns.includes(column);
 
   // Calculate visible columns count for colspan
-  const visibleColumnsCount =
-    1 + // Sr. No column
-    (isColumnVisible("siteName") ? 1 : 0) +
-    (isColumnVisible("unit") ? 1 : 0) +
-    (isColumnVisible("unitNumber") ? 1 : 0) +
-    (hasAnyActionPermission && isColumnVisible("Action") ? 1 : 0);
+  // const visibleColumnsCount =
+  //   1 + // Sr. No column
+  //   (isColumnVisible("siteName") ? 1 : 0) +
+  //   (isColumnVisible("unit") ? 1 : 0) +
+  //   (isColumnVisible("unitNumber") ? 1 : 0) +
+  //   (hasAnyActionPermission && isColumnVisible("Action") ? 1 : 0);
 
   const fetchPageData = async (pageNumber = 1) => {
     setLoading(true);
     try {
-      const res = await showPropertyDetailsList(selectedSite, pageNumber);
+      const res = await showPropertyDetailsList(1, pageNumber);
       if (res) {
         setTableData(res.data || []);
         setTotalRecords(res.total || 0);
@@ -110,7 +110,7 @@ export default function PropertyDetails() {
 
   useEffect(() => {
     fetchPageData(1);
-  }, [selectedSite]);
+  }, []);
 
   const handleDelete = async (id: number) => {
     if (!id) {
@@ -230,18 +230,18 @@ export default function PropertyDetails() {
       }
     } catch (error) {
       console.error("Upload failed:", error);
-      toast.error(error?.response?.data?.message || "Something went wrong");
+      toast.error((error as any)?.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   // Define columns for CSV export
-  const columns = [
-    { key: "siteName", label: "Site Name" },
-    { key: "unit", label: "Unit" },
-    { key: "unitNumber", label: "Unit Number" },
-  ];
+  // const columns = [
+  //   { key: "siteName", label: "Site Name" },
+  //   { key: "unit", label: "Unit" },
+  //   { key: "unitNumber", label: "Unit Number" },
+  // ];
 
   // Show loader while checking permissions
   if (permissionLoading) {
@@ -388,8 +388,8 @@ export default function PropertyDetails() {
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={visibleColumnsCount}
                     className="py-12 text-center"
+                    // colSpan={visibleColumnsCount}
                   >
                     Loading...
                   </TableCell>
@@ -397,8 +397,8 @@ export default function PropertyDetails() {
               ) : filteredData.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={visibleColumnsCount}
                     className="py-12 text-center text-gray-500"
+                    // colSpan={visibleColumnsCount}
                   >
                     {search
                       ? "No matching properties found"

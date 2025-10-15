@@ -8,7 +8,7 @@ import Button from "../../components/ui/button/Button";
 import { FaRegEye, FaEyeSlash } from "react-icons/fa";
 import { handleUpdateProfile } from "../../utils/Handlerfunctions/formEditHandlers";
 import { fetchProfile } from "../../utils/Handlerfunctions/getdata";
-import { Navigate } from "react-router";
+
 
 export default function EditProfile() {
   const [formData, setFormData] = useState({

@@ -17,12 +17,9 @@ import {
   FormControl,
   Checkbox,
   ListItemText,
-} from "@mui/material";    
+} from "@mui/material";
 import SiteFilter from "../../components/form/input/FilterbySite";
-import {
-  TodayReceivedpayment,
-  fetchDashboardCount,
-} from "../../utils/Handlerfunctions/getdata"; // ✅ import API fn
+import { TodayReceivedpayment } from "../../utils/Handlerfunctions/getdata"; // ✅ import API fn
 import { getAdminId } from "../../utils/Handlerfunctions/getdata";
 import { usePermissions } from "../../hooks/usePermissions";
 import { copyTableData, downloadCSV } from "../../utils/copy";
@@ -97,7 +94,7 @@ export default function TodayReceivedpaymentTable() {
     return <div className="font-poppins text-gray-800 dark:text-white"></div>;
   }
 
-  const columns = [
+  const columns: { key: keyof Payment; label: string }[]  = [
     { key: "name", label: "Client Name" },
     { key: "title", label: "Site Name" },
     { key: "block", label: "Block" },
@@ -126,14 +123,21 @@ export default function TodayReceivedpaymentTable() {
             >
               Copy
             </Button>
-          <Button
-  size="small"
-  variant="contained"
-  className="!bg-blue-600 hover:!bg-blue-700 text-white"
-  onClick={() => downloadCSV(filteredData, columns, selectedColumns, "today_received_payments.csv")}
->
-  CSV
-</Button>
+            <Button
+              size="small"
+              variant="contained"
+              className="!bg-blue-600 hover:!bg-blue-700 text-white"
+              onClick={() =>
+                downloadCSV(
+                  filteredData,
+                  columns,
+                  selectedColumns,
+                  "today_received_payments.csv"
+                )
+              }
+            >
+              CSV
+            </Button>
             <Button
               size="small"
               variant="contained"

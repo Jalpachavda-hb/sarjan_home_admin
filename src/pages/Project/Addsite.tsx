@@ -68,8 +68,8 @@ interface FilePreview {
 const FilePreviewGrid = ({
   files,
   title,
-  onRemove,
-}: {
+}: // onRemove,
+{
   files: FilePreview[];
   title: string;
   onRemove?: (index: number) => void;
@@ -173,7 +173,7 @@ const Addsite = () => {
   const isEditMode = Boolean(id);
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
 
   // API Options
   const [projectTypesOptions, setProjectTypesOptions] = useState<Option[]>([]);
@@ -692,7 +692,9 @@ const Addsite = () => {
                       onClick={() => window.open(mapLink, "_blank")}
                       className="flex items-center gap-1 px-3 py-2 border rounded text-blue-600 hover:bg-blue-50 transition whitespace-nowrap"
                     >
-                      <EyeIcon className="w-4 h-4" />
+                      <EyeIcon
+                      // className="w-4 h-4"
+                      />
                       View
                     </button>
                   )}
@@ -717,7 +719,9 @@ const Addsite = () => {
                       onClick={() => window.open(videoLink, "_blank")}
                       className="flex items-center gap-1 px-3 py-2 border rounded text-blue-600 hover:bg-blue-50 transition whitespace-nowrap"
                     >
-                      <EyeIcon className="w-4 h-4" />
+                      <EyeIcon
+                      //  className="w-4 h-4"
+                      />
                       View
                     </button>
                   )}

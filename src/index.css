@@ -274,9 +274,6 @@
     @apply bg-gray-200 rounded-full dark:bg-gray-700;
   }
 }
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #344054;
-}
 
 @layer utilities {
   /* For Remove Date Icon */
@@ -916,7 +913,7 @@ span.flatpickr-weekday,
 .disabledInput {
   font-weight:530;   
   font-size: 15px;      /* Make text bold */
-  color: #000000;               /* Darker color for readability */
+  color: #000000;               
   background-color: #f5f5f5; /* Slightly grey background */
   border: 1px solid #ccc;    /* Keep border visible */
   padding: 8px 10px;         /* Optional padding for better look */
@@ -931,19 +928,7 @@ span.flatpickr-weekday,
   padding: 0.625rem 1rem; /* py-2.5 px-4 */
   font-size: 0.875rem; /* text-sm */
   box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* approximate shadow-theme-xs */
-  appearance: none; /* appearance-none */
-  color: #f9fafb; /* dark:text-white/90 for dark mode, fallback */
+  appearance: none;
+  color: #f9fafb;
  
 }
-
-
-
-
-
-
-
-
-
-
-
-

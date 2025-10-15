@@ -18,7 +18,7 @@ import { useState, useMemo, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { TextField, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { deleteProjectCategory } from "../../utils/Handlerfunctions/formdeleteHandlers";
 import {
   Dialog,
@@ -26,7 +26,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { Navigate } from "react-router";
+// import { Navigate } from "react-router";
 import { usePermissions } from "../../hooks/usePermissions";
 import AccessDenied from "../../components/ui/AccessDenied";
 
@@ -41,12 +41,12 @@ export default function ProjectCategory() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState<ProjectCategoryType | null>(null);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const navigate = useNavigate();
+  const [selectedColumns] = useState<string[]>([]);
+  // const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [formMode, setFormMode] = useState<"add" | "edit">("add");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  // const [ setShowForm] = useState(false);
+  // const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  // const [selectedCategory, setSelectedCategory] = useState("");
   const [tableData, setTableData] = useState<ProjectCategoryType[]>([]);
   const [editError, setEditError] = useState<string>("");
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -126,9 +126,9 @@ export default function ProjectCategory() {
     }
   };
 
-  const handleCancelForm = () => {
-    setShowForm(false);
-  };
+  // const handleCancelForm = () => {
+  //   setShowForm(false);
+  // };
 
   const handleDelete = async (id: string) => {
     try {

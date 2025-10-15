@@ -6,7 +6,7 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import { FaRegEye } from "react-icons/fa";
-import SiteFilter from "../../components/form/input/FilterbySite";
+
 import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo, useEffect } from "react";
@@ -24,12 +24,7 @@ import {
 import {
   TextField,
   Button,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Checkbox,
-  ListItemText,
+ 
 } from "@mui/material";
 
 interface MyTicket {
@@ -46,11 +41,11 @@ interface MyTicket {
 export default function MyTiket() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumns] = useState<string[]>([]);
   const [tickets, setTickets] = useState<MyTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
+  const [siteFilter] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replies, setReplies] = useState<any[]>([]);
@@ -315,7 +310,6 @@ export default function MyTiket() {
               {loading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
                     className="text-center py-12 text-gray-500"
                   >
                     Loading tickets...
@@ -324,7 +318,6 @@ export default function MyTiket() {
               ) : paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
                     className="text-center py-12 text-gray-500"
                   >
                     No data available
@@ -371,7 +364,7 @@ export default function MyTiket() {
                     {isColumnVisible("blocknumberType") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
-                          <button onClick={() => handleClose(item.id)}>
+                          <button onClick={() => handleClose(String(item.id))}>
                             <Badge variant="light" color="error">
                               Close Ticket
                             </Badge>

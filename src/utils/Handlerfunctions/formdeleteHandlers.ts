@@ -74,23 +74,17 @@ export const deleteProjectCategory = async (id: string, adminId: string) => {
 export const deleteCommonDocument = async (id: string) => {
   const adminId = getAdminId();
   if (!adminId) {
-    toast.error("Admin ID not found");
-    return false;
+    throw new Error("Admin ID not found");
   }
 
-  console.log("delete call");
-
-  // 🔥 Hit delete API with form-data (as per Postman)
   const formData = new FormData();
   formData.append("id", id);
   formData.append("admin_id", adminId);
 
-  const res = await axiosInstance.post(
+  return await axiosInstance.post(
     API_PATHS.COMMONDOCUMENTS.DELETECOMMONDOCUMENTS,
     formData
   );
-
-  return res;
 };
 
 export const deletePersonalDocument = async (id: string) => {
@@ -191,7 +185,7 @@ export const destroyPaymentDetails = async (payment_id: number) => {
     console.log("Deleting ProprtyDetail ID:", payment_id);
 
     const formData = new FormData();
-    formData.append("payment_id", payment_id);
+    formData.append("payment_id", String(payment_id));
     formData.append("admin_id", adminId);
 
     const res = await axiosInstance.post(

@@ -37,21 +37,21 @@ export default function sitedetails() {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState<sitedetails | null>(null);
-  const [tableData, setTableData] = useState<sitedetails[]>([]);
+  const [selectedColumns] = useState<string[]>([]);
+  // const [editOpen, setEditOpen] = useState(false);
+  // const [editData, setEditData] = useState<sitedetails | null>(null);
+  // const [tableData, setTableData] = useState<sitedetails[]>([]);
   // use for search
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
-  const [addOpen, setAddOpen] = useState(false);
+  // const [siteFilter, setSiteFilter] = useState("");
+  // const [ setAddOpen] = useState(false);
   const [siteDetails, setSiteDetails] = useState<sitedetails[]>([]);
-  const [newCategory, setNewCategory] = useState("");
+  // const [newCategory, setNewCategory] = useState("");/
 
   // const handleEdit = (id: sitedetails) => {
   //   window.location.href = `site_details/Addsite/${id}`;
   // };
-   const handleEdit = (id: sitedetails) => {
+   const handleEdit = (id: string) => {
     window.location.href = `/admin/projects/site_details/Addsite/${id}`;
   };
 
@@ -286,7 +286,7 @@ export default function sitedetails() {
                   size="small"
                   variant="contained"
                   className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
-                  onClick={() => setAddOpen(true)}
+                  // onClick={() => setAddOpen(true)}
                 >
                   Add Site Details
                 </Button>

@@ -9,7 +9,7 @@ import Badge from "../../components/ui/badge/Badge";
 import TablePagination from "@mui/material/TablePagination";
 import { useState, useMemo, useEffect } from "react";
 import { MdDelete } from "react-icons/md";
-import { FaRegEye, FaRegEdit } from "react-icons/fa";
+import { FaRegEye } from "react-icons/fa";
 import { fetchPersonalDocuments } from "../../utils/Handlerfunctions/getdata";
 import { TextField, Button } from "@mui/material";
 import { toast } from "react-toastify";
@@ -30,18 +30,20 @@ export default function Personaldocument() {
   const [tableData, setTableData] = useState<Adminuser[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Adminuser;
-    direction: "asc" | "desc";
-  } | null>(null);
+  const [selectedColumns] = useState<string[]>([]);
+  const sortConfig = null;
   const [search, setSearch] = useState("");
-  const [siteFilter, setSiteFilter] = useState("");
-    const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
+  const [siteFilter] = useState("");
+  const {
+    canDelete,
+    canCreate,
+    canView,
+    loading: permissionLoading,
+  } = usePermissions();
 
- const canViewDocuments = canView("Documents");
+  const canViewDocuments = canView("Documents");
   const canCreateDocuments = canCreate("Documents");
-  const canEditDocuments = canEdit("Documents");
+  // const canEditDocuments = canEdit("Documents");
   const canDeleteDocuments = canDelete("Documents");
 
   // ✅ Load data
@@ -62,7 +64,9 @@ export default function Personaldocument() {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -88,16 +92,6 @@ export default function Personaldocument() {
       );
     }
 
-    if (sortConfig) {
-      data.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-
     return data;
   }, [tableData, search, siteFilter, sortConfig]);
 
@@ -107,15 +101,6 @@ export default function Personaldocument() {
       page * rowsPerPage + rowsPerPage
     );
   }, [filteredData, page, rowsPerPage]);
-
-  const handleSort = (key: keyof Adminuser) => {
-    let direction: "asc" | "desc" = "asc";
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    setPage(0);
-  };
 
   // ✅ Delete
   const handleDelete = async (id: number) => {
@@ -131,7 +116,7 @@ export default function Personaldocument() {
 
     if (result.isConfirmed) {
       try {
-        await deletePersonalDocument(id);
+        await deletePersonalDocument(String(id));
         setTableData((prev) => prev.filter((doc) => doc.id !== id));
         toast.success("Document deleted successfully!");
       } catch (err) {
@@ -141,20 +126,19 @@ export default function Personaldocument() {
     }
   };
 
+  const handleView = (item: Adminuser) => {
+    console.log("Viewing document for item:", item);
 
- const handleView = (item: Adminuser) => {
-  console.log("Viewing document for item:", item);
+    if (!item.personal_document_file) {
+      toast.error("File not available");
+      return;
+    }
 
-  if (!item.personal_document_file) {
-    toast.error("File not available");
-    return;
-  }
-
-  window.open(item.personal_document_file, "_blank", "noopener,noreferrer");
-};
+    window.open(item.personal_document_file, "_blank", "noopener,noreferrer");
+  };
 
   // ✅ Edit in new tab
-  
+
   // Show loader while checking permissions
   if (permissionLoading) {
     return (
@@ -180,16 +164,17 @@ export default function Personaldocument() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div />
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-             {canCreateDocuments && (
-            <a href="/admin/personal_documents/add">
-              <Button
-                size="small"
-                variant="contained"
-                className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
-              >
-                + Add Document Types
-              </Button>
-            </a>)}
+            {canCreateDocuments && (
+              <a href="/admin/personal_documents/add">
+                <Button
+                  size="small"
+                  variant="contained"
+                  className="!bg-indigo-700 hover:!bg-indigo-900 text-white"
+                >
+                  + Add Document Types
+                </Button>
+              </a>
+            )}
             <TextField
               size="small"
               variant="outlined"
@@ -209,26 +194,17 @@ export default function Personaldocument() {
               <TableRow>
                 <TableCell className="columtext">Sr. No</TableCell>
                 {isColumnVisible("site_title") && (
-                  <TableCell
-                    className="columtext cursor-pointer"
-                    onClick={() => handleSort("site_title")}
-                  >
+                  <TableCell className="columtext cursor-pointer">
                     Site Name
                   </TableCell>
                 )}
                 {isColumnVisible("client_name") && (
-                  <TableCell
-                    className="columtext cursor-pointer"
-                    onClick={() => handleSort("client_name")}
-                  >
+                  <TableCell className="columtext cursor-pointer">
                     Client Name
                   </TableCell>
                 )}
                 {isColumnVisible("personal_document_name") && (
-                  <TableCell
-                    className="columtext cursor-pointer"
-                    onClick={() => handleSort("personal_document_name")}
-                  >
+                  <TableCell className="columtext cursor-pointer">
                     Personal Document Name
                   </TableCell>
                 )}
@@ -252,10 +228,14 @@ export default function Personaldocument() {
                       {page * rowsPerPage + index + 1}
                     </TableCell>
                     {isColumnVisible("site_title") && (
-                      <TableCell className="rowtext">{item.site_title}</TableCell>
+                      <TableCell className="rowtext">
+                        {item.site_title}
+                      </TableCell>
                     )}
                     {isColumnVisible("client_name") && (
-                      <TableCell className="rowtext">{item.client_name}</TableCell>
+                      <TableCell className="rowtext">
+                        {item.client_name}
+                      </TableCell>
                     )}
                     {isColumnVisible("personal_document_name") && (
                       <TableCell className="rowtext">
@@ -265,20 +245,20 @@ export default function Personaldocument() {
                     {isColumnVisible("action") && (
                       <TableCell className="rowtext">
                         <div className="flex gap-2 mt-1">
-                           {canDeleteDocuments && (
-                          <Badge variant="light" color="error">
-                            <MdDelete
-                              className="text-2xl cursor-pointer"
-                              onClick={() => handleDelete(item.id)}
-                            />
-                          </Badge>)}
-                          <Badge variant="light" >
+                          {canDeleteDocuments && (
+                            <Badge variant="light" color="error">
+                              <MdDelete
+                                className="text-2xl cursor-pointer"
+                                onClick={() => handleDelete(item.id)}
+                              />
+                            </Badge>
+                          )}
+                          <Badge variant="light">
                             <FaRegEye
                               className="text-2xl cursor-pointer"
                               onClick={() => handleView(item)}
                             />
                           </Badge>
-                         
                         </div>
                       </TableCell>
                     )}
@@ -310,8 +290,12 @@ export default function Personaldocument() {
               labelRowsPerPage="Rows per page:"
               sx={{
                 color: "inherit",
-                ".MuiSelect-select": { color: "inherit", backgroundColor: "transparent" },
-                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": { color: "inherit" },
+                ".MuiSelect-select": {
+                  color: "inherit",
+                  backgroundColor: "transparent",
+                },
+                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                  { color: "inherit" },
                 ".MuiSvgIcon-root": { color: "inherit" },
               }}
             />

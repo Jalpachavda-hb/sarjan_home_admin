@@ -40,6 +40,11 @@ interface ClientReport {
   remainingGstAmount: string;
   ledger: string;
 }
+type ColumnConfig = {
+  key: keyof ClientReport;
+  label: string;
+};
+
 export default function Clientreport() {
   const { canView, loading: permissionLoading } = usePermissions();
   const canViewReports = canView("Reports");
@@ -57,7 +62,7 @@ export default function Clientreport() {
     total_remaining_gst_amount: "₹0",
   });
 
-  const columns = [
+ const columns: ColumnConfig[] = [
     { key: "clientName", label: "Client Name" },
     { key: "purchasedSiteName", label: "Purchased Site Name" },
     { key: "unitType", label: "Unit Type" },

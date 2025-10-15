@@ -43,6 +43,19 @@ import SiteFilter from "../../components/form/input/FilterbySite";
 import { usePermissions } from "../../hooks/usePermissions";
 import AccessDenied from "../../components/ui/AccessDenied";
 import { printTableData } from "../../utils/printTableData";
+interface PaymentDetails {
+  id: string;
+  clientName: string;
+  siteName: string;
+  unitNo: string;
+  propertyAmount: string;
+  gstAmount: string;
+  receivedDate: string;
+  receivedAmountType: string;
+  receivedAmount: string;
+  receiptUrl?: string;
+}
+
 interface Payment {
   id: number;
   clientName: string;
@@ -57,7 +70,13 @@ interface Payment {
 }
 
 export default function Payment() {
-  const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
+  const {
+    canDelete,
+    canEdit,
+    canCreate,
+    canView,
+    loading: permissionLoading,
+  } = usePermissions();
 
   // Check permissions for Payments feature
   const canViewPayments = canView("Payments");
@@ -99,7 +118,9 @@ export default function Payment() {
         siteFilter || "",
         dateFilter ? Number(dateFilter) : 0
       );
-      setTableData(data);
+      setTableData(
+        data.map((item: PaymentDetails) => ({ ...item, id: Number(item.id) }))
+      );
     };
     loadPayments();
   }, [siteFilter, dateFilter]);
@@ -128,8 +149,13 @@ export default function Payment() {
       try {
         await destroyPaymentDetails(payment_id);
         const adminId = getAdminId();
-        const updatedData = await fetchPaymentDetails(adminId);
-        setTableData(updatedData);
+        const updatedData = await fetchPaymentDetails(adminId!);
+        setTableData(
+          updatedData.map((item: PaymentDetails) => ({
+            ...item,
+            id: Number(item.id),
+          }))
+        );
 
         toast.success("Deleted successfully!");
       } catch (err) {
@@ -164,7 +190,7 @@ export default function Payment() {
           : Number(selectedPayment.propertyAmount.replace(/[^0-9.-]+/g, ""));
       setMaxAllowedAmount(newMax);
 
-      if (receivedAmount > newMax) {
+      if (Number(receivedAmount) > newMax) {
         setErrors((prev) => ({
           ...prev,
           receivedAmount: "Received amount exceeds balance",
@@ -212,7 +238,7 @@ export default function Payment() {
     setReceiptPreview(payment.receiptUrl || null);
     setOldReceiptUrl(payment.receiptUrl || "");
     setReceiptFile(null); // Reset file when opening modal
-    setFormError(""); // Clear any previous errors
+    setErrors({});
 
     // Set the maximum allowed amount based on amount type
     if (payment.receivedAmountType === "GST Amount") {
@@ -253,19 +279,16 @@ export default function Payment() {
     return "";
   };
 
-const columns = [
-  { key: "clientName", label: "Client Name" },
-  { key: "siteName", label: "Site Name" },
-  { key: "unitNo", label: "Unit Number" },
-  { key: "propertyAmount", label: "Property Amount" },
-  { key: "gstAmount", label: "GST Amount" },
-  { key: "receivedDate", label: "Received Date" },
-  { key: "receivedAmountType", label: "Received Amount Type" },
-  { key: "receivedAmount", label: "Received Amount" },
- 
-];
-
-
+  const columns = [
+    { key: "clientName", label: "Client Name" },
+    { key: "siteName", label: "Site Name" },
+    { key: "unitNo", label: "Unit Number" },
+    { key: "propertyAmount", label: "Property Amount" },
+    { key: "gstAmount", label: "GST Amount" },
+    { key: "receivedDate", label: "Received Date" },
+    { key: "receivedAmountType", label: "Received Amount Type" },
+    { key: "receivedAmount", label: "Received Amount" },
+  ];
 
   // Show loader while checking permissions
   if (permissionLoading) {
@@ -372,7 +395,7 @@ const columns = [
               <MuiSelect
                 labelId="date-filter-label"
                 value={dateFilter}
-                onChange={(e) => setDateFilter(Number(e.target.value))}
+                onChange={(e) => setDateFilter(String(e.target.value))}
                 label="Filter by Date"
                 sx={{ fontFamily: "Poppins, sans-serif", fontSize: "14px" }}
               >
@@ -557,8 +580,8 @@ const columns = [
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={11}
                     className="text-center py-4 text-gray-500 font-poppins"
+                    // colSpan={11}
                   >
                     No data available
                   </TableCell>
@@ -588,6 +611,7 @@ const columns = [
 
         {/* Edit Modal */}
         {/* Edit Modal */}
+        {formError && <p className="text-red-500 text-sm mb-2">{formError}</p>}
         <Dialog
           className="swal2-container"
           open={isModalOpen}
@@ -629,7 +653,7 @@ const columns = [
                   onChange={(val) => {
                     handleAmountTypeChange(val);
                     // Validate amount if it exceeds new max
-                    if (receivedAmount > maxAllowedAmount) {
+                    if (Number(receivedAmount) > maxAllowedAmount) {
                       setErrors((prev) => ({
                         ...prev,
                         receivedAmount: "Received amount exceeds balance",
@@ -747,7 +771,7 @@ const columns = [
 
                 try {
                   const res = await editPaymentfromAdmin(
-                    getAdminId(),
+                    getAdminId()!,
                     selectedPayment.id.toString(),
                     amountType,
                     Number(receivedAmount),
@@ -760,8 +784,13 @@ const columns = [
 
                     // Refresh table data
                     const adminId = getAdminId();
-                    const updatedData = await fetchPaymentDetails(adminId);
-                    setTableData(updatedData);
+                    const updatedData = await fetchPaymentDetails(adminId!);
+                    setTableData(
+                      updatedData.map((item: PaymentDetails) => ({
+                        ...item,
+                        id: Number(item.id),
+                      }))
+                    );
 
                     // Reset modal
                     setIsModalOpen(false);

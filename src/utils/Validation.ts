@@ -23,9 +23,16 @@ export const validatePassword = (value: string): string | null => {
   return null; // ✅ only required, no length check
 };
 
+interface CategoryValues {
+  categoryName: string;
+}
 
-export const validateCategory = (values) => {
-  const errors = {};
+interface CategoryErrors {
+  categoryName?: string; // optional because it may not exist if valid
+}
+
+export const validateCategory = (values: CategoryValues): CategoryErrors => {
+  const errors: CategoryErrors = {};
 
   if (!values.categoryName || values.categoryName.trim() === "") {
     errors.categoryName = "Category name is required";

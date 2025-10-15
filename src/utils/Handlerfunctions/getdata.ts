@@ -151,7 +151,7 @@ export const fetchSplashScreens = async (adminId: string) => {
 
 export const fetchSiteInquiry = async (
   adminId: string,
-  siteFilter?: number,
+   siteFilter?: string | number,
   searchByDays?: number
 ) => {
   try {
@@ -296,7 +296,7 @@ export const fetchClientReports = async (adminId: string) => {
     );
 
     if (response.data.status === 200) {
-      return response.data.data.map((item: any, index: number) => ({
+      return response.data.data.map((item: any) => ({
         id: item.client_id + "-" + item.block_detail_id, // unique id
         clientName: item.name || "N/A",
         purchasedSiteName: item.title || "N/A",
@@ -639,7 +639,7 @@ export const showclientTicket = async (requestSiteFilter?: string) => {
   }
 };
 
-export const showclientlist = async (siteId: string, page: number = 1) => {
+export const showclientlist = async (siteId: string, page: number = 1, perPage?: number) => {
   const adminId = getAdminId();
   if (!adminId) {
     toast.error("Admin ID not found");
@@ -652,6 +652,7 @@ export const showclientlist = async (siteId: string, page: number = 1) => {
         admin_id: adminId,
         site_id: siteId,
         page,
+        ...(perPage && { per_page: perPage }),
       },
     });
     return res.data || null;
@@ -662,18 +663,24 @@ export const showclientlist = async (siteId: string, page: number = 1) => {
   }
 };
 
-export const fetchUnitType = async () => {
+export interface DropdownOption {
+  label: string;
+  value: string;
+ id?: number;
+}
+
+export const fetchUnitType = async (): Promise<DropdownOption[]> => {
   try {
-    const response = await axiosInstance.get(
+    const response = await axiosInstance.get<{ data: string[] }>(
       API_PATHS.MULTITIMEUSEAPI.UNITTYPE
     );
 
-    // Convert array of strings into dropdown-friendly objects
+    // Map array of strings into dropdown-friendly objects
     return (
-      response.data?.data?.map((item, index) => ({
-        label: item, // what you display
-        value: item, // value you store
-        id: index, // optional (if you need a unique key)
+      response.data?.data?.map((item: any, index: number) => ({
+        label: item,
+        value: item,
+        id: index,
       })) || []
     );
   } catch (error) {
@@ -682,17 +689,22 @@ export const fetchUnitType = async () => {
   }
 };
 
-export const getClientName = async () => {
+interface Client {
+  id: number | string; // match your backend type
+  name: string;
+  block_detail_id?: any;
+}
+
+export const getClientName = async (): Promise<DropdownOption[]> => {
   try {
-    const response = await axiosInstance.get(
+    const response = await axiosInstance.get<{ data: Client[] }>(
       API_PATHS.MULTITIMEUSEAPI.GETCLIENTNAMEFROMSITEID
     );
 
-    // Map API response into dropdown format
     return (
-      response.data?.data?.map((item) => ({
-        label: item.name, // text shown in dropdown
-        value: item.id, // value you submit/store
+      response.data?.data?.map((item: any) => ({
+        label: item.name,
+        value: item.id,
       })) || []
     );
   } catch (error) {

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import {
   MenuItem,
   Select,
@@ -21,8 +21,13 @@ const StyledInputLabel = styled(InputLabel)({
   fontSize: '0.875rem',
 });
 
-export default function ColumnSelector({ selectedColumns, setSelectedColumns }) {
-  const handleChange = (event) => {
+interface ColumnSelectorProps {
+  selectedColumns: string[];
+  setSelectedColumns: (columns: string[]) => void;
+}
+
+export default function ColumnSelector({ selectedColumns, setSelectedColumns }: ColumnSelectorProps) {
+  const handleChange = (event: any) => {
     const {
       target: { value },
     } = event;
