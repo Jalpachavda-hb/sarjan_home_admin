@@ -14,7 +14,8 @@ import {
   fetchUnitType,
   getClientName,
   getBlockFromSiteId,
-  getBlockFromBlockid
+  getBlockFromBlockid,
+  showclientlist
 } from "../../utils/Handlerfunctions/getdata";
 import AccessDenied from "../../components/ui/AccessDenied";
 import { usePermissions } from "../../hooks/usePermissions";
@@ -79,6 +80,7 @@ const Addnewclient: React.FC = () => {
   const [clients, setClients] = useState<Option[]>([]);
   const [blocks, setBlocks] = useState<Option[]>([]);
   const [blockDetails, setBlockDetails] = useState<Option[]>([]);
+  const [assignedBlockNumbers, setAssignedBlockNumbers] = useState<string[]>([]);
   const [siteId] = useState<string | null>(initialSiteId);
 
   const [clientData, setClientData] = useState<ClientData>({
@@ -163,17 +165,34 @@ const Addnewclient: React.FC = () => {
     };
   }, [siteId]);
 
+  // Fetch assigned block numbers for the site
+  useEffect(() => {
+    if (!siteId) return;
+    const fetchAssignedBlocks = async () => {
+      try {
+        const res = await showclientlist(siteId, 1);
+        const assigned = res?.details?.map((client: any) => client.block_number) || [];
+        setAssignedBlockNumbers(assigned.filter(Boolean));
+      } catch (err) {
+        console.error("Error fetching assigned blocks:", err);
+      }
+    };
+    fetchAssignedBlocks();
+  }, [siteId]);
+
   // Fetch block numbers when block_id changes
   useEffect(() => {
     if (!clientData.block_id) return;
     const fetchBlockDetails = async () => {
       try {
         const data = await getBlockFromBlockid(clientData.block_id);
-        // Transform block details to use string values
-        const transformedBlockDetails = data.map((block: any) => ({
-          value: String(block.value),
-          label: block.label,
-        }));
+        // Transform block details to use string values and filter out assigned ones
+        const transformedBlockDetails = data
+          .map((block: any) => ({
+            value: String(block.value),
+            label: block.label,
+          }))
+          .filter((block: Option) => !assignedBlockNumbers.includes(block.label));
         setBlockDetails(transformedBlockDetails);
       } catch (err) {
         console.error("Error fetching block details:", err);
@@ -181,7 +200,7 @@ const Addnewclient: React.FC = () => {
       }
     };
     fetchBlockDetails();
-  }, [clientData.block_id]);
+  }, [clientData.block_id, assignedBlockNumbers]);
 
 
 const handleChange = (
@@ -453,24 +472,30 @@ const handleChange = (
               )}
 
               {/* Block Numbers */}
-              {blockDetails.length > 0 && (
+              {clientData.block_id && (
                 <div>
                   <Label>
                     Block Numbers <span className="text-red-500">*</span>
                   </Label>
-                  <MultiSelect
-                    label=""
-                    options={blockDetails.map((o) => ({
-                      value: o.value,
-                      text: o.label,
-                    }))}
-                    onChange={(selected: string[]) =>
-                      setClientData((prev: ClientData) => ({
-                        ...prev,
-                        block_detail_id: selected,
-                      }))
-                    }
-                  />
+                  {blockDetails.length > 0 ? (
+                    <MultiSelect
+                      label=""
+                      options={blockDetails.map((o) => ({
+                        value: o.value,
+                        text: o.label,
+                      }))}
+                      onChange={(selected: string[]) =>
+                        setClientData((prev: ClientData) => ({
+                          ...prev,
+                          block_detail_id: selected,
+                        }))
+                      }
+                    />
+                  ) : (
+                    <div className="p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                      No blocks found
+                    </div>
+                  )}
                   {errors.block_detail_id && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.block_detail_id}

@@ -2,9 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { IoEllipsisHorizontalSharp } from "react-icons/io5";
 import { IoMdDocument } from "react-icons/io";
-import {
-  fetchWebSetting,
-} from "../utils/Handlerfunctions/getdata";
+import { fetchWebSetting } from "../utils/Handlerfunctions/getdata";
 import {
   MdOutlinePendingActions,
   MdOutlineReport,
@@ -203,7 +201,13 @@ const othersItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const {
+    isExpanded,
+    isMobileOpen,
+    isHovered,
+    setIsHovered,
+    toggleMobileSidebar,
+  } = useSidebar();
   const location = useLocation();
   const { canView, loading } = usePermissions();
   const [logo, setLogo] = useState<string | null>(null);
@@ -361,7 +365,7 @@ const AppSidebar: React.FC = () => {
                       <span className="menu-item-text">{nav.name}</span>
                       <FaAngleDown
                         className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                          isSubmenuOpen ? "rotate-180 text-brand-500" : ""
+                          isSubmenuOpen ? "rotate-180 text-[#ae8643]" : ""
                         }`}
                       />
                     </>
@@ -369,8 +373,20 @@ const AppSidebar: React.FC = () => {
                 </button>
               ) : (
                 nav.path && (
+                  // <Link
+                  //   to={nav.path}
+                  //   className={`menu-item group ${
+                  //     isActive(nav.path)
+                  //       ? "menu-item-active"
+                  //       : "menu-item-inactive"
+                  //   }`}
+                  // >
                   <Link
                     to={nav.path}
+                    onClick={() => {
+                      if (isMobileOpen) toggleMobileSidebar(); // close on mobile click
+                      setIsHovered(false);
+                    }}
                     className={`menu-item group ${
                       isActive(nav.path)
                         ? "menu-item-active"
@@ -410,6 +426,10 @@ const AppSidebar: React.FC = () => {
                       <li key={subItem.name}>
                         <Link
                           to={subItem.path}
+                          onClick={() => {
+                            if (isMobileOpen) toggleMobileSidebar(); // close sidebar on submenu click
+                            setIsHovered(false);
+                          }}
                           className={`menu-dropdown-item ${
                             isActive(subItem.path)
                               ? "menu-dropdown-item-active"
