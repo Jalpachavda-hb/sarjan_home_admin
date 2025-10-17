@@ -1,13 +1,22 @@
 
 
 
-export const validateEmail = (value: string): string | null => {
+// utils/Validation.ts (if not already there)
+export const validateEmail = (email: string): string | undefined => {
+  if (!email) return undefined; // optional field
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(value)) {
-    return "Invalid email format";
-  }
-  return null;
+  if (!emailRegex.test(email)) return "Invalid email format";
+  return undefined;
 };
+
+export const validateName = (name: string): string | undefined => {
+  const nameRegex = /^[A-Za-z\s]+$/;
+  if (!name) return "Name is required";
+  if (!nameRegex.test(name))
+    return "Name should contain only letters and spaces";
+  return undefined;
+};
+
 
 export const validateContact = (value: string): string | null => {
   if (!/^\d*$/.test(value)) { // only digits allowed

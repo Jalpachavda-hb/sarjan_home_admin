@@ -56,6 +56,14 @@ export default function Inquiry() {
   const [dateFilter, setDateFilter] = useState<number>(0);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
 
+  const [_toastMessage, setToastMessage] = useState("");
+  const [_showToast, setShowToast] = useState(false);
+
+  const showToastMessage = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 1500); // hide after 1.5 sec
+  };
   const [inquiryThroughCards, setInquiryThroughCards] = useState<
     InquiryThroughCard[]
   >([]);
@@ -239,9 +247,10 @@ export default function Inquiry() {
                 size="small"
                 variant="contained"
                 className="!bg-green-600 hover:!bg-green-700 text-white"
-                onClick={() =>
-                  copyTableData(filteredData, columns, selectedColumns)
-                }
+                onClick={() => {
+                  copyTableData(filteredData, columns, selectedColumns);
+                  showToastMessage("Table data copied!");
+                }}
               >
                 Copy
               </Button>
@@ -312,7 +321,11 @@ export default function Inquiry() {
               {/* Filter by Site */}
               <SiteFilter
                 value={siteFilter === "" ? "" : String(siteFilter)}
-                onChange={(e) => setSiteFilter(e.target.value === "" ? "" : Number(e.target.value))}
+                onChange={(e) =>
+                  setSiteFilter(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
               />
 
               {/* <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -445,9 +458,10 @@ export default function Inquiry() {
                             placement="top"
                           >
                             <IconButton
-                              onClick={() =>
-                                navigator.clipboard.writeText(item.email)
-                              }
+                              onClick={() => {
+                                navigator.clipboard.writeText(item.email);
+                                showToastMessage("Email copied!");
+                              }}
                             >
                               <MdEmail className="text-indigo-600" />
                             </IconButton>

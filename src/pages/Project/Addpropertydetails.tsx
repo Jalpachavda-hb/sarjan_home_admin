@@ -177,12 +177,9 @@ const Addpropertydetails = ({ mode }: Props) => {
 
     try {
       if (mode === "add") {
-        // For ADD mode: Create the complete block_number and send proper block
-        const completeBlockNumber = `${formData.block}-${formData.block_number}`;
-
         const payload = {
           block: formData.block, // Send the single letter (K, B, C)
-          block_number: completeBlockNumber, // Send the combined format (K-301)
+          block_number: formData.block_number, // Send the combined format (K-301)
           rera_area: formData.rera_area,
           undivided_landshare: formData.undivided_landshare,
           balcony_area: formData.balcony_area,
@@ -225,11 +222,11 @@ const Addpropertydetails = ({ mode }: Props) => {
         }
       } else if (mode === "edit" && blockDetailId) {
         // For EDIT mode: Use the existing format
-        const completeBlockNumber = `${formData.block}-${formData.block_number}`;
+        // const completeBlockNumber = `${formData.block}-${formData.block_number}`;
 
         const payload = {
           block: formData.block, // Unit letter only
-          block_number: completeBlockNumber, // Combined format
+          block_number: formData.block_number,
           rera_area: formData.rera_area,
           undivided_landshare: formData.undivided_landshare,
           balcony_area: formData.balcony_area,
@@ -358,8 +355,95 @@ const Addpropertydetails = ({ mode }: Props) => {
                   />
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-6 xl:grid-cols-2">
+                <div>
+                  <Label>Rera Area</Label>
+                  <Input
+                    type="number"
+                    name="rera_area"
+                    value={formData.rera_area}
+                    onChange={handleChange}
+                    placeholder="Enter Rera Area"
+                  />
+                </div>
+                <div>
+                  <Label>Wash Area</Label>
+                  <Input
+                    type="number"
+                    name="wash_area"
+                    value={formData.wash_area}
+                    onChange={handleChange}
+                    placeholder="Enter Wash Area"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-6 xl:grid-cols-2">
+                <div>
+                  <Label>Terrace Area(if)</Label>
+                  <Input
+                    type="number"
+                    name="terrace_area"
+                    value={formData.terrace_area}
+                    onChange={handleChange}
+                    placeholder="Enter Terrace Area"
+                  />
+                </div>
+                <div>
+                  <Label>Undivided Landshare :</Label>
+                  <Input
+                    type="number"
+                    name="undivided_landshare"
+                    value={formData.undivided_landshare}
+                    onChange={handleChange}
+                    placeholder="Enter Undivided Landshare "
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-6 xl:grid-cols-2">
+                <div>
+                  <Label>North</Label>
+                  <Input
+                    type="number"
+                    name="north"
+                    value={formData.north}
+                    onChange={handleChange}
+                    placeholder="Enter North Area"
+                  />
+                </div>
+                <div>
+                  <Label>South </Label>
+                  <Input
+                    type="number"
+                    name="south"
+                    value={formData.south}
+                    onChange={handleChange}
+                    placeholder="Enter South Area"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-6 xl:grid-cols-2">
+                <div>
+                  <Label>East</Label>
+                  <Input
+                    type="number"
+                    name="east"
+                    value={formData.east}
+                    onChange={handleChange}
+                    placeholder="Enter east Area"
+                  />
+                </div>
+                <div>
+                  <Label>West </Label>
+                  <Input
+                    type="number"
+                    name="west"
+                    value={formData.west}
+                    onChange={handleChange}
+                    placeholder="Enter west Area"
+                  />
+                </div>
+              </div>
 
-              {/* Rest of your form fields */}
               {/* ... */}
             </div>
           </ComponentCard>

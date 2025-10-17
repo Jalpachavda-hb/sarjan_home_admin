@@ -531,8 +531,8 @@ export const getAdminUserById = async (id: string) => {
 };
 
 export const showPropertyDetailsList = async (
-  site_id: number | string,
-  page: number
+  // site_id?: number | string,
+  page?: number
 ) => {
   const adminId = getAdminId();
   if (!adminId) {
@@ -541,10 +541,13 @@ export const showPropertyDetailsList = async (
   }
 
   try {
-    const res = await axiosInstance.get(
-      API_PATHS.SITEDETAILS.PROPERTYDETAILSLIST,
-      { params: { admin_id: adminId, site_id, page } }
-    );
+    const res = await axiosInstance.get(API_PATHS.SITEDETAILS.PROPERTYDETAILSLIST, {
+      params: {
+        admin_id: adminId,
+        // site_id: site_id ?? "",  
+        page: page ?? "",        
+      },
+    });
 
     const mappedData = res.data?.details?.map((item: any) => ({
       id: item.block_detail_id,

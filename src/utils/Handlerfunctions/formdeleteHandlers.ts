@@ -149,7 +149,7 @@ export const deletePropertyDetails = async (block_detail_id: string) => {
   }
 
   try {
-    console.log("Deleting ProprtyDetail ID:", block_detail_id);
+    console.log("Deleting PropertyDetail ID:", block_detail_id);
 
     const formData = new FormData();
     formData.append("block_detail_id", block_detail_id);
@@ -160,16 +160,37 @@ export const deletePropertyDetails = async (block_detail_id: string) => {
       formData
     );
 
-    if (res?.status === 200) {
+    const status = res?.data?.status || res?.status; // safely check both places
+
+    // ✅ Case 1: Normal success
+    if (status === 200) {
       toast.success("Property Detail deleted successfully!");
       return true;
-    } else {
-      toast.error(res?.data?.message || "Failed to delete Property Detail");
+    }
+
+    // ✅ Case 2: Backend returns status 401 but we still want success toast
+    if (status === 401) {
+      toast.warning(res?.data?.message || "Block detail cannot be deleted as it is assigned to a client.");
       return false;
     }
+
+    // ❌ Case 3: Any other response
+    toast.error(res?.data?.message || "Failed to delete Property Detail");
+    return false;
+
   } catch (error: any) {
     console.error("Delete Property Detail failed:", error);
-    toast.error("Failed to delete Property Detail");
+
+    // Handle thrown Axios error (non-2xx)
+    const backendStatus = error?.response?.data?.status;
+    const backendMessage = error?.response?.data?.message;
+
+    if (backendStatus === 401) {
+      toast.success(backendMessage || "Block detail cannot be deleted as it is assigned to a client.");
+    } else {
+      toast.error(backendMessage || "Failed to delete Property Detail");
+    }
+
     return false;
   }
 };

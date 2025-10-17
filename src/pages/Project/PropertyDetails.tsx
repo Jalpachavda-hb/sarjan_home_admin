@@ -91,7 +91,7 @@ export default function PropertyDetails() {
   const fetchPageData = async (pageNumber = 1) => {
     setLoading(true);
     try {
-      const res = await showPropertyDetailsList(1, pageNumber);
+      const res = await showPropertyDetailsList( pageNumber);
       if (res) {
         setTableData(res.data || []);
         setTotalRecords(res.total || 0);

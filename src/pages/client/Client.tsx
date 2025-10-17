@@ -19,9 +19,8 @@ import { printTableData } from "../../utils/printTableData";
 import {
   showclientlist,
   getUserRole,
-
 } from "../../utils/Handlerfunctions/getdata";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { TextField, Button } from "@mui/material";
 import { deleteClient } from "../../utils/Handlerfunctions/formdeleteHandlers";
@@ -31,6 +30,7 @@ import {
 } from "@mui/material";
 import { usePermissions } from "../../hooks/usePermissions";
 import AccessDenied from "../../components/ui/AccessDenied";
+
 interface Client {
   id: string;
   clientName: string;
@@ -46,7 +46,13 @@ interface Client {
 
 export default function ClientList() {
   const { id } = useParams(); // ✅ get site id from URL (/admin/clients/:id)
- const { canDelete, canEdit, canCreate, canView, loading: permissionLoading } = usePermissions();
+  const {
+    canDelete,
+    canEdit,
+    canCreate,
+    canView,
+    loading: permissionLoading,
+  } = usePermissions();
 
   // Check permissions for Clients feature
   const canViewClient = canView("Clients");
@@ -59,12 +65,15 @@ export default function ClientList() {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(5);
- 
+
   const [search, setSearch] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [siteName] = useState<string>("");
+const location = useLocation();
+const passedSiteName = location.state?.siteName || "";
+const [siteName] = useState<string>(passedSiteName);
+
   const [sortConfig] = useState<{
     key: keyof Client;
     direction: "asc" | "desc";
@@ -98,7 +107,7 @@ export default function ClientList() {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     if (!id) return;
 
     fetchClients();
@@ -169,14 +178,13 @@ export default function ClientList() {
 
   // Show Access Denied if user doesn't have view permission
 
-    if (permissionLoading) {
+  if (permissionLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
-
 
   if (!canViewClient) {
     return (

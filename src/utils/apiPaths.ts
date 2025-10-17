@@ -1,5 +1,10 @@
+// export const BASE_URL = "https://sarjanhomes.in/api/";
+// export const IMGURL = "https://sarjanhomes.in";
+
 export const BASE_URL = "http://192.168.29.2:8000/api/";
-export const IMGURL = "http://192.168.29.2:8000";
+export const IMGURL = "http://192.168.29.2:8000/";
+
+
 
 export const API_PATHS = {
   // PENDINGFORAPPROVALS

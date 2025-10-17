@@ -162,48 +162,48 @@ const Addclientpayment = () => {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-1">
         <div className="space-y-6">
           <ComponentCard title="Add Payment Details">
-            <div className="space-y-6">
+            <div className="space-y-6"> 
               {/* Client Name */}
               <div>
                 <Label>Client Name</Label>
-                <Input disabled value={bookingDetails?.client_name} />
+                <Input disabled className="disabledInput"  value={bookingDetails?.client_name} />
               </div>
 
               {/* Summary */}
               <div className="grid grid-cols-3 gap-6">
                 <div>
                   <Label>Principal Amount</Label>
-                  <Input disabled value={bookingDetails?.property_amount} />
+                  <Input disabled className="disabledInput" value={bookingDetails?.property_amount} />
                 </div>
                 <div>
                   <Label>GST Amount</Label>
-                  <Input disabled value={bookingDetails?.gst_amount} />
+                  <Input disabled className="disabledInput" value={bookingDetails?.gst_amount} />
                 </div>
                 <div>
                   <Label>Total Amount</Label>
-                  <Input disabled value={bookingDetails?.total_amount} />
+                  <Input disabled className="disabledInput" value={bookingDetails?.total_amount} />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-6">
                 <div>
                   <Label>Total Received Principal</Label>
-                  <Input disabled value={bookingDetails?.received_principal} />
+                  <Input disabled className="disabledInput" value={bookingDetails?.received_principal} />
                 </div>
                 <div>
                   <Label>Total Received GST</Label>
-                  <Input disabled value={bookingDetails?.received_gst} />
+                  <Input disabled className="disabledInput" value={bookingDetails?.received_gst} />
                 </div>
                 <div>
                   <Label>Balance Principal</Label>
-                  <Input disabled value={bookingDetails?.balance_principal} />
+                  <Input disabled className="disabledInput" value={bookingDetails?.balance_principal} />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-6">
                 <div>
                   <Label>Balance GST</Label>
-                  <Input disabled value={bookingDetails?.balance_gst} />
+                  <Input disabled className="disabledInput" value={bookingDetails?.balance_gst} />
                 </div>
               </div>
 

@@ -182,8 +182,6 @@ export default function ClientProperty() {
 
   // const uniqueSites = [...new Set(tableData.map((item) => item.siteName))];
 
-  
-
   // Show loader while checking permissions
   if (permissionLoading) {
     return (
@@ -232,21 +230,11 @@ export default function ClientProperty() {
                 <TableCell className="columtext">Sr. No</TableCell>
 
                 {isColumnVisible("siteName") && (
-                  <TableCell
-                    className="columtext"
-
-                  >
-                    Site Name
-                  </TableCell>
+                  <TableCell className="columtext">Site Name</TableCell>
                 )}
 
                 {isColumnVisible("count") && (
-                  <TableCell
-                    className="columtext"
-                    
-                  >
-                    Count
-                  </TableCell>
+                  <TableCell className="columtext">Count</TableCell>
                 )}
                 {isColumnVisible("blocknumberType") && (
                   <TableCell className="columtext">View Client</TableCell>
@@ -281,6 +269,7 @@ export default function ClientProperty() {
                         <div className="flex gap-2 mt-1">
                           <Link
                             to={`/admin/clients/${item.id}`}
+                            state={{ siteName: item.siteName }} 
                             className="text-blue-500 hover:text-blue-700"
                           >
                             <Badge variant="light" color="success">

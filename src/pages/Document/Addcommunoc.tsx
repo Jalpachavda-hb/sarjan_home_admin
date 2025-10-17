@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
@@ -22,7 +21,7 @@ const Addcommunoc = () => {
     if (selectedFile) {
       setFile(selectedFile);
       setReceiptPreview(URL.createObjectURL(selectedFile));
-       setErrors({ ...errors, file: "" });
+      setErrors({ ...errors, file: "" });
     }
   };
 
@@ -50,7 +49,7 @@ const Addcommunoc = () => {
         Number(selectedSite)
       );
       if (res) {
-        toast.success("Document submitted successfully!");
+        // toast.success("Document submitted successfully!");
 
         // reset form
         setDocumentName("");
@@ -77,25 +76,24 @@ const Addcommunoc = () => {
           <ComponentCard title="Add Commun Document Details">
             <div className="space-y-6">
               {/* Select Site */}
-              <SiteSelector value={selectedSite}
-              //  onChange={setSelectedSite}
-               
-               onChange={(val) => {
-                      setSelectedSite(val);
-                      setErrors((prev) => ({ ...prev, selectedSite: "" }));
-                    }}
+              <SiteSelector
+                value={selectedSite}
+                //  onChange={setSelectedSite}
 
-
-
-
-               />
+                onChange={(val) => {
+                  setSelectedSite(val);
+                  setErrors((prev) => ({ ...prev, selectedSite: "" }));
+                }}
+              />
               {errors.selectedSite && (
                 <p className="text-red-500 text-sm ">{errors.selectedSite}</p>
               )}
 
               {/* Document Name */}
               <div>
-                <Label>Enter Document Name  <span className="text-red-500">*</span></Label>
+                <Label>
+                  Enter Document Name <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   placeholder="Enter document name"
                   value={documentName}
@@ -113,7 +111,9 @@ const Addcommunoc = () => {
 
               {/* File Upload */}
               <div>
-                <Label>Upload Document  <span className="text-red-500">*</span></Label>
+                <Label>
+                  Upload Document <span className="text-red-500">*</span>
+                </Label>
                 <FileInput id="fileUpload" onChange={handleReceiptChange} />
                 {errors.file && (
                   <p className="text-red-500 text-sm mt-1">{errors.file}</p>
