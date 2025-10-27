@@ -91,7 +91,7 @@ export default function PropertyDetails() {
   const fetchPageData = async (pageNumber = 1) => {
     setLoading(true);
     try {
-      const res = await showPropertyDetailsList( pageNumber);
+      const res = await showPropertyDetailsList(pageNumber);
       if (res) {
         setTableData(res.data || []);
         setTotalRecords(res.total || 0);
@@ -230,7 +230,9 @@ export default function PropertyDetails() {
       }
     } catch (error) {
       console.error("Upload failed:", error);
-      toast.error((error as any)?.response?.data?.message || "Something went wrong");
+      toast.error(
+        (error as any)?.response?.data?.message || "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
@@ -288,11 +290,12 @@ export default function PropertyDetails() {
                   );
                 }}
                 displayEmpty
-                renderValue={(selected) =>
-                  selected.length === 0
-                    ? "Select Columns"
-                    : `${selected.length} selected`
-                }
+                renderValue={() => "Select Columns"}
+                // renderValue={(selected) =>
+                //   selected.length === 0
+                //     ? "Select Columns"
+                //     : `${selected.length} selected`
+                // }
                 className="bg-white dark:bg-gray-200 rounded-md"
                 sx={{
                   fontFamily: "Poppins",
@@ -339,6 +342,7 @@ export default function PropertyDetails() {
               size="small"
               variant="outlined"
               placeholder="Search..."
+              className="dark:bg-gray-200 rounded-md"
               value={search}
               onChange={(e) => setSearch(e.target.value.trimStart())}
               sx={{
@@ -495,8 +499,18 @@ export default function PropertyDetails() {
                 shape="rounded"
                 siblingCount={1}
                 boundaryCount={1}
-                showFirstButton
-                showLastButton
+                sx={{
+                  "& .MuiPaginationItem-root": {
+                    color: "inherit",
+                  },
+                  "& .MuiPaginationItem-root.Mui-selected": {
+                    backgroundColor: "#3B82F6",
+                    color: "#FFFFFF",
+                  },
+                  "& .MuiPaginationItem-icon": {
+                    color: "inherit",
+                  },
+                }}
               />
             </Stack>
           )}

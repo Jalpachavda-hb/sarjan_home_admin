@@ -194,6 +194,7 @@ export default function Pandingforaprovel() {
               onChange={(e) => setSearch(e.target.value.trimStart())}
               sx={{ fontFamily: "Poppins" }}
               InputProps={{ sx: { fontFamily: "Poppins", fontSize: "14px" } }}
+                className="dark:bg-gray-200 rounded-md"
             />
           </div>
         </div>
@@ -310,7 +311,7 @@ export default function Pandingforaprovel() {
                                 if (result.isConfirmed) {
                                   try {
                                     // Call the API here
-                                    await reject(item.id); // <-- make sure to pass the correct ID
+                                    await reject(item.id); 
                                     toast.success("Rejected successfully!");
 
                                     // Refresh the table data
@@ -341,7 +342,7 @@ export default function Pandingforaprovel() {
 
         <div className="mt-4 flex justify-between items-center w-full">
           <div className="w-1/2">
-            <p className="text-sm">
+            <p className="text-sm dark:text-gray-400">
               Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–
               {Math.min((page + 1) * rowsPerPage, filteredData.length)} of{" "}
               {filteredData.length} entries
@@ -359,15 +360,20 @@ export default function Pandingforaprovel() {
               rowsPerPageOptions={[5, 10, 25]}
               labelRowsPerPage="Rows per page:"
               sx={{
-                color: "inherit",
-                ".MuiSelect-select": {
-                  color: "inherit",
-                  backgroundColor: "transparent",
+              color: "#9CA3AF", // text-gray-400
+              ".MuiSelect-select": {
+                color: "#9CA3AF",
+              },
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                {
+                  color: "#9CA3AF",
                 },
-                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                  { color: "inherit" },
-                ".MuiSvgIcon-root": { color: "inherit" },
-              }}
+              ".MuiSvgIcon-root": {
+                color: "#9CA3AF",
+              },
+              
+              
+            }}
             />
           </div>
         </div>

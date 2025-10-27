@@ -159,6 +159,7 @@ export default function ProjectType() {
           <div className="flex flex-wrap gap-2 justify-end items-center">
             <TextField
               size="small"
+               className="dark:bg-gray-200 rounded-md"
               variant="outlined"
               placeholder="Search..."
               value={search}
@@ -233,7 +234,7 @@ export default function ProjectType() {
         </div>
 
         <div className="mt-4 flex justify-between items-center w-full">
-          <p className="text-sm">
+          <p className="text-sm dark:text-gray-400">
             Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–
             {Math.min((page + 1) * rowsPerPage, filteredData.length)} of{" "}
             {filteredData.length} entries
@@ -247,6 +248,21 @@ export default function ProjectType() {
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25]}
+            sx={{
+              color: "#9CA3AF", // text-gray-400
+              ".MuiSelect-select": {
+                color: "#9CA3AF",
+              },
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                {
+                  color: "#9CA3AF",
+                },
+              ".MuiSvgIcon-root": {
+                color: "#9CA3AF",
+              },
+              
+              
+            }}
           />
         </div>
       </div>
@@ -268,6 +284,7 @@ export default function ProjectType() {
             name="name"
             value={editData?.name || ""}
             onChange={handleEditChange}
+            
           />
         </DialogContent>
         <DialogActions>

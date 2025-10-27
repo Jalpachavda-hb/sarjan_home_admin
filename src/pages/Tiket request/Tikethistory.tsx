@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import {
   Table,
@@ -44,12 +43,14 @@ interface MyTiket {
 
 export default function Tikethistory() {
   const role = getUserRole();
-  
+
   // Show Access Denied if user role is not 1
   if (role !== 1) {
-    return <AccessDenied message="You don't have permission to view ticket history." />;
+    return (
+      <AccessDenied message="You don't have permission to view ticket history." />
+    );
   }
-  
+
   const [tickets, setTickets] = useState<MyTiket[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -155,9 +156,6 @@ export default function Tikethistory() {
   );
 
   // unique site names
- 
-
-
 
   return (
     <div className="font-poppins text-gray-800 dark:text-white">
@@ -167,19 +165,22 @@ export default function Tikethistory() {
         {/* filters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-wrap gap-2 items-center">
-
             {/* <SiteFilter
               value={siteFilter}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 setSiteFilter(e.target.value)
               }
             /> */}
-           
+
             <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Select Columns</InputLabel>
+              <InputLabel
+                className="text-gray-700 dark:text-white"
+                sx={{ fontFamily: "Poppins" }}
+              ></InputLabel>
               <Select
                 multiple
                 value={selectedColumns}
+                className="bg-white dark:bg-gray-200 rounded-md"
                 onChange={(e) =>
                   setSelectedColumns(
                     typeof e.target.value === "string"
@@ -187,6 +188,19 @@ export default function Tikethistory() {
                       : e.target.value
                   )
                 }
+                displayEmpty
+                sx={{
+                  fontFamily: "Poppins",
+                  "& .MuiSelect-select": {
+                    color: "#6B7280",
+                    fontWeight: 300,
+                  },
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: { maxHeight: 300, fontFamily: "Poppins" },
+                  },
+                }}
                 renderValue={() => "Select Columns"}
               >
                 {[
@@ -226,6 +240,7 @@ export default function Tikethistory() {
 
             <TextField
               size="small"
+                className="dark:bg-gray-200 rounded-md"
               variant="outlined"
               placeholder="Search..."
               value={search}
@@ -338,7 +353,7 @@ export default function Tikethistory() {
 
         {/* pagination */}
         <div className="mt-4 flex justify-between items-center w-full">
-          <p className="text-sm">
+          <p className="text-sm dark:text-gray-400">
             Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–
             {Math.min((page + 1) * rowsPerPage, filteredData.length)} of{" "}
             {filteredData.length} entries
@@ -351,6 +366,21 @@ export default function Tikethistory() {
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25]}
+            sx={{
+              color: "#9CA3AF", // text-gray-400
+              ".MuiSelect-select": {
+                color: "#9CA3AF",
+              },
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                {
+                  color: "#9CA3AF",
+                },
+              ".MuiSvgIcon-root": {
+                color: "#9CA3AF",
+              },
+              
+              
+            }}
           />
         </div>
       </div>

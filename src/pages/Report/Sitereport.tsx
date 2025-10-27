@@ -237,6 +237,7 @@ export default function Sitereport() {
             <TextField
               size="small"
               variant="outlined"
+                className="dark:bg-gray-200 rounded-md"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value.trimStart())}
@@ -314,7 +315,7 @@ export default function Sitereport() {
 
         <div className="mt-4 flex justify-between items-center w-full">
           <div className="w-1/2">
-            <p className="text-sm">
+            <p className="text-sm dark:text-gray-400">
               Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–
               {Math.min((page + 1) * rowsPerPage, filteredData.length)} of{" "}
               {filteredData.length} entries
@@ -331,20 +332,21 @@ export default function Sitereport() {
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[5, 10, 25, 30, 35, 40, 50]}
               labelRowsPerPage="Rows per page:"
-              sx={{
-                color: "inherit",
-                ".MuiSelect-select": {
-                  color: "inherit",
-                  backgroundColor: "transparent",
+             sx={{
+              color: "#9CA3AF", // text-gray-400
+              ".MuiSelect-select": {
+                color: "#9CA3AF",
+              },
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                {
+                  color: "#9CA3AF",
                 },
-                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                  {
-                    color: "inherit",
-                  },
-                ".MuiSvgIcon-root": {
-                  color: "inherit",
-                },
-              }}
+              ".MuiSvgIcon-root": {
+                color: "#9CA3AF",
+              },
+              
+              
+            }}
             />
           </div>
         </div>

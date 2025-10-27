@@ -259,6 +259,7 @@ export default function MyTiket() {
             <TextField
               size="small"
               variant="outlined"
+                className="dark:bg-gray-200 rounded-md"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value.trimStart())}
@@ -440,7 +441,7 @@ export default function MyTiket() {
 
         {/* Pagination */}
         <div className="mt-4 flex justify-between items-center w-full">
-          <p className="text-sm">
+          <p className="text-sm dark:text-gray-400">
             Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–
             {Math.min((page + 1) * rowsPerPage, filteredData.length)} of{" "}
             {filteredData.length} entries
@@ -455,15 +456,20 @@ export default function MyTiket() {
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25]}
             labelRowsPerPage="Rows per page:"
-            sx={{
-              color: "inherit",
+           sx={{
+              color: "#9CA3AF", // text-gray-400
               ".MuiSelect-select": {
-                color: "inherit",
-                backgroundColor: "transparent",
+                color: "#9CA3AF",
               },
               ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                { color: "inherit" },
-              ".MuiSvgIcon-root": { color: "inherit" },
+                {
+                  color: "#9CA3AF",
+                },
+              ".MuiSvgIcon-root": {
+                color: "#9CA3AF",
+              },
+              
+              
             }}
           />
         </div>

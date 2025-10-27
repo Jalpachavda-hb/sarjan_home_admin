@@ -98,6 +98,7 @@ export default function UserLog() {
             onChange={(e) => setSearch(e.target.value.trimStart())}
             sx={{ fontFamily: "Poppins" }}
             InputProps={{ sx: { fontFamily: "Poppins", fontSize: "14px" } }}
+              className="dark:bg-gray-200 rounded-md"
           />
         </div>
 
@@ -164,7 +165,7 @@ export default function UserLog() {
         </div>
 
         <div className="mt-4 flex justify-between items-center w-full border-t border-gray-200 dark:border-gray-700 pt-3">
-          <p className="text-sm">
+          <p className="text-sm dark:text-gray-400">
             {totalRecords === 0 ? (
               "Showing 0 entries"
             ) : (
@@ -180,15 +181,25 @@ export default function UserLog() {
             <Pagination
               count={Math.ceil(totalRecords / rowsPerPage)}
               page={page + 1}
-              // onChange={(_, value) => setPage(value - 1)}
               onChange={(_, value) => {
                 setPage(value - 1);
-                // fetchAdminLogs(value);
               }}
               color="primary"
               shape="rounded"
               siblingCount={1}
               boundaryCount={1}
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  color: 'inherit',
+                },
+                '& .MuiPaginationItem-root.Mui-selected': {
+                  backgroundColor: '#3B82F6',
+                  color: '#FFFFFF',
+                },
+                '& .MuiPaginationItem-icon': {
+                  color: 'inherit',
+                },
+              }}
             />
           </Stack>
         </div>

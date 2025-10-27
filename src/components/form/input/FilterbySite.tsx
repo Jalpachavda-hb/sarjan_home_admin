@@ -7,6 +7,7 @@ interface SiteFilterProps {
   value: string;
   onChange: (event: SelectChangeEvent<string>) => void;
   label?: string;
+  className?: string; 
 }
 
 const SiteFilter = ({
@@ -27,7 +28,7 @@ const SiteFilter = ({
   }, []);
 
   return (
-    <FormControl size="small" sx={{ minWidth: 180 }}>
+    <FormControl size="small" sx={{ minWidth: 180 }}  className="dark:bg-gray-200 rounded-md">
       <InputLabel>{label}</InputLabel>
       <Select
         value={value}

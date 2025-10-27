@@ -233,6 +233,7 @@ export default function Clientreport() {
               <TextField
                 size="small"
                 variant="outlined"
+                  className="dark:bg-gray-200 rounded-md"
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value.trimStart())}
@@ -383,7 +384,7 @@ export default function Clientreport() {
 
           {/* Footer */}
           <div className="mt-4 flex justify-between items-center">
-            <p className="text-sm">
+            <p className="text-sm dark:text-gray-400">
               Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–
               {Math.min((page + 1) * rowsPerPage, filteredData.length)} of{" "}
               {filteredData.length} entries
@@ -397,6 +398,21 @@ export default function Clientreport() {
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[5, 10, 25, 30]}
               labelRowsPerPage="Rows per page:"
+              sx={{
+              color: "#9CA3AF", // text-gray-400
+              ".MuiSelect-select": {
+                color: "#9CA3AF",
+              },
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                {
+                  color: "#9CA3AF",
+                },
+              ".MuiSvgIcon-root": {
+                color: "#9CA3AF",
+              },
+              
+              
+            }}
             />
           </div>
         </div>
@@ -429,7 +445,7 @@ export default function Clientreport() {
         ].map((item, index) => (
           <div
             key={index}
-            className="bg-[#0d2250] text-white rounded-sm shadow-md p-5 flex flex-col justify-center"
+            className="bg-[#0d2250] dark:bg-[#ae8643] text-white rounded-sm shadow-md p-5 flex flex-col justify-center"
           >
             <h6 className="text-sm font-semibold mb-1">{item.title}</h6>
             <p className="text-lg font-semibold">{item.value}</p>

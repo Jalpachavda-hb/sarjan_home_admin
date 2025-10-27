@@ -53,7 +53,7 @@ export default function Inquiry() {
   const [siteFilter, setSiteFilter] = useState<number | "">("");
   const [selectedColumns] = useState<string[]>([]);
   const [inquiryThroughFilter, setInquiryThroughFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState<number>(0);
+  const [dateFilter, setDateFilter] = useState<number>();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
 
   const [_toastMessage, setToastMessage] = useState("");
@@ -255,7 +255,7 @@ export default function Inquiry() {
                 Copy
               </Button>
 
-              <FormControl size="small" sx={{ minWidth: 160 }}>
+              <FormControl size="small" sx={{ minWidth: 160 }}  className="dark:bg-gray-200 rounded-md">
                 <InputLabel
                   id="date-filter-label"
                   sx={{ fontFamily: "Poppins, sans-serif" }}
@@ -290,7 +290,7 @@ export default function Inquiry() {
                 </Select>
               </FormControl>
               {/* Inquiry Through Filter */}
-              <FormControl size="small" sx={{ minWidth: 210 }}>
+              <FormControl size="small" sx={{ minWidth: 210 }}  className="dark:bg-gray-200 rounded-md">
                 <InputLabel sx={{ fontFamily: "Poppins, sans-serif" }}>
                   Filter by Inquiry Type
                 </InputLabel>
@@ -382,6 +382,7 @@ export default function Inquiry() {
               <TextField
                 size="small"
                 placeholder="Search..."
+                  className="dark:bg-gray-200 rounded-md"
                 value={search}
                 onChange={(e) => setSearch(e.target.value.trimStart())}
                 inputProps={{ style: { fontFamily: "Poppins, sans-serif" } }}
@@ -463,7 +464,7 @@ export default function Inquiry() {
                                 showToastMessage("Email copied!");
                               }}
                             >
-                              <MdEmail className="text-indigo-600" />
+                              <MdEmail className="text-indigo-600 dark:text-[#ae8643]" />
                             </IconButton>
                           </Tooltip>
                         </TableCell>
@@ -505,7 +506,7 @@ export default function Inquiry() {
 
           {/* Pagination */}
           <div className="mt-4 flex justify-between items-center w-full">
-            <p className="text-sm">
+            <p className="text-sm dark:text-gray-400">
               Showing {filteredData.length === 0 ? 0 : page * rowsPerPage + 1}–
               {Math.min((page + 1) * rowsPerPage, filteredData.length)} of{" "}
               {filteredData.length} entries
@@ -518,6 +519,21 @@ export default function Inquiry() {
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[5, 10, 25]}
+              sx={{
+              color: "#9CA3AF", // text-gray-400
+              ".MuiSelect-select": {
+                color: "#9CA3AF",
+              },
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                {
+                  color: "#9CA3AF",
+                },
+              ".MuiSvgIcon-root": {
+                color: "#9CA3AF",
+              },
+              
+              
+            }}
             />
           </div>
         </div>
@@ -528,7 +544,7 @@ export default function Inquiry() {
         {inquiryThroughCards.map((opt, index) => (
           <div
             key={index}
-            className="bg-[#0d2250] text-white rounded-sm shadow-md p-5 flex flex-col justify-center"
+            className="bg-[#0d2250] text-white  dark:bg-[#ae8643] rounded-sm shadow-md p-5 flex flex-col justify-center"
           >
             <h6 className="text-sm font-semibold mb-1">
               {normalizeCardLabel(opt.inquiry_through)}
