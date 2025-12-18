@@ -1,10 +1,8 @@
-// export const BASE_URL = "https://sarjanhomes.in/api/";
-// export const IMGURL = "https://sarjanhomes.in";
+export const BASE_URL = "https://sarjanhomes.in/api/";
+export const IMGURL = "https://sarjanhomes.in";
 
-export const BASE_URL = "http://192.168.29.2:8000/api/";
-export const IMGURL = "http://192.168.29.2:8000/";
-
-
+// export const BASE_URL = "http://192.168.29.2:8000/api/";
+// export const IMGURL = "http://192.168.29.2:8000/";
 
 export const API_PATHS = {
   // PENDINGFORAPPROVALS
@@ -148,6 +146,22 @@ export const API_PATHS = {
   WEBSETTING: {
     GETWEBSETTING: "getWebSetting",
     UPDATEWEBSETTING: "updateWebSetting",
+    GETSLIDER: "getSliders",
+    ADDSLIDER: "AddSliders",
+    DELETESLIDER: "deleteSlider",
+    GETTESTIMONIAL: "getTestimonialer",
+    DELETETETESTIMONIAL: "deleteTestimonialer",
+    ADDTESTIMONIAL: "addTestimonialer",
+    GETABOUTSECTION: "about-section",
+    UPDATEABOUTSECTION: "about-section/update",
+    GETHEROSECTION: "hero-sliders",
+    DELETESLIDERHERO: "hero-sliders/delete",
+    ADDHEROSLIDER: "hero-sliders/save",
+    GETCONTACTUS: "contact-us",
+    UPDATECONTACTUS: "contact-us/update",
+    // main about us Selection(MAS)
+    GETMAINABOUTUSSECTION: "masGet",
+    UPDATEMAINABOUTUSSECTION: "masUpdate",
   },
   APPSETTING: {
     GETSPLASHSCREEN: "showsplashscreen", // showsplashscreen?admin_id=1" ,

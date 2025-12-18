@@ -165,12 +165,14 @@ export default function Payment() {
     }
   };
 
-  const handleAmountChange = (val: number) => {
-    setReceivedAmount(val);
-    const errorMsg = validateAmount(val);
-    setErrors((prev) => ({ ...prev, receivedAmount: errorMsg }));
-  };
+const handleAmountChange = (val: number | "") => {
+  setReceivedAmount(val);
 
+  const errorMsg =
+    val === "" ? "Please enter a valid amount" : validateAmount(val);
+
+  setErrors((prev) => ({ ...prev, receivedAmount: errorMsg }));
+};
   const handleReceiptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -264,20 +266,18 @@ export default function Payment() {
   };
 
   const validateAmount = (amount: number): string => {
-    if (!amount || amount <= 0) {
-      return "Please enter a valid amount";
-    }
+  if (!amount || amount <= 0) {
+    return "Please enter a valid amount";
+  }
 
-    if (amount > maxAllowedAmount) {
-      if (amountType === "GST Amount") {
-        return "Received GST amount exceeds balance";
-      } else {
-        return "Received principal amount exceeds balance";
-      }
-    }
+  if (amount > maxAllowedAmount) {
+    return amountType === "GST Amount"
+      ? "Received GST amount exceeds balance"
+      : "Received principal amount exceeds balance";
+  }
 
-    return "";
-  };
+  return "";
+};
 
   const columns = [
     { key: "clientName", label: "Client Name" },
@@ -624,8 +624,6 @@ export default function Payment() {
               ".MuiSvgIcon-root": {
                 color: "#9CA3AF",
               },
-              
-              
             }}
           />
         </div>
@@ -699,10 +697,21 @@ export default function Payment() {
                 <Input
                   type="number"
                   value={receivedAmount}
-                  onChange={(e) => handleAmountChange(Number(e.target.value))}
                   placeholder="Enter amount"
                   className="mt-1"
                   error={!!errors.receivedAmount}
+                  min={0}
+                  step={1}
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault(); // ❌ block negative & exponential
+                    }
+                  }}
+                  onWheel={(e) => e.currentTarget.blur()} // ❌ block scroll change
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    handleAmountChange(value === "" ? "" : Number(value));
+                  }}
                 />
                 {errors.receivedAmount && (
                   <p className="text-red-500 text-sm mt-1">

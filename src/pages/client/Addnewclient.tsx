@@ -9,13 +9,17 @@ import Button from "../../components/ui/button/Button";
 import Select from "../../components/form/Select";
 import { CiMail } from "react-icons/ci";
 import MultiSelect from "../../components/form/MultiSelect";
-import { validateContact ,validateEmail ,validateName} from "../../utils/Validation";
+import {
+  validateContact,
+  validateEmail,
+  validateName,
+} from "../../utils/Validation";
 import {
   fetchUnitType,
   getClientName,
   getBlockFromSiteId,
   getBlockFromBlockid,
-  showclientlist
+  showclientlist,
 } from "../../utils/Handlerfunctions/getdata";
 import AccessDenied from "../../components/ui/AccessDenied";
 import { usePermissions } from "../../hooks/usePermissions";
@@ -80,7 +84,9 @@ const Addnewclient: React.FC = () => {
   const [clients, setClients] = useState<Option[]>([]);
   const [blocks, setBlocks] = useState<Option[]>([]);
   const [blockDetails, setBlockDetails] = useState<Option[]>([]);
-  const [assignedBlockNumbers, setAssignedBlockNumbers] = useState<string[]>([]);
+  const [assignedBlockNumbers, setAssignedBlockNumbers] = useState<string[]>(
+    []
+  );
   const [siteId] = useState<string | null>(initialSiteId);
 
   const [clientData, setClientData] = useState<ClientData>({
@@ -113,7 +119,7 @@ const Addnewclient: React.FC = () => {
       try {
         const [u, c] = await Promise.all([fetchUnitType(), getClientName()]);
         if (!mounted) return;
-        
+
         // Transform data to use string values only
         const transformedUnitTypes = u.map((item: any) => ({
           value: String(item.value),
@@ -146,13 +152,13 @@ const Addnewclient: React.FC = () => {
       try {
         const data = await getBlockFromSiteId(siteId);
         if (!mounted) return;
-        
+
         // Transform blocks to use string values
         const transformedBlocks = data.map((block: any) => ({
           value: String(block.value),
           label: block.label,
         }));
-        
+
         setBlocks(transformedBlocks);
       } catch (err) {
         console.error("Error fetching blocks:", err);
@@ -171,7 +177,8 @@ const Addnewclient: React.FC = () => {
     const fetchAssignedBlocks = async () => {
       try {
         const res = await showclientlist(siteId, 1);
-        const assigned = res?.details?.map((client: any) => client.block_number) || [];
+        const assigned =
+          res?.details?.map((client: any) => client.block_number) || [];
         setAssignedBlockNumbers(assigned.filter(Boolean));
       } catch (err) {
         console.error("Error fetching assigned blocks:", err);
@@ -192,7 +199,9 @@ const Addnewclient: React.FC = () => {
             value: String(block.value),
             label: block.label,
           }))
-          .filter((block: Option) => !assignedBlockNumbers.includes(block.label));
+          .filter(
+            (block: Option) => !assignedBlockNumbers.includes(block.label)
+          );
         setBlockDetails(transformedBlockDetails);
       } catch (err) {
         console.error("Error fetching block details:", err);
@@ -202,8 +211,7 @@ const Addnewclient: React.FC = () => {
     fetchBlockDetails();
   }, [clientData.block_id, assignedBlockNumbers]);
 
-
-const handleChange = (
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
@@ -215,22 +223,20 @@ const handleChange = (
         // Only allow letters and spaces, remove numbers and special characters
         finalValue = value.replace(/[^a-zA-Z\s]/g, "");
         break;
-      
+
       case "contact":
         // Only allow numbers, max 10 digits
         finalValue = value.replace(/\D/g, "").slice(0, 10);
         break;
-      
+
       case "email":
         // Trim whitespace for email
         finalValue = value.trim();
         break;
-      
+
       case "property_amount":
-        // Allow only positive numbers
-        if (value && Number(value) < 0) {
-          finalValue = "";
-        }
+        // ✅ Allow only digits (0–9), no dots, no negative numbers
+        finalValue = value.replace(/[^0-9]/g, ""); // remove . and other invalid chars
         break;
     }
 
@@ -242,11 +248,11 @@ const handleChange = (
       case "name":
         error = validateName(finalValue);
         break;
-      
+
       case "email":
         error = validateEmail(finalValue);
         break;
-      
+
       case "contact":
         if (!finalValue) {
           error = "Contact is required";
@@ -254,7 +260,7 @@ const handleChange = (
           error = "Contact must be 10 digits";
         }
         break;
-      
+
       case "property_amount":
         if (finalValue && Number(finalValue) <= 0) {
           error = "Amount must be positive";
@@ -264,11 +270,6 @@ const handleChange = (
 
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
-
-
-
-
-
 
   const handleSelectChange = (field: keyof ClientData) => (value: string) => {
     setClientData((prev: ClientData) => ({ ...prev, [field]: value }));
@@ -361,7 +362,7 @@ const handleChange = (
               {/* New Client */}
               {clientData.client_type === "1" && (
                 <>
-                   <div>
+                  <div>
                     <Label>
                       Name <span className="text-red-500">*</span>
                     </Label>
@@ -391,7 +392,9 @@ const handleChange = (
                       </span>
                     </div>
                     {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.email}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -512,9 +515,37 @@ const handleChange = (
                 <Input
                   name="property_amount"
                   value={clientData.property_amount}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const { value } = e.target;
+
+                    // Allow only digits (no letters, no decimals)
+                    if (!/^\d*$/.test(value)) return; // stop typing invalid chars
+
+                    setClientData((prev: ClientData) => ({
+                      ...prev,
+                      property_amount: value,
+                    }));
+
+                    // Live validation
+                    if (value === "") {
+                      setErrors((prev) => ({
+                        ...prev,
+                        property_amount: "Property amount is required",
+                      }));
+                    } else if (Number(value) <= 0) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        property_amount: "Amount must be positive",
+                      }));
+                    } else {
+                      setErrors((prev) => ({
+                        ...prev,
+                        property_amount: undefined,
+                      }));
+                    }
+                  }}
                   placeholder="50000"
-                  type="number"
+                  type="text"
                 />
                 {errors.property_amount && (
                   <p className="text-red-500 text-sm mt-1">
@@ -536,7 +567,9 @@ const handleChange = (
                     ]}
                     value={clientData.gst_slab}
                     onChange={(value: string) => {
-                      const principal = parseFloat(clientData.property_amount || "0");
+                      const principal = parseFloat(
+                        clientData.property_amount || "0"
+                      );
                       const gstAmount = principal * (parseFloat(value) / 100);
                       const total = principal + gstAmount;
                       setClientData((prev: ClientData) => ({

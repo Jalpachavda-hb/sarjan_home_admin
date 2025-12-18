@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 
-import ComponentCard from "../components/common/ComponentCard";
-import Label from "../components/form/Label";
-import Input from "../components/form/input/InputField";
-import FileInput from "../components/form/input/FileInput";
-import Button from "../components/ui/button/Button";
-import { updateWebSetting } from "../utils/Handlerfunctions/formEditHandlers";
-import { fetchWebSetting } from "../utils/Handlerfunctions/getdata";
-import { getAdminId } from "../utils/Handlerfunctions/getdata";
+import ComponentCard from "../../../components/common/ComponentCard";
+import Label from "../../../components/form/Label";
+import Input from "../../../components/form/input/InputField";
+import FileInput from "../../../components/form/input/FileInput";
+import Button from "../../../components/ui/button/Button";
+import { updateWebSetting } from "../../../utils/Handlerfunctions/formEditHandlers";
+import { fetchWebSetting } from "../../../utils/Handlerfunctions/getdata";
+import { getAdminId } from "../../../utils/Handlerfunctions/getdata";
 
-const WebSetting = () => {
+
+
+const Logosetting = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
   const [groupName, setGroupName] = useState("");
@@ -141,34 +143,31 @@ const WebSetting = () => {
                   </p>
                 )}
               </div>
-            </div>
-          </ComponentCard>
-        </div>
-
-        {/* Card 2: Favicon */}
-        <div className="space-y-6">
-          <ComponentCard title="Favicon Icon">
-            <div className="space-y-6">
-              <Label>Current Favicon icon preview:</Label>
-              {faviconPreview && (
-                <div className="w-50 h-32 border rounded overflow-hidden">
-                  <img
-                    src={faviconPreview}
-                    alt="Favicon Preview"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              )}
-              <div>
-                <Label htmlFor="faviconUpload">
-                  Upload Favicon <span className="text-red-500">*</span>{" "}
-                </Label>
-                <FileInput id="faviconUpload" onChange={handleFaviconChange} />
-                {errors.faviconFile && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.faviconFile}
-                  </p>
+              <div className="space-y-6">
+                <Label>Current Slide1</Label>
+                {faviconPreview && (
+                  <div className="w-50 h-32 border rounded overflow-hidden">
+                    <img
+                      src={faviconPreview}
+                      alt="Favicon Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 )}
+                <div>
+                  <Label htmlFor="faviconUpload">
+                    Upload Favicon <span className="text-red-500">*</span>{" "}
+                  </Label>
+                  <FileInput
+                    id="faviconUpload"
+                    onChange={handleFaviconChange}
+                  />
+                  {errors.faviconFile && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.faviconFile}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </ComponentCard>
@@ -185,4 +184,4 @@ const WebSetting = () => {
   );
 };
 
-export default WebSetting;
+export default Logosetting;

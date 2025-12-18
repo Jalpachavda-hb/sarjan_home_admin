@@ -9,14 +9,17 @@ interface InputProps {
   value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
-  min?: string;
-  max?: string;
+  onClick?: () => void;
+  min?: number;
+  max?: number;
   step?: number;
   disabled?: boolean;
   success?: boolean;
   error?: boolean;
   hint?: string;
   maxLength?: number;
+  onWheel?: (e: React.WheelEvent<HTMLInputElement>) => void;
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 const Input: FC<InputProps> = ({

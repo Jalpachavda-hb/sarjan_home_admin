@@ -19,9 +19,13 @@ const AddPaymentDetails = () => {
   const navigate = useNavigate();
 
   const [selectedSite, setSelectedSite] = useState<string>("");
-  const [unitOptions, setUnitOptions] = useState<{ value: string; label: string }[]>([]);
+  const [unitOptions, setUnitOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [selectedUnit, setSelectedUnit] = useState<string>("");
-  const [clientOptions, setClientOptions] = useState<{ value: string; label: string }[]>([]);
+  const [clientOptions, setClientOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [selectedClient, setSelectedClient] = useState<string>("");
 
   const [receivedAmount, setReceivedAmount] = useState<number | "">("");
@@ -148,7 +152,9 @@ const AddPaymentDetails = () => {
                     clearError("site");
                   }}
                 />
-                {errors.site && <p className="text-red-500 text-sm">{errors.site}</p>}
+                {errors.site && (
+                  <p className="text-red-500 text-sm">{errors.site}</p>
+                )}
               </div>
 
               {/* Unit Number */}
@@ -166,7 +172,9 @@ const AddPaymentDetails = () => {
                     }}
                     placeholder="Select Unit Number"
                   />
-                  {errors.unit && <p className="text-red-500 text-sm">{errors.unit}</p>}
+                  {errors.unit && (
+                    <p className="text-red-500 text-sm">{errors.unit}</p>
+                  )}
                 </div>
               )}
 
@@ -185,7 +193,9 @@ const AddPaymentDetails = () => {
                     }}
                     placeholder="Select Client"
                   />
-                  {errors.client && <p className="text-red-500 text-sm">{errors.client}</p>}
+                  {errors.client && (
+                    <p className="text-red-500 text-sm">{errors.client}</p>
+                  )}
                 </div>
               )}
 
@@ -194,16 +204,34 @@ const AddPaymentDetails = () => {
                 <Label>
                   Received Amount <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  type="number"
+                {/* <Input
+                  type="number"E
                   value={receivedAmount}
                   onChange={(e) => {
                     setReceivedAmount(Number(e.target.value));
                     clearError("amount");
                   }}
                   placeholder="Enter amount"
+                /> */}
+                <Input
+                  type="number"
+                  value={receivedAmount}
+                  min={0}
+                  step={1}
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setReceivedAmount(value === "" ? "" : Number(value));
+                  }}
                 />
-                {errors.amount && <p className="text-red-500 text-sm">{errors.amount}</p>}
+                {errors.amount && (
+                  <p className="text-red-500 text-sm">{errors.amount}</p>
+                )}
               </div>
 
               {/* Amount Type */}
@@ -220,7 +248,9 @@ const AddPaymentDetails = () => {
                   }}
                   placeholder="Select Amount Type"
                 />
-                {errors.amountType && <p className="text-red-500 text-sm">{errors.amountType}</p>}
+                {errors.amountType && (
+                  <p className="text-red-500 text-sm">{errors.amountType}</p>
+                )}
               </div>
 
               {/* Payment Date */}
@@ -236,7 +266,9 @@ const AddPaymentDetails = () => {
                     clearError("date");
                   }}
                 />
-                {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
+                {errors.date && (
+                  <p className="text-red-500 text-sm">{errors.date}</p>
+                )}
               </div>
 
               {/* Upload Receipt */}

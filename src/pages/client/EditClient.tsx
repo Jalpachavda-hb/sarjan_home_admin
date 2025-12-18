@@ -219,7 +219,7 @@ const EditClient: React.FC = () => {
       const res = await editClient(
         submitData,
         originalData,
-        aadharCard,
+        aadharCard
         // panCard
       );
 
@@ -431,13 +431,42 @@ const EditClient: React.FC = () => {
               {/* Property & GST */}
               <div>
                 <Label>
-                  Property Amount <span className="text-red-500">*</span>
+                  Property Amount <span className="text-red-500">*</span>{" "}
                 </Label>
                 <Input
                   name="property_amount"
                   value={clientData.property_amount}
-                  onChange={handleChange}
-                  type="number"
+                  onChange={(e) => {
+                    const { value } = e.target;
+
+                    // ✅ Allow only digits (no letters, no decimals)
+                    const cleanedValue = value.replace(/[^0-9]/g, "");
+
+                    setClientData((prev: any) => ({
+                      ...prev,
+                      property_amount: cleanedValue,
+                    }));
+
+                    // ✅ Live validation
+                    if (cleanedValue === "") {
+                      setErrors((prev) => ({
+                        ...prev,
+                        property_amount: "Property amount is required",
+                      }));
+                    } else if (Number(cleanedValue) <= 0) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        property_amount: "Amount must be positive",
+                      }));
+                    } else {
+                      setErrors((prev) => ({
+                        ...prev,
+                        property_amount: undefined,
+                      }));
+                    }
+                  }}
+                  placeholder="50000"
+                  type="text"
                 />
                 {errors.property_amount && (
                   <p className="text-red-500 text-sm mt-1">

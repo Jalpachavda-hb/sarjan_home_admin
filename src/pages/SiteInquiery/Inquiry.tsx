@@ -255,7 +255,11 @@ export default function Inquiry() {
                 Copy
               </Button>
 
-              <FormControl size="small" sx={{ minWidth: 160 }}  className="dark:bg-gray-200 rounded-md">
+              <FormControl
+                size="small"
+                sx={{ minWidth: 160 }}
+                className="dark:bg-gray-200 rounded-md"
+              >
                 <InputLabel
                   id="date-filter-label"
                   sx={{ fontFamily: "Poppins, sans-serif" }}
@@ -290,7 +294,11 @@ export default function Inquiry() {
                 </Select>
               </FormControl>
               {/* Inquiry Through Filter */}
-              <FormControl size="small" sx={{ minWidth: 210 }}  className="dark:bg-gray-200 rounded-md">
+              <FormControl
+                size="small"
+                sx={{ minWidth: 210 }}
+                className="dark:bg-gray-200 rounded-md"
+              >
                 <InputLabel sx={{ fontFamily: "Poppins, sans-serif" }}>
                   Filter by Inquiry Type
                 </InputLabel>
@@ -328,61 +336,13 @@ export default function Inquiry() {
                 }
               />
 
-              {/* <FormControl size="small" sx={{ minWidth: 200 }}>
-                <InputLabel
-                  className="text-gray-700 dark:text-white"
-                  sx={{ fontFamily: "Poppins" }}
-                />
-                <Select
-                  multiple
-                  value={selectedColumns}
-                  onChange={(e) =>
-                    setSelectedColumns(
-                      typeof e.target.value === "string"
-                        ? e.target.value.split(",")
-                        : e.target.value
-                    )
-                  }
-                  displayEmpty
-                  renderValue={() => "Select Columns"}
-                  className="bg-white dark:bg-gray-200 rounded-md"
-                >
-                  {[
-                    "siteName",
-                    "name",
-                    "contactNumber",
-                    "email",
-                    "numberOfInquiry",
-                    "inquiryThrough",
-                    "remark",
-                    "inquiryDate",
-                  ].map((col) => (
-                    <MenuItem key={col} value={col}>
-                      <Checkbox checked={selectedColumns.includes(col)} />
-                      <ListItemText
-                        primary={
-                          {
-                            siteName: "Site Name",
-                            name: "Name",
-                            contactNumber: "Contact Number",
-                            email: "Email",
-                            numberOfInquiry: "Number of Inquiry",
-                            inquiryThrough: "Inquiry Through",
-                            remark: "Remark",
-                            inquiryDate: "Inquiry Date",
-                          }[col]
-                        }
-                      />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl> */}
+              
 
               {/* Search */}
               <TextField
                 size="small"
                 placeholder="Search..."
-                  className="dark:bg-gray-200 rounded-md"
+                className="dark:bg-gray-200 rounded-md"
                 value={search}
                 onChange={(e) => setSearch(e.target.value.trimStart())}
                 inputProps={{ style: { fontFamily: "Poppins, sans-serif" } }}
@@ -520,20 +480,18 @@ export default function Inquiry() {
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[5, 10, 25]}
               sx={{
-              color: "#9CA3AF", // text-gray-400
-              ".MuiSelect-select": {
-                color: "#9CA3AF",
-              },
-              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                {
+                color: "#9CA3AF", // text-gray-400
+                ".MuiSelect-select": {
                   color: "#9CA3AF",
                 },
-              ".MuiSvgIcon-root": {
-                color: "#9CA3AF",
-              },
-              
-              
-            }}
+                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                  {
+                    color: "#9CA3AF",
+                  },
+                ".MuiSvgIcon-root": {
+                  color: "#9CA3AF",
+                },
+              }}
             />
           </div>
         </div>

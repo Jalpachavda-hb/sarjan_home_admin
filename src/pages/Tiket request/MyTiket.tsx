@@ -263,7 +263,7 @@ export default function MyTiket() {
           <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
             <TextField
               size="small"
-                className="dark:bg-gray-200 rounded-md"
+              className="dark:bg-gray-200 rounded-md"
               variant="outlined"
               placeholder="Search..."
               value={search}
@@ -321,17 +321,13 @@ export default function MyTiket() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell
-                    className="text-center py-12 text-gray-500"
-                  >
+                  <TableCell className="text-center py-12 text-gray-500">
                     Loading tickets...
                   </TableCell>
                 </TableRow>
               ) : paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    className="text-center py-12 text-gray-500"
-                  >
+                  <TableCell className="text-center py-12 text-gray-500">
                     No data available
                   </TableCell>
                 </TableRow>
@@ -484,8 +480,6 @@ export default function MyTiket() {
               ".MuiSvgIcon-root": {
                 color: "#9CA3AF",
               },
-              
-              
             }}
           />
         </div>

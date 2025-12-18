@@ -273,10 +273,10 @@ export const addAdminUser = async (
     formData.append("site_detail_id", String(site_detail_id));
     formData.append("role_id", String(role_id));
 
-    // ✅ Clients
+    //  Clients
     clients.forEach((c) => formData.append("clients[]", c));
 
-    // ✅ Permissions - Send as individual form fields (convert to lowercase)
+    //  Permissions - Send as individual form fields (convert to lowercase)
     Object.entries(permissions).forEach(([feature, values]) => {
       const lowercaseFeature = feature.toLowerCase(); // Convert to lowercase
       if (Array.isArray(values) && values.length > 0) {
@@ -382,10 +382,10 @@ export const addPaymentDetail = async ({
       { headers: { "Content-Type": "multipart/form-data" } }
     );
 
-    console.log("✅ Payment Added:", response.data);
+    console.log(" Payment Added:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ Error submitting payment:", error);
+    console.error(" Error submitting payment:", error);
     throw error;
   }
 };
@@ -432,11 +432,11 @@ export const addNewClient = async (
     const formData = new FormData();
     formData.append("admin_id", adminId.toString());
 
-    // ✅ Loop through clientData fields
+    //  Loop through clientData fields
     Object.entries(clientData).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== "") {
         if (Array.isArray(value)) {
-          // ✅ Handle arrays like block_detail_id[]
+          //  Handle arrays like block_detail_id[]
           value.forEach((item) => {
             formData.append(`${key}[]`, item.toString());
           });
@@ -446,7 +446,7 @@ export const addNewClient = async (
       }
     });
 
-    // ✅ Append File uploads
+    //  Append File uploads
     if (aadharCard) formData.append("aadhar_card", aadharCard);
     if (panCard) formData.append("pan_card", panCard);
 
@@ -564,7 +564,7 @@ export const uploadcsv = async (formData: FormData) => {
 
   try {
     const response = await axiosInstance.post(
-      API_PATHS.SITEDETAILS.UPLOADBLOCKDETAILCVC, // make sure this route matches backend
+      API_PATHS.SITEDETAILS.UPLOADBLOCKDETAILCVC,
       formData,
       {
         headers: {
@@ -575,6 +575,238 @@ export const uploadcsv = async (formData: FormData) => {
     return response.data;
   } catch (error) {
     console.error("CSV upload error:", (error as any).response?.data || error);
+    throw error;
+  }
+};
+
+export const Addslider = async (formData: FormData) => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    //  Append admin_id if not already present
+    if (!formData.has("admin_id")) {
+      formData.append("admin_id", adminId);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.WEBSETTING.ADDSLIDER,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (response.status === 200) {
+      toast.success("Slider added successfully ");
+      return response.data;
+    } else {
+      toast.error("Failed to add slider ");
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error adding slider:", error);
+    toast.error("Something went wrong while adding slider ");
+    throw error;
+  }
+};
+
+export const ADDTESTIMONIAL = async (formData: FormData) => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    //  Append admin_id if not already present
+    if (!formData.has("admin_id")) {
+      formData.append("admin_id", adminId);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.WEBSETTING.ADDTESTIMONIAL,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (response.status === 200) {
+      // toast.success("Slider added successfully ");
+      return response.data;
+    } else {
+      toast.error("Failed to add slider ");
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error adding slider:", error);
+    toast.error("Something went wrong while adding slider ");
+    throw error;
+  }
+};
+
+export const updateaboutussection = async (formData: FormData) => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    //  Append admin_id if not already present
+    if (!formData.has("admin_id")) {
+      formData.append("admin_id", adminId);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.WEBSETTING.UPDATEABOUTSECTION,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (response.status === 200) {
+      // toast.success("Slider added successfully ");
+      return response.data;
+    } else {
+      toast.error("Failed to add section ");
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error adding slider:", error);
+    toast.error("Something went wrong while adding slider ");
+    throw error;
+  }
+};
+
+export interface HeroSlideInput {
+  id?: number;
+  title: string;
+  description: string;
+  slide_image: File | string | null;
+  background_image: File | string | null;
+}
+
+export const saveHeroSliders = async (
+  slides: HeroSlideInput[]
+): Promise<boolean> => {
+  const adminId = getAdminId();
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return false;
+  }
+
+  try {
+    for (const slide of slides) {
+      const formData = new FormData();
+
+      // REQUIRED
+      formData.append("admin_id", adminId);
+      formData.append("title", slide.title);
+      formData.append("description", slide.description);
+
+      // UPDATE MODE
+      if (slide.id) {
+        formData.append("hs_id", String(slide.id));
+      }
+
+      // Only send slide image if user has chosen a new file
+      if (slide.slide_image instanceof File) {
+        formData.append("slide_image", slide.slide_image);
+      }
+
+      // Only send background image if user has chosen a new file
+      if (slide.background_image instanceof File) {
+        formData.append("background_image", slide.background_image);
+      }
+
+      // API CALL
+      const response = await axiosInstance.post(
+        API_PATHS.WEBSETTING.ADDHEROSLIDER,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      if (response.data.status !== 200) {
+        toast.error(response.data.message || "Failed to save slider");
+        return false;
+      }
+    }
+
+    toast.success("All sliders saved successfully!");
+    return true;
+  } catch (error: any) {
+    console.error("Hero slider save error:", error);
+    toast.error(error.response?.data?.message || "Something went wrong!");
+    return false;
+  }
+};
+
+export const updatecontact = async (formData: FormData) => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    //  Append admin_id if not already present
+    if (!formData.has("admin_id")) {
+      formData.append("admin_id", adminId);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.WEBSETTING.UPDATECONTACTUS,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (response.status === 200) {
+      toast.success("Contact data Update  successfully ");
+      return response.data;
+    } else {
+      toast.error("Failed to add section ");
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error adding updating contact data:", error);
+    toast.error("Something went wrong while adding slider ");
+    throw error;
+  }
+};
+
+export const updateaboutmain = async (formData: FormData) => {
+  const adminId = getAdminId();
+
+  if (!adminId) {
+    toast.error("Admin ID not found. Please login again.");
+    return null;
+  }
+
+  try {
+    //  Append admin_id if not already present
+    if (!formData.has("admin_id")) {
+      formData.append("admin_id", adminId);
+    }
+
+    const response = await axiosInstance.post(
+      API_PATHS.WEBSETTING.UPDATEMAINABOUTUSSECTION,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      toast.error("Failed to add section ");
+      return null;
+    }
+  } catch (error: any) {
+    console.error("Error adding updating about data:", error);
+    toast.error("Something went wrong while adding slider ");
     throw error;
   }
 };

@@ -111,7 +111,7 @@ const DynamicAmenities = ({ initialValues = [], onChange }: Props) => {
 
   return (
     <div className="font-[Poppins] text-gray-600">
-      <Label className="mb-1 block">Add Amenities</Label>
+      <Label className="mb-1 block">Add Speciality</Label>
       {inputs.map((input, index) => (
         <div key={index} className="flex gap-2 mt-2 items-center w-full">
           <div className="flex-1">

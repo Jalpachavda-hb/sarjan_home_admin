@@ -283,6 +283,7 @@ export default function PropertyDetails() {
               <Select
                 multiple
                 value={selectedColumns}
+                
                 onChange={(e) => {
                   const value = e.target.value;
                   setSelectedColumns(
@@ -551,7 +552,7 @@ export default function PropertyDetails() {
               </Label>
               <input
                 type="file"
-                accept=".csv"
+                accept=".csv, .xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 onChange={handleCsvFileChange}
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />

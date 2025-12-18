@@ -133,6 +133,80 @@ export const fetchWebSetting = async () => {
 };
 // ==========================
 
+export const fetchSlider = async () => {
+  try {
+    const response = await axiosInstance.get(API_PATHS.WEBSETTING.GETSLIDER);
+
+    if (response.status === 200 && response.data?.data) {
+      return response.data.data; // ✅ returns array of sliders
+    } else {
+      toast.error("No slider data found ⚠️");
+      return [];
+    }
+  } catch (error: any) {
+    console.error("Error fetching slider:", error);
+    toast.error("Failed to fetch slider data ❌");
+    throw error;
+  }
+};
+
+export const gettesTimonial = async () => {
+  try {
+    const response = await axiosInstance.get(
+      API_PATHS.WEBSETTING.GETTESTIMONIAL
+    );
+
+    if (response.status === 200 && response.data?.data) {
+      return response.data.data; // ✅ returns array of sliders
+    } else {
+      toast.error("No testimonial data found ⚠️");
+      return [];
+    }
+  } catch (error: any) {
+    console.error("Error fetching testimonial:", error);
+    toast.error("Failed to fetch testimonial data ❌");
+    throw error;
+  }
+};
+
+export const gettesaboutus = async () => {
+  try {
+    const response = await axiosInstance.get(
+      API_PATHS.WEBSETTING.GETABOUTSECTION
+    );
+
+    if (response.status === 200 && response.data?.data) {
+      return response.data.data; // ✅ returns array of sliders
+    } else {
+      toast.error("No testimonial data found ⚠️");
+      return [];
+    }
+  } catch (error: any) {
+    console.error("Error fetching testimonial:", error);
+    toast.error("Failed to fetch testimonial data ❌");
+    throw error;
+  }
+};
+
+export const herosliders = async () => {
+  try {
+    const response = await axiosInstance.get(
+      API_PATHS.WEBSETTING.GETHEROSECTION
+    );
+
+    if (response.status === 200 && response.data?.data) {
+      return response.data.data; // ✅ returns array of sliders
+    } else {
+      toast.error("No hero section data found ⚠️");
+      return [];
+    }
+  } catch (error: any) {
+    console.error("Error fetching hero section:", error);
+    toast.error("Failed to fetch hero section data ❌");
+    throw error;
+  }
+};
+
 // APP SEETING
 export const fetchSplashScreens = async (adminId: string) => {
   try {
@@ -151,7 +225,7 @@ export const fetchSplashScreens = async (adminId: string) => {
 
 export const fetchSiteInquiry = async (
   adminId: string,
-   siteFilter?: string | number,
+  siteFilter?: string | number,
   searchByDays?: number
 ) => {
   try {
@@ -482,7 +556,7 @@ export const fetchPersonalDocuments = async () => {
     if (res.data.status === 200) {
       return res.data.data; // array of docs
     } else {
-      toast.error(res.data.message || "Failed to fetch documents");
+      console.error(res.data.message || "Failed to fetch documents");
       return [];
     }
   } catch (error: any) {
@@ -541,13 +615,16 @@ export const showPropertyDetailsList = async (
   }
 
   try {
-    const res = await axiosInstance.get(API_PATHS.SITEDETAILS.PROPERTYDETAILSLIST, {
-      params: {
-        admin_id: adminId,
-        // site_id: site_id ?? "",  
-        page: page ?? "",        
-      },
-    });
+    const res = await axiosInstance.get(
+      API_PATHS.SITEDETAILS.PROPERTYDETAILSLIST,
+      {
+        params: {
+          admin_id: adminId,
+          // site_id: site_id ?? "",
+          page: page ?? "",
+        },
+      }
+    );
 
     const mappedData = res.data?.details?.map((item: any) => ({
       id: item.block_detail_id,
@@ -642,7 +719,11 @@ export const showclientTicket = async (requestSiteFilter?: string) => {
   }
 };
 
-export const showclientlist = async (siteId: string, page: number = 1, perPage?: number) => {
+export const showclientlist = async (
+  siteId: string,
+  page: number = 1,
+  perPage?: number
+) => {
   const adminId = getAdminId();
   if (!adminId) {
     toast.error("Admin ID not found");
@@ -669,7 +750,7 @@ export const showclientlist = async (siteId: string, page: number = 1, perPage?:
 export interface DropdownOption {
   label: string;
   value: string;
- id?: number;
+  id?: number;
 }
 
 export const fetchUnitType = async (): Promise<DropdownOption[]> => {
@@ -949,14 +1030,50 @@ export const getSiteData = async (adminId: string) => {
 };
 export const fetchSitedetails = async (id: string) => {
   try {
-    const response = await axiosInstance.get(API_PATHS.SITEDETAILS.SITEDETAILSBYID, {
-      params: { site_id: id },
-    });
+    const response = await axiosInstance.get(
+      API_PATHS.SITEDETAILS.SITEDETAILSBYID,
+      {
+        params: { site_id: id },
+      }
+    );
 
     // ✅ return full response, not just `data.data`
     return response.data;
   } catch (error) {
     console.error("Error fetching site details:", error);
+    return null;
+  }
+};
+
+
+
+export const getcontactusdata = async () => {
+  try {
+    const response = await axiosInstance.get(
+      API_PATHS.WEBSETTING.GETCONTACTUS,
+     
+    );
+
+    // ✅ return full response, not just `data.data`
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching site details:", error);
+    return null;
+  }
+};
+
+
+export const getmainaboutussection = async () => {
+  try {
+    const response = await axiosInstance.get(
+      API_PATHS.WEBSETTING.GETMAINABOUTUSSECTION,
+     
+    );
+
+    // ✅ return full response, not just `data.data`
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching about details:", error);
     return null;
   }
 };

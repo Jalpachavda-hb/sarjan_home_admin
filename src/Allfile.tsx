@@ -34,8 +34,14 @@ import AppLayout from "./layout/AppLayout";
 import Home from "./pages/Dashboard/Home";
 import Homeslider from "./pages/App settings/Homeslider";
 import Addscreen from "./pages/App settings/Addscreen";
-import WebSetting from "./pages/WebSetting";
+import Herosection from "./pages/setting/Homepage/Homepage";
+import Aboutus from "./pages/Aboutus";
 import Addpropertydetails from "./pages/Project/Addpropertydetails";
+import Logosetting from "./pages/setting/Homepage/Logosetting";
+import Aboutussection from "./pages/setting/Homepage/Aboutussection";
+import Slider from "./pages/setting/Homepage/Slider";
+import Testimonial from "./pages/setting/Homepage/Testimonial";
+import Contactus from "./pages/Contactus";
 
 import UserProfiles from "./pages/UserProfiles";
 export default function Allfile() {
@@ -59,7 +65,10 @@ export default function Allfile() {
 
         <Route path="clients/:id/addnewclient" element={<Addnewclient />} />
         <Route path="clients/:id/:id/edit" element={<EditClient />} />
-         <Route path="clients/:id/:id/payment_details/add" element={<Addclientpayment />} />
+        <Route
+          path="clients/:id/:id/payment_details/add"
+          element={<Addclientpayment />}
+        />
         <Route path="ticket-request/mytiket" element={<MyTiket />} />
         <Route
           path="ticket-request/mytiket/addtiket"
@@ -108,8 +117,13 @@ export default function Allfile() {
         <Route path="inquiry" element={<Inquiry />} />
         <Route path="settings/home_slider" element={<Homeslider />} />
         <Route path="settings/home_slider/addscreen" element={<Addscreen />} />
-
-        <Route path="web_settings" element={<WebSetting />} />
+        <Route path="logo_setting" element={<Logosetting />} />
+        <Route path="web_settings" element={<Herosection />} />
+        <Route path="aboutus_section" element={<Aboutussection />} />
+        <Route path="web_settings/about" element={<Aboutus />} />
+        <Route path="slider" element={<Slider />} />
+        <Route path="testimonial_section" element={<Testimonial />} />
+        <Route path="/web_settings/contact" element={<Contactus />} />
       </Route>
 
       {/* Fallback Route */}

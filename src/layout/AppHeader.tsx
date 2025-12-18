@@ -38,10 +38,8 @@ const AppHeader: React.FC = () => {
   return (
     <header className="sticky top-0 z-9999 flex w-full bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-800 lg:border-b">
       <div className="flex w-full flex-col md:flex-row md:px-6">
-
         {/* Left Section */}
         <div className="flex w-full items-center justify-between px-3 py-3 border-b border-gray-200 dark:border-gray-800 lg:border-b-0 lg:py-4 lg:px-0">
-
           {/* Sidebar Toggle */}
           <button
             onClick={handleToggle}
@@ -50,20 +48,34 @@ const AppHeader: React.FC = () => {
           >
             {isMobileOpen ? (
               // Close Icon
-              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6.2 7.3a.75.75 0 011.1-1l4.7 4.7 4.7-4.7a.75.75 0 111 1L13 12l4.7 4.7a.75.75 0 11-1 1L12 13 7.3 17.7a.75.75 0 11-1-1L11 12 6.2 7.3z"/>
+              <svg
+                width="20"
+                height="20"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M6.2 7.3a.75.75 0 011.1-1l4.7 4.7 4.7-4.7a.75.75 0 111 1L13 12l4.7 4.7a.75.75 0 11-1 1L12 13 7.3 17.7a.75.75 0 11-1-1L11 12 6.2 7.3z" />
               </svg>
             ) : (
               // Menu Icon
-              <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 12">
-                <path d="M1.3.25h13.3a.75.75 0 010 1.5H1.3a.75.75 0 010-1.5zM1.3 10.25h13.3a.75.75 0 010 1.5H1.3a.75.75 0 010-1.5zM1.3 5.25h6.7a.75.75 0 010 1.5H1.3a.75.75 0 010-1.5z"/>
+              <svg
+                width="20"
+                height="20"
+                fill="currentColor"
+                viewBox="0 0 16 12"
+              >
+                <path d="M1.3.25h13.3a.75.75 0 010 1.5H1.3a.75.75 0 010-1.5zM1.3 10.25h13.3a.75.75 0 010 1.5H1.3a.75.75 0 010-1.5zM1.3 5.25h6.7a.75.75 0 010 1.5H1.3a.75.75 0 010-1.5z" />
               </svg>
             )}
           </button>
 
           {/* Logo (Mobile Only) */}
           <Link to="/" className="md:hidden">
-            <img className="w-40" src={logo || "/images/logo/logo-icon.png"} alt="Logo" />
+            <img
+              className="w-40"
+              src={logo || "/images/logo/logo-icon.png"}
+              alt="Logo"
+            />
           </Link>
 
           {/* User Menu (Mobile) */}
@@ -90,7 +102,6 @@ const AppHeader: React.FC = () => {
 };
 
 export default AppHeader;
-
 
 // import { useEffect, useRef, useState } from "react";
 // import { Link } from "react-router";

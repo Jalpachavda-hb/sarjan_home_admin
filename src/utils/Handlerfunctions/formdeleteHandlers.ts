@@ -170,14 +170,16 @@ export const deletePropertyDetails = async (block_detail_id: string) => {
 
     // ✅ Case 2: Backend returns status 401 but we still want success toast
     if (status === 401) {
-      toast.warning(res?.data?.message || "Block detail cannot be deleted as it is assigned to a client.");
+      toast.warning(
+        res?.data?.message ||
+          "Block detail cannot be deleted as it is assigned to a client."
+      );
       return false;
     }
 
     // ❌ Case 3: Any other response
     toast.error(res?.data?.message || "Failed to delete Property Detail");
     return false;
-
   } catch (error: any) {
     console.error("Delete Property Detail failed:", error);
 
@@ -186,7 +188,10 @@ export const deletePropertyDetails = async (block_detail_id: string) => {
     const backendMessage = error?.response?.data?.message;
 
     if (backendStatus === 401) {
-      toast.success(backendMessage || "Block detail cannot be deleted as it is assigned to a client.");
+      toast.success(
+        backendMessage ||
+          "Block detail cannot be deleted as it is assigned to a client."
+      );
     } else {
       toast.error(backendMessage || "Failed to delete Property Detail");
     }
@@ -432,5 +437,63 @@ export const deleteSite = async (id: string) => {
     };
   } catch (error: any) {
     return { success: false, message: "Failed to delete site" };
+  }
+};
+
+export const deleteslider = async (id: string) => {
+  try {
+    const formData = new FormData();
+    formData.append("slider_id", id);
+
+    const res = await axiosInstance.post(
+      API_PATHS.WEBSETTING.DELETESLIDER,
+      formData
+    );
+
+    if (res?.status === 200)
+      return { success: true, message: "Slide deleted!" };
+
+    return { success: false, message: res.data?.message || "Failed to delete" };
+  } catch {
+    return { success: false, message: "Failed to delete" };
+  }
+};
+export const deleteTestimonial = async (id: number | string) => {
+  try {
+    const formData = new FormData();
+    formData.append("Testimonialer_id", String(id)); // FIXED KEY NAME
+
+    const res = await axiosInstance.post(
+      API_PATHS.WEBSETTING.DELETETETESTIMONIAL,
+      formData
+    );
+
+    if (res?.status === 200)
+      return { success: true, message: "Testimonial deleted!" };
+
+    return { success: false, message: res.data?.message || "Failed to delete" };
+  } catch {
+    return { success: false, message: "Failed to delete" };
+  }
+};
+
+
+
+export const deleteheroslider = async (id: number | string) => {
+  try {
+    const formData = new FormData();
+    formData.append("id", String(id)); // FIXED KEY NAME
+
+    const res = await axiosInstance.post(
+      API_PATHS.WEBSETTING.DELETESLIDERHERO,
+      formData
+    );
+
+    if (res?.status === 200)
+      return { success: true, message: "Testimonial deleted!" };
+
+    return { success: false, message: res.data?.message || "Failed to delete" };
+  } catch {
+    return { success: false, message: "Failed to delete" };
   }
 };
